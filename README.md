@@ -1,116 +1,99 @@
 # ComfyUI XDev Nodes — Expanded
 
-A clean, CI‑ready starter kit for **ComfyUI custom node development**. Includes:
+A clean, CI-ready **starter kit** for building and publishing **ComfyUI custom nodes**.  
+It shows the minimal patterns you need (inputs, returns, registration), includes sample nodes, example workflows, tests, and a ready-to-use CI pipeline.
 
-- Minimal Python nodes with clear INPUT/RETURN metadata
-- Image/text utilities
-- Optional frontend `web/` folder (served by ComfyUI)
-- Packaging metadata compatible with the ComfyUI Registry
-- Tests you can adapt for your CI
+---
 
-## Install (local dev)
+## Highlights
+
+- Minimal examples: **HelloString**, **AnyPassthrough**, **AppendSuffix**, **PickByBrightness**
+- Clean structure for **backend nodes** (+ optional `web/` assets)
+- **Registry-ready**: `pyproject.toml` with `[tool.comfy]`
+- **Workflows** for instant validation
+- **Tests + GitHub Actions** for quality gates
+- Docs & quick **datatype** reference
+
+---
+
+## Quick Start
 
 ```bash
+# Developer install
 git clone https://github.com/aiforhumans/comfyui-xdev-nodes
 cd comfyui-xdev-nodes
-# Developer install
 pip install -e .
 ```
-Then link/copy this folder into your `ComfyUI/custom_nodes/` directory (or use ComfyUI Manager).
-
-## Nodes
-- **HelloString** — returns a constant greeting.
-- **AnyPassthrough** — demonstrates the `ANY` datatype; returns input unchanged.
-- **PickByBrightness** — picks brightest/darkest image from batch.
-- **AppendSuffix** — appends a suffix to text.
-
-## Notes
-- `image.py` gracefully degrades if `torch` is not available (falls back to NumPy / pure Python).
-
----
-
-## Next steps (recommended)
-
-### 1) Fill in registry metadata
-Edit `pyproject.toml`:
-- Set `[tool.comfy]` → `PublisherId` (usually your GitHub username), `DisplayName`, and add `Icon` and `Banner` URLs (raw GitHub links to images in this repo).
-- Keep `requires-comfyui` aligned with the versions you test.
-
-### 2) Add a Help Page for ComfyUI Manager
-Create a short help page in `docs/` and link it from the README. Include:
-- What each node does (with screenshots)
-- Example workflows (`.json`) and expected outputs
-- Known limitations / GPU/CPU notes
-
-### 3) Provide example workflows
-Add a `workflows/` folder with small demo `.json` workflows that use your nodes. This helps users validate install quickly.
-
-### 4) Set up tests & lint
-- Add/extend `tests/` and run locally:
-  ```bash
-  pip install -r requirements-dev.txt  # if you add one
-  pytest -q
-  ```
-- (Optional) Add linting:
-  ```toml
-  # example ruff config in pyproject.toml
-  [tool.ruff]
-  line-length = 100
-  select = ["E","F","I","UP"]
-  ```
-- (Optional) Pre-commit hooks:
-  ```bash
-  pip install pre-commit
-  pre-commit install
-  ```
-
-### 5) Add CI (GitHub Actions)
-Create `.github/workflows/ci.yml` to run `pytest` and `ruff` on push/PR. Example job:
-```yaml
-name: CI
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - run: pip install -e . pytest ruff
-      - run: ruff .
-      - run: pytest -q
+Place this folder (or a symlink) in:
 ```
+<your-ComfyUI-root>/custom_nodes/comfyui-xdev-nodes
+```
+Start ComfyUI. Nodes appear under:
+- `XDev/Basic`
+- `XDev/Text`
+- `XDev/Image`
 
-### 6) Version & releases
-- Use SemVer in `pyproject.toml` (`1.0.0`, `1.1.0`, `1.1.1`).
-- Tag releases in Git for distribution and easier rollback:
-  ```bash
-  git tag v0.1.1 -m "XDev Nodes initial release"
-  git push --tags
-  ```
-
-### 7) Publish checklist (manual install or registry)
-- ✅ `pyproject.toml` is complete and valid
-- ✅ Folder name equals the package/repo name
-- ✅ Nodes load cleanly in ComfyUI (no stdout/stderr spam)
-- ✅ Example workflows run end‑to‑end
-- ✅ README + screenshots + help page are up-to-date
-
-### 8) UX polish (optional but nice)
-- Add icons/banners and per-node thumbnails
-- Provide tooltips for parameters in docstrings
-- Add categories/subcategories that match your ecosystem
-
-### 9) Backwards compatibility & deprecation
-- If you rename node IDs, add shims or a migration note
-- Avoid breaking inputs/outputs without a major version bump
-
-### 10) Issue templates
-Add `.github/ISSUE_TEMPLATE/` with bug/feature templates to streamline user reports.
+Open an example workflow from `workflows/` to test.
 
 ---
 
-## Project layout
+## Node Reference (this pack)
+
+### 1) HelloString
+- `INPUT_TYPES` → `{ "required": {} }`
+- `RETURN_TYPES` → `("STRING",)`
+- `FUNCTION` → `"hello"`
+- Purpose: return a static greeting.
+
+### 2) AnyPassthrough
+- `INPUT_TYPES` → `{ "required": { "value": ("*", {}) } }`
+- `RETURN_TYPES` → `("*",)`
+- `FUNCTION` → `"do_it"`
+- Purpose: pass any value through unchanged.
+
+### 3) AppendSuffix
+- `INPUT_TYPES` → `{ "required": { "text": ("STRING", {"default": ""}), "suffix": ("STRING", {"default": " - xdev"}) } }`
+- `RETURN_TYPES` → `("STRING",)`
+- `FUNCTION` → `"run"`
+- Purpose: append a suffix to a string.
+
+### 4) PickByBrightness
+- `INPUT_TYPES` → `{ "required": { "images": ("IMAGE", {}), "mode": (["brightest","darkest"], {"default":"brightest"}) } }`
+- `RETURN_TYPES` → `("IMAGE",)`
+- `FUNCTION` → `"pick"`
+- Purpose: pick brightest or darkest image in a batch.  
+- Note: uses **torch** if present; falls back to **NumPy** or pure Python.
+
+---
+
+## How ComfyUI discovers your nodes
+
+`xdev_nodes/__init__.py` exposes:
+- `NODE_CLASS_MAPPINGS`: `"XDEV_NodeId" → PythonClass`
+- `NODE_DISPLAY_NAME_MAPPINGS`: `"XDEV_NodeId" → "Pretty Name"`
+- Optional: `WEB_DIRECTORY` for serving `web/` assets
+
+ComfyUI imports the package, reads those mappings, and renders nodes in the UI.
+
+---
+
+## Create Your Own Node (recipe)
+
+1. **Copy** one of the example classes (e.g., `AppendSuffix`).
+2. Change:
+   - `INPUT_TYPES` (widget types + options)
+   - `RETURN_TYPES` (output sockets)
+   - `FUNCTION` (method name)
+   - Method signature (params match inputs)
+3. **Register** the class in `xdev_nodes/__init__.py`:
+   - Add to `NODE_CLASS_MAPPINGS`
+   - Add to `NODE_DISPLAY_NAME_MAPPINGS`
+4. Restart ComfyUI → test in a workflow.
+
+---
+
+## Project Layout
+
 ```
 pyproject.toml
 README.md
@@ -124,9 +107,180 @@ xdev_nodes/
     text.py                     # AppendSuffix
   web/
     __init__.py                 # optional frontend assets
+workflows/
+  hello_string_save.json
+  pick_by_brightness_preview.json
 tests/
   test_imports.py
   test_basic_nodes.py
-workflows/                      # (recommended) example .json workflows
-docs/                           # (recommended) help page for ComfyUI Manager
+.github/
+  workflows/ci.yml
+  ISSUE_TEMPLATE/
+    bug_report.md
+    feature_request.md
+  pull_request_template.md
+docs/
+  how_to_pick_types.png
 ```
+
+---
+
+## ComfyUI Datatypes — Quick Reference
+
+> Use in nodes:  
+> `INPUT_TYPES = lambda: {"required": {"arg": (<TYPE>, {opts})}}`  
+> `RETURN_TYPES = ("<TYPE>", ... )`
+
+### Core types
+| Datatype | Input Spec (examples) | Python / Shape | Notes |
+|---|---|---|---|
+| INT | `("INT", {"default": 0, "min": 0, "max": 100})` | `int` | Bounds, step |
+| FLOAT | `("FLOAT", {"default": 0.5, "step": 0.01})` | `float` | Bounds, step |
+| STRING | `("STRING", {"default": ""})` | `str` | `multiline`, `placeholder` |
+| BOOLEAN | `("BOOLEAN", {"default": False})` | `bool` | Toggle labels |
+| IMAGE | `("IMAGE", {})` | `Tensor [B,H,W,C]` | RGB 0..1 or 0..255 |
+| LATENT | `("LATENT", {})` | `dict["samples": Tensor [B,C,H,W]]` | + extras |
+| MASK | `("MASK", {})` | `Tensor [H,W]` or `[B,1,H,W]` | Binary/float |
+| AUDIO | `("AUDIO", {})` | `dict["waveform": Tensor [B,C,T]]` | + rate |
+| * (ANY) | `("*", {})` | passthrough | any |
+
+### Dropdown (COMBO)
+| Pattern | Example | Returns |
+|---|---|---|
+| Fixed list | `(["brightest","darkest"], {"default":"brightest"})` | `str` |
+| File list | `(folder_paths.get_filename_list("checkpoints"), {})` | `str` |
+
+### Pipeline
+| Datatype | Input Spec | Python | Notes |
+|---|---|---|---|
+| NOISE | `("NOISE", {})` | object | `.generate_noise` |
+| SAMPLER | `("SAMPLER", {})` | object | `.sample(...)` |
+| SIGMAS | `("SIGMAS", {})` | 1-D tensor | steps+1 |
+| GUIDER | `("GUIDER", {})` | callable | predict noise |
+| MODEL/CLIP/VAE/CONDITIONING | `("MODEL", {})`, etc. | objects | SD parts |
+
+### Useful input options
+| Key | Meaning | Example |
+|---|---|---|
+| `default` | initial value | `{"default": 0.5}` |
+| `min/max/step` | numeric bounds | `{"min":0,"max":1,"step":0.01}` |
+| `multiline` | multi-line | `{"multiline": true}` |
+| `placeholder` | hint | `{"placeholder":"Enter prompt"}` |
+| `defaultInput` | socket default | `{"defaultInput": true}` |
+| `forceInput` | require link | `{"forceInput": true}` |
+| `lazy` | defer compute | `{"lazy": true}` |
+| `rawLink` | pass raw | `{"rawLink": true}` |
+
+---
+
+## How to Pick Types (flowchart)
+
+See the visual guide at:
+```
+docs/how_to_pick_types.png
+```
+
+---
+
+## Example Workflows
+
+- `workflows/hello_string_save.json`
+  - Chain: `XDEV_HelloString → SaveText`
+- `workflows/pick_by_brightness_preview.json`
+  - Chain: `LoadImage(s) → XDEV_PickByBrightness → PreviewImage`
+
+These are **illustrative**; tweak to your ComfyUI version/plugins.
+
+---
+
+## Development
+
+```bash
+# dev install
+pip install -e .
+# run tests
+pytest -q
+# lint (ruff)
+ruff .
+```
+
+Tips:
+- Keep node classes small and focused.
+- Name IDs with a clear prefix (e.g., `XDEV_`).
+- Avoid heavy logs in hot paths.
+
+---
+
+## CI (GitHub Actions)
+
+`.github/workflows/ci.yml` runs:
+- Install + `pytest`
+- `ruff` lint
+
+Trigger: push / PR to `main` or `master`.
+
+---
+
+## Registry Metadata (pyproject.toml)
+
+- `[project]`: `name`, `version`, `description`, `license`, `urls`, `requires-python`
+- `[tool.comfy]`:
+  - `PublisherId`: your ID (often GitHub username)
+  - `DisplayName`: friendly name
+  - `Icon` / `Banner`: raw URLs (square icon; 21:9 banner)
+  - `requires-comfyui`: version range (e.g., `>=1.0.0`)
+  - `includes`: extra folders (e.g., `'dist'`)
+
+**SemVer**: bump `MAJOR.MINOR.PATCH` for changes.
+
+---
+
+## Publish Checklist
+
+- `pyproject.toml` complete
+- Nodes load; no errors
+- Example workflows run
+- README + screenshots updated
+- CI green
+- Tag release (e.g., `v0.1.1`)
+
+---
+
+## Troubleshooting
+
+- **Nodes don’t show**
+  - Folder in `custom_nodes/`?
+  - Package imports without errors?
+  - Registered in `NODE_CLASS_MAPPINGS`?
+
+- **Missing torch**
+  - Install `torch` (GPU/CPU) or rely on fallbacks in `image.py`.
+
+- **Version mismatch**
+  - Check `requires-comfyui`; update ComfyUI if needed.
+
+- **Weird datatypes**
+  - Use the Quick Reference and flowchart; prefer simple types first.
+
+---
+
+## Contributing
+
+- Open issues with templates in `.github/ISSUE_TEMPLATE/`
+- PRs: follow the checklist in `pull_request_template.md`
+- Keep examples minimal and well-commented
+
+---
+
+## License
+
+MIT — see `LICENSE`.
+
+---
+
+## Kort in het Nederlands (samenvatting)
+
+Dit is een **startpakket** voor ComfyUI-nodes.  
+Zet de map in `ComfyUI/custom_nodes/`, herstart ComfyUI, en je ziet de nodes in de UI.  
+Voorbeelden, workflows, tests en CI zijn inbegrepen.  
+Nieuwe node? Kopieer een voorbeeld, pas `INPUT_TYPES`/`RETURN_TYPES`/`FUNCTION` aan, registreer in `__init__.py`, klaar.
