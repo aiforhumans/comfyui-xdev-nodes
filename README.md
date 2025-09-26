@@ -1,18 +1,38 @@
-# ComfyUI XDev Nodes — Expanded
+# ComfyUI XDev Nodes — Professional Starter Kit
 
-A clean, CI-ready **starter kit** for building and publishing **ComfyUI custom nodes**.  
-It shows the minimal patterns you need (inputs, returns, registration), includes sample nodes, example workflows, tests, and a ready-to-use CI pipeline.
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/aiforhumans/comfyui-xdev-nodes)](https://github.com/aiforhumans/comfyui-xdev-nodes/releases)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/aiforhumans/comfyui-xdev-nodes/ci.yml)](https://github.com/aiforhumans/comfyui-xdev-nodes/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![ComfyUI](https://img.shields.io/badge/ComfyUI-1.0%2B-green)](https://github.com/comfyanonymous/ComfyUI)
+
+A **production-ready starter kit** for building and publishing **ComfyUI custom nodes** with professional-grade patterns, comprehensive validation, rich documentation, and complete GitHub standards.
+
+> 🚀 **NEW**: Enhanced with comprehensive input validation, rich tooltips, error handling, and professional development patterns inspired by enterprise-grade ComfyUI frameworks.
 
 ---
 
-## Highlights
+## ✨ Key Features
 
-- Minimal examples: **HelloString**, **AnyPassthrough**, **AppendSuffix**, **PickByBrightness**
-- Clean structure for **backend nodes** (+ optional `web/` assets)
-- **Registry-ready**: `pyproject.toml` with `[tool.comfy]`
-- **Workflows** for instant validation
-- **Tests + GitHub Actions** for quality gates
-- Docs & quick **datatype** reference
+### Professional Development Patterns
+- 🔍 **Comprehensive Input Validation** - Detailed type checking with informative error messages
+- 📚 **Rich Tooltip Documentation** - Professional-grade help text for all inputs
+- 🛡️ **Robust Error Handling** - Graceful degradation and fallback implementations
+- 🎯 **Multiple Output Formats** - Enhanced return types with metadata and processing info
+- ⚡ **Smart Caching** - Proper ComfyUI cache management with `IS_CHANGED`
+
+### Enhanced Node Examples
+- **HelloString** - Basic node patterns with validation
+- **AnyPassthrough** - Type-safe passthrough with comprehensive checks
+- **AppendSuffix** - Text processing with multiline support and validation
+- **PickByBrightness** - Advanced image processing with multiple algorithms (torch/numpy/python fallbacks)
+
+### Professional Infrastructure
+- 🏗️ **GitHub Standards** - Complete CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md
+- 🔒 **Security Guidelines** - ComfyUI-specific security best practices
+- 📊 **Comprehensive Testing** - Unit tests with validation scenarios
+- 🚀 **CI/CD Pipeline** - Automated testing, linting, and quality gates
+- 📖 **Rich Documentation** - Web-based help system with markdown docs
 
 ---
 
@@ -39,30 +59,54 @@ Open an example workflow from `workflows/` to test.
 
 ## Node Reference (this pack)
 
-### 1) HelloString
-- `INPUT_TYPES` → `{ "required": {} }`
-- `RETURN_TYPES` → `("STRING",)`
-- `FUNCTION` → `"hello"`
-- Purpose: return a static greeting.
+### 1) 👋 HelloString (XDev)
+**Category**: `XDev/Basic` | **Enhanced with validation patterns**
 
-### 2) AnyPassthrough
-- `INPUT_TYPES` → `{ "required": { "value": ("*", {}) } }`
-- `RETURN_TYPES` → `("*",)`
-- `FUNCTION` → `"do_it"`
-- Purpose: pass any value through unchanged.
+- **Purpose**: Demonstrates basic node structure with comprehensive validation
+- **Inputs**: None (shows minimal input pattern)
+- **Outputs**: `STRING` - Static greeting message
+- **Features**: Input validation framework, rich tooltips, professional error handling
+- **Use Case**: Learning foundation patterns for ComfyUI node development
 
-### 3) AppendSuffix
-- `INPUT_TYPES` → `{ "required": { "text": ("STRING", {"default": ""}), "suffix": ("STRING", {"default": " - xdev"}) } }`
-- `RETURN_TYPES` → `("STRING",)`
-- `FUNCTION` → `"run"`
-- Purpose: append a suffix to a string.
+### 2) 🔄 AnyPassthrough (XDev) 
+**Category**: `XDev/Basic` | **Type-safe passthrough**
 
-### 4) PickByBrightness
-- `INPUT_TYPES` → `{ "required": { "images": ("IMAGE", {}), "mode": (["brightest","darkest"], {"default":"brightest"}) } }`
-- `RETURN_TYPES` → `("IMAGE",)`
-- `FUNCTION` → `"pick"`
-- Purpose: pick brightest or darkest image in a batch.  
-- Note: uses **torch** if present; falls back to **NumPy** or pure Python.
+- **Purpose**: Pass any value through unchanged with type validation
+- **Inputs**: `value` (ANY) - Any input type with comprehensive validation
+- **Outputs**: `*` - Original value unchanged, with processing metadata
+- **Features**: Type checking, null/undefined handling, processing statistics
+- **Use Case**: Debugging workflows, type conversion, data flow analysis
+
+### 3) ✏️ AppendSuffix (XDev)
+**Category**: `XDev/Text` | **Professional text processing**
+
+- **Purpose**: Advanced text manipulation with multiline support
+- **Inputs**: 
+  - `text` (STRING) - Main text content (multiline supported)
+  - `suffix` (STRING) - Suffix to append
+  - `validate_input` (BOOLEAN) - Enable comprehensive validation
+- **Outputs**: 
+  - `processed_text` (STRING) - Text with suffix appended
+  - `character_count` (INT) - Total character count
+  - `processing_info` (STRING) - Processing metadata
+- **Features**: Multiline text handling, input validation, processing statistics
+
+### 4) 🖼️ PickByBrightness (XDev)
+**Category**: `XDev/Image` | **Advanced image processing**
+
+- **Purpose**: Intelligent image selection with multiple algorithms
+- **Inputs**:
+  - `images` (IMAGE) - Image batch to process
+  - `algorithm` - Selection algorithm: `["average", "luminance", "perceived", "channel_max"]`
+  - `mode` - Selection mode: `["brightest", "darkest"]`
+- **Outputs**:
+  - `selected_image` (IMAGE) - Chosen image
+  - `brightness_score` (FLOAT) - Calculated brightness value
+  - `algorithm_info` (STRING) - Processing details
+- **Features**: 
+  - **Robust Fallbacks**: torch → numpy → pure Python implementations
+  - **Multiple Algorithms**: Average, luminance, perceived brightness, channel max
+  - **Professional Validation**: Comprehensive input checking and error handling
 
 ---
 
@@ -193,21 +237,46 @@ These are **illustrative**; tweak to your ComfyUI version/plugins.
 
 ---
 
-## Development
+## 🛠️ Development
 
+### Setup
 ```bash
-# dev install
+# Development installation
+git clone https://github.com/aiforhumans/comfyui-xdev-nodes
+cd comfyui-xdev-nodes
 pip install -e .
-# run tests
-pytest -q
-# lint (ruff)
-ruff .
+
+# Create development symlink
+scripts/dev-link.ps1  # Windows
+scripts/dev-link.sh   # Unix/Linux
 ```
 
-Tips:
-- Keep node classes small and focused.
-- Name IDs with a clear prefix (e.g., `XDEV_`).
-- Avoid heavy logs in hot paths.
+### Testing & Quality
+```bash
+# Run comprehensive tests
+pytest -q
+
+# Lint with ruff
+ruff .
+
+# Test specific validation scenarios
+python -m pytest tests/test_basic_nodes.py::test_validation_patterns -v
+```
+
+### Professional Development Tips
+- 📝 **Rich Documentation**: Every input needs comprehensive tooltips
+- ✅ **Input Validation**: Implement `_validate_inputs()` method with detailed error messages
+- 🎯 **Multiple Outputs**: Return processing metadata alongside main results
+- 🔄 **Fallback Patterns**: Gracefully handle missing dependencies (see `image.py`)
+- 🏷️ **Clear Naming**: Use prefixed IDs (e.g., `XDEV_`) and descriptive categories
+- 📊 **Processing Info**: Include algorithm details and performance metrics in outputs
+
+### Code Quality Standards
+- **Type Hints**: Use comprehensive type annotations
+- **Error Handling**: Never crash workflows - return error messages as outputs
+- **Resource Management**: Implement proper memory and time limits for processing
+- **Security**: Validate file paths and sanitize all user inputs
+- **Performance**: Cache expensive computations with `IS_CHANGED`
 
 ---
 
@@ -264,11 +333,28 @@ Trigger: push / PR to `main` or `master`.
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-- Open issues with templates in `.github/ISSUE_TEMPLATE/`
-- PRs: follow the checklist in `pull_request_template.md`
-- Keep examples minimal and well-commented
+We welcome contributions! This project follows professional GitHub standards:
+
+### Getting Started
+- 📋 **[Contributing Guidelines](CONTRIBUTING.md)** - Comprehensive development setup and patterns
+- 🤝 **[Code of Conduct](CODE_OF_CONDUCT.md)** - Community standards and educational focus
+- 🔒 **[Security Policy](SECURITY.md)** - Vulnerability reporting and ComfyUI security best practices
+
+### Development Process
+- Open issues using templates in `.github/ISSUE_TEMPLATE/`
+- Follow the PR checklist in `pull_request_template.md`
+- Include validation test cases for new features
+- Add comprehensive documentation with examples
+- Ensure all nodes follow XDev professional patterns
+
+### Code Review Focus
+- ✅ Input validation and error handling
+- 📚 Rich tooltip documentation
+- 🛡️ Security considerations for ComfyUI environments
+- 🧪 Test coverage including edge cases
+- 📖 Clear documentation with working examples
 
 ---
 
