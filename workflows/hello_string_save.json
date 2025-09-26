@@ -1,0 +1,56 @@
+{
+  "last_node_id": 3,
+  "last_link_id": 1,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "XDEV_HelloString",
+      "pos": [
+        120,
+        120
+      ],
+      "size": [
+        300,
+        60
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "SaveText",
+      "pos": [
+        480,
+        120
+      ],
+      "size": [
+        300,
+        60
+      ],
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 1
+        }
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "STRING"
+    ]
+  ]
+}

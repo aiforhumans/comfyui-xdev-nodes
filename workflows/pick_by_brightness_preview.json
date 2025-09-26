@@ -1,0 +1,93 @@
+{
+  "last_node_id": 5,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        120,
+        80
+      ],
+      "size": [
+        300,
+        60
+      ],
+      "widgets_values": [
+        "example.png"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "ImageBatch",
+      "pos": [
+        120,
+        180
+      ],
+      "size": [
+        300,
+        60
+      ],
+      "inputs": [
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "link": null
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "XDEV_PickByBrightness",
+      "pos": [
+        480,
+        130
+      ],
+      "size": [
+        320,
+        60
+      ],
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mode",
+          "type": "STRING",
+          "link": null,
+          "widget": "brightest"
+        }
+      ],
+      "widgets_values": [
+        "brightest"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "PreviewImage",
+      "pos": [
+        840,
+        130
+      ],
+      "size": [
+        300,
+        60
+      ],
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        }
+      ]
+    }
+  ],
+  "links": []
+}
