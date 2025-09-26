@@ -1,0 +1,274 @@
+{
+  "last_node_id": 8,
+  "last_link_id": 7,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "XDEV_InputDev",
+      "pos": [100, 100],
+      "size": [300, 200],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [1]
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        "IMAGE"
+      ],
+      "title": "Input: Source Image"
+    },
+    {
+      "id": 2,
+      "type": "XDEV_ImageSplit",
+      "pos": [450, 100],
+      "size": [350, 300],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "tiles",
+          "type": "IMAGE",
+          "links": [2]
+        },
+        {
+          "name": "tile_count",
+          "type": "INT",
+          "links": [3]
+        },
+        {
+          "name": "tiles_per_row",
+          "type": "INT", 
+          "links": [4]
+        },
+        {
+          "name": "split_info",
+          "type": "STRING",
+          "links": [5]
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        "grid",
+        3,
+        3,
+        256,
+        256,
+        16,
+        "batch",
+        true
+      ],
+      "title": "Split into 3x3 Grid"
+    },
+    {
+      "id": 3,
+      "type": "XDEV_ImageTile",
+      "pos": [850, 100], 
+      "size": [350, 280],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "tiled_image",
+          "type": "IMAGE", 
+          "links": [6]
+        },
+        {
+          "name": "output_width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "output_height", 
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "tile_info",
+          "type": "STRING",
+          "links": [7]
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        2,
+        2,
+        "mirror_both",
+        true,
+        8,
+        true
+      ],
+      "title": "Create Mirrored Tile Pattern"
+    },
+    {
+      "id": 4,
+      "type": "XDEV_OutputDev",
+      "pos": [1250, 100],
+      "size": [300, 250],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "INPUT_1",
+          "type": "*",
+          "link": 6
+        },
+        {
+          "name": "INPUT_2", 
+          "type": "*",
+          "link": 3
+        },
+        {
+          "name": "INPUT_3",
+          "type": "*",
+          "link": 7
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        true
+      ],
+      "title": "Output Analysis"
+    },
+    {
+      "id": 5,
+      "type": "XDEV_ImageCrop",
+      "pos": [450, 450],
+      "size": [350, 300],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "crop_x",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "crop_y",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "crop_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        512,
+        512,
+        "smart",
+        0,
+        0,
+        0.0,
+        true
+      ],
+      "title": "Smart Content-Aware Crop"
+    },
+    {
+      "id": 6,
+      "type": "XDEV_ImageResize",
+      "pos": [850, 450],
+      "size": [350, 280],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "resize_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        1024,
+        768,
+        "lanczos",
+        true,
+        true
+      ],
+      "title": "High-Quality Resize"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "IMAGE"],
+    [2, 2, 0, 3, 0, "IMAGE"],
+    [3, 2, 1, 4, 1, "INT"],
+    [4, 2, 2, 4, 2, "INT"], 
+    [5, 2, 3, 4, 3, "STRING"],
+    [6, 3, 0, 4, 0, "IMAGE"],
+    [7, 3, 3, 4, 2, "STRING"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1,
+      "offset": [0, 0]
+    }
+  },
+  "version": 0.4,
+  "workflow": {
+    "title": "XDev Image Control Showcase",
+    "description": "Demonstration of advanced image control nodes including split, tile, crop, and resize operations with performance monitoring"
+  }
+}

@@ -247,3 +247,1247 @@ class PickByBrightness:
             return cache_key
         except:
             return f"{mode}_{algorithm}_{validate_input}_{return_metadata}"
+
+
+# =============================================================================
+# PHASE 2: IMAGE CONTROL NODES - Professional Image Manipulation
+# =============================================================================
+
+from ..performance import performance_monitor, cached_operation, intern_string
+from ..mixins import ImageProcessingNode
+
+
+class ImageResize(ImageProcessingNode):
+    """
+    Professional image resizing with multiple algorithms and performance optimization.
+    
+    Features:
+    - Multiple resize algorithms (lanczos, bilinear, bicubic, nearest)
+    - Aspect ratio preservation options
+    - Performance monitoring and caching
+    - Batch processing support
+    """
+    
+    # Precomputed resize methods for performance
+    _RESIZE_METHODS = {
+        intern_string("lanczos"): "lanczos",
+        intern_string("bilinear"): "bilinear", 
+        intern_string("bicubic"): "bicubic",
+        intern_string("nearest"): "nearest"
+    }
+    
+    _METHOD_NAMES = tuple(_RESIZE_METHODS.keys())
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
+        return {
+            "required": {
+                "image": ("IMAGE", {
+                    "tooltip": "Input image tensor in ComfyUI format [B,H,W,C] with values 0-1"
+                }),
+                "width": ("INT", {
+                    "default": 512,
+                    "min": 1,
+                    "max": 8192,
+                    "step": 1,
+                    "tooltip": "Target width in pixels. Use 0 to auto-calculate from height preserving aspect ratio."
+                }),
+                "height": ("INT", {
+                    "default": 512,
+                    "min": 1,
+                    "max": 8192,
+                    "step": 1,
+                    "tooltip": "Target height in pixels. Use 0 to auto-calculate from width preserving aspect ratio."
+                }),
+                "method": (cls._METHOD_NAMES, {
+                    "default": "lanczos",
+                    "tooltip": "Resize algorithm: lanczos (best quality), bilinear (balanced), bicubic (smooth), nearest (pixelated)"
+                })
+            },
+            "optional": {
+                "keep_aspect_ratio": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Preserve original aspect ratio. When enabled, the image will be scaled to fit within width/height."
+                }),
+                "validate_input": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Enable input validation. Disable for maximum performance in trusted workflows."
+                })
+            }
+        }
+    
+    RETURN_TYPES = ("IMAGE", "INT", "INT", "STRING")
+    RETURN_NAMES = ("image", "width", "height", "resize_info")
+    FUNCTION = "resize_image"
+    DESCRIPTION = "Professional image resizing with multiple algorithms and aspect ratio control"
+    
+    @performance_monitor
+    @cached_operation
+    def resize_image(self, image, width: int, height: int, method: str, keep_aspect_ratio: bool = True, validate_input: bool = True):
+        """Resize image with professional quality and performance optimization"""
+        
+        if validate_input:
+            validation = self.validate_image_inputs(image)
+            if not validation["valid"]:
+                return (image, width, height, f"Error: {validation['error']}")
+        
+        torch = get_torch()
+        if torch is None:
+            return (image, width, height, "Error: PyTorch not available for image resizing")
+        
+        try:
+            # Get original dimensions
+            batch_size, orig_height, orig_width, channels = image.shape
+            
+            # Calculate target dimensions with aspect ratio preservation
+            if keep_aspect_ratio and width > 0 and height > 0:
+                aspect_ratio = orig_width / orig_height
+                target_aspect = width / height
+                
+                if aspect_ratio > target_aspect:
+                    # Image is wider - fit by width
+                    final_width = width
+                    final_height = int(width / aspect_ratio)
+                else:
+                    # Image is taller - fit by height
+                    final_height = height
+                    final_width = int(height * aspect_ratio)
+            else:
+                final_width = width if width > 0 else orig_width
+                final_height = height if height > 0 else orig_height
+            
+            # Convert to torch format [B,C,H,W] for resize
+            image_torch = image.permute(0, 3, 1, 2)
+            
+            # Apply resize using interpolation
+            if method == "lanczos":
+                # Use area interpolation as lanczos approximation
+                resized = torch.nn.functional.interpolate(
+                    image_torch, 
+                    size=(final_height, final_width),
+                    mode='area' if final_width < orig_width else 'bilinear',
+                    align_corners=False
+                )
+            elif method == "bilinear":
+                resized = torch.nn.functional.interpolate(
+                    image_torch,
+                    size=(final_height, final_width), 
+                    mode='bilinear',
+                    align_corners=False
+                )
+            elif method == "bicubic":
+                resized = torch.nn.functional.interpolate(
+                    image_torch,
+                    size=(final_height, final_width),
+                    mode='bicubic',
+                    align_corners=False
+                )
+            elif method == "nearest":
+                resized = torch.nn.functional.interpolate(
+                    image_torch,
+                    size=(final_height, final_width),
+                    mode='nearest'
+                )
+            else:
+                resized = torch.nn.functional.interpolate(
+                    image_torch,
+                    size=(final_height, final_width),
+                    mode='bilinear',
+                    align_corners=False
+                )
+            
+            # Convert back to ComfyUI format [B,H,W,C]
+            result_image = resized.permute(0, 2, 3, 1)
+            
+            # Ensure values are in [0,1] range
+            result_image = torch.clamp(result_image, 0.0, 1.0)
+            
+            info = f"Resized from {orig_width}x{orig_height} to {final_width}x{final_height} using {method}"
+            if keep_aspect_ratio:
+                info += f" (aspect ratio preserved)"
+            
+            return (result_image, final_width, final_height, info)
+            
+        except Exception as e:
+            error_msg = f"Resize failed: {str(e)}"
+            return (image, width, height, error_msg)
+
+
+class ImageCrop(ImageProcessingNode):
+    """
+    Professional image cropping with multiple modes and smart centering.
+    
+    Features:
+    - Multiple crop modes (center, smart, custom coordinates)
+    - Automatic padding for out-of-bounds crops
+    - Performance monitoring and validation
+    - Batch processing support
+    """
+    
+    _CROP_MODES = (
+        intern_string("center"),
+        intern_string("smart"), 
+        intern_string("custom"),
+        intern_string("top_left"),
+        intern_string("top_right"),
+        intern_string("bottom_left"),
+        intern_string("bottom_right")
+    )
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
+        return {
+            "required": {
+                "image": ("IMAGE", {
+                    "tooltip": "Input image tensor in ComfyUI format [B,H,W,C]"
+                }),
+                "width": ("INT", {
+                    "default": 512,
+                    "min": 1,
+                    "max": 8192,
+                    "step": 1,
+                    "tooltip": "Crop width in pixels"
+                }),
+                "height": ("INT", {
+                    "default": 512,
+                    "min": 1,
+                    "max": 8192,
+                    "step": 1,
+                    "tooltip": "Crop height in pixels"
+                }),
+                "mode": (cls._CROP_MODES, {
+                    "default": "center",
+                    "tooltip": "Crop positioning: center, smart (brightness-based), custom coordinates, or corner positions"
+                })
+            },
+            "optional": {
+                "x_offset": ("INT", {
+                    "default": 0,
+                    "min": -8192,
+                    "max": 8192,
+                    "step": 1,
+                    "tooltip": "X coordinate offset (used in custom mode). Can be negative."
+                }),
+                "y_offset": ("INT", {
+                    "default": 0,
+                    "min": -8192,
+                    "max": 8192,
+                    "step": 1,
+                    "tooltip": "Y coordinate offset (used in custom mode). Can be negative."
+                }),
+                "pad_color": ("FLOAT", {
+                    "default": 0.0,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.01,
+                    "tooltip": "Padding color for out-of-bounds areas (0.0 = black, 1.0 = white)"
+                }),
+                "validate_input": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Enable input validation. Disable for maximum performance."
+                })
+            }
+        }
+    
+    RETURN_TYPES = ("IMAGE", "INT", "INT", "STRING")
+    RETURN_NAMES = ("image", "crop_x", "crop_y", "crop_info")
+    FUNCTION = "crop_image"
+    DESCRIPTION = "Professional image cropping with smart positioning and padding"
+    
+    @performance_monitor
+    @cached_operation
+    def crop_image(self, image, width: int, height: int, mode: str, 
+                   x_offset: int = 0, y_offset: int = 0, pad_color: float = 0.0, validate_input: bool = True):
+        """Crop image with smart positioning and automatic padding"""
+        
+        if validate_input:
+            validation = self.validate_image_inputs(image)
+            if not validation["valid"]:
+                return (image, 0, 0, f"Error: {validation['error']}")
+        
+        torch = get_torch()
+        if torch is None:
+            return (image, 0, 0, "Error: PyTorch not available for image cropping")
+        
+        try:
+            batch_size, orig_height, orig_width, channels = image.shape
+            
+            # Calculate crop position based on mode
+            if mode == "center":
+                crop_x = (orig_width - width) // 2
+                crop_y = (orig_height - height) // 2
+            elif mode == "smart":
+                # Find region with highest brightness for intelligent cropping
+                brightness_map = image.mean(dim=3)  # [B,H,W]
+                # Use sliding window to find best crop position
+                best_score = -1
+                crop_x, crop_y = 0, 0
+                
+                step_size = max(1, min(width, height) // 8)  # Adaptive step size
+                for y in range(0, max(1, orig_height - height + 1), step_size):
+                    for x in range(0, max(1, orig_width - width + 1), step_size):
+                        y_end = min(y + height, orig_height)
+                        x_end = min(x + width, orig_width)
+                        region_score = brightness_map[0, y:y_end, x:x_end].mean().item()
+                        if region_score > best_score:
+                            best_score = region_score
+                            crop_x, crop_y = x, y
+                            
+            elif mode == "custom":
+                crop_x = x_offset
+                crop_y = y_offset
+            elif mode == "top_left":
+                crop_x, crop_y = 0, 0
+            elif mode == "top_right":
+                crop_x, crop_y = orig_width - width, 0
+            elif mode == "bottom_left":
+                crop_x, crop_y = 0, orig_height - height
+            elif mode == "bottom_right":
+                crop_x, crop_y = orig_width - width, orig_height - height
+            else:
+                crop_x = (orig_width - width) // 2
+                crop_y = (orig_height - height) // 2
+            
+            # Create output tensor with padding if needed
+            result_image = torch.full((batch_size, height, width, channels), pad_color, dtype=image.dtype, device=image.device)
+            
+            # Calculate valid crop region
+            src_x_start = max(0, crop_x)
+            src_y_start = max(0, crop_y)
+            src_x_end = min(orig_width, crop_x + width)
+            src_y_end = min(orig_height, crop_y + height)
+            
+            dst_x_start = max(0, -crop_x)
+            dst_y_start = max(0, -crop_y)
+            dst_x_end = dst_x_start + (src_x_end - src_x_start)
+            dst_y_end = dst_y_start + (src_y_end - src_y_start)
+            
+            # Copy valid region
+            if src_x_end > src_x_start and src_y_end > src_y_start:
+                result_image[:, dst_y_start:dst_y_end, dst_x_start:dst_x_end] = \
+                    image[:, src_y_start:src_y_end, src_x_start:src_x_end]
+            
+            info = f"Cropped {width}x{height} from {orig_width}x{orig_height} at ({crop_x},{crop_y}) using {mode} mode"
+            if crop_x < 0 or crop_y < 0 or crop_x + width > orig_width or crop_y + height > orig_height:
+                info += " (with padding)"
+            
+            return (result_image, crop_x, crop_y, info)
+            
+        except Exception as e:
+            error_msg = f"Crop failed: {str(e)}"
+            return (image, 0, 0, error_msg)
+
+
+class ImageRotate(ImageProcessingNode):
+    """
+    Professional image rotation with multiple algorithms and automatic cropping.
+    
+    Features:
+    - Precise angle rotation with interpolation
+    - Automatic cropping to remove black borders
+    - Multiple rotation modes (90° increments, arbitrary angles)
+    - Performance optimized with caching
+    """
+    
+    _ROTATION_MODES = (
+        intern_string("90"),
+        intern_string("180"), 
+        intern_string("270"),
+        intern_string("arbitrary")
+    )
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
+        return {
+            "required": {
+                "image": ("IMAGE", {
+                    "tooltip": "Input image tensor in ComfyUI format [B,H,W,C]"
+                }),
+                "mode": (cls._ROTATION_MODES, {
+                    "default": "90",
+                    "tooltip": "Rotation mode: 90/180/270 degrees (lossless) or arbitrary angle"
+                })
+            },
+            "optional": {
+                "angle": ("FLOAT", {
+                    "default": 0.0,
+                    "min": -360.0,
+                    "max": 360.0,
+                    "step": 0.1,
+                    "tooltip": "Rotation angle in degrees (used in arbitrary mode). Positive = clockwise."
+                }),
+                "auto_crop": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Automatically crop to remove black borders from arbitrary rotations"
+                }),
+                "background_color": ("FLOAT", {
+                    "default": 0.0,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.01,
+                    "tooltip": "Background color for empty areas (0.0 = black, 1.0 = white)"
+                }),
+                "validate_input": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Enable input validation for safety"
+                })
+            }
+        }
+    
+    RETURN_TYPES = ("IMAGE", "FLOAT", "STRING")
+    RETURN_NAMES = ("image", "actual_angle", "rotation_info")
+    FUNCTION = "rotate_image"
+    DESCRIPTION = "Professional image rotation with lossless 90° increments and arbitrary angles"
+    
+    @performance_monitor
+    @cached_operation
+    def rotate_image(self, image, mode: str, angle: float = 0.0, auto_crop: bool = True, 
+                     background_color: float = 0.0, validate_input: bool = True):
+        """Rotate image with professional quality and automatic cropping"""
+        
+        if validate_input:
+            validation = self.validate_image_inputs(image)
+            if not validation["valid"]:
+                return (image, 0.0, f"Error: {validation['error']}")
+        
+        torch = get_torch()
+        if torch is None:
+            return (image, 0.0, "Error: PyTorch not available for image rotation")
+        
+        try:
+            batch_size, height, width, channels = image.shape
+            
+            # Handle different rotation modes
+            if mode in ["90", "180", "270"]:
+                # Lossless rotation using torch tensor operations
+                rotation_angle = int(mode)
+                
+                if rotation_angle == 90:
+                    # Rotate 90° clockwise: transpose + flip horizontally
+                    rotated = image.transpose(1, 2).flip(1)
+                elif rotation_angle == 180:
+                    # Rotate 180°: flip both dimensions
+                    rotated = image.flip(1).flip(2)
+                elif rotation_angle == 270:
+                    # Rotate 270° clockwise: transpose + flip vertically
+                    rotated = image.transpose(1, 2).flip(2)
+                else:
+                    rotated = image
+                
+                actual_angle = float(rotation_angle)
+                info = f"Lossless rotation by {rotation_angle}° ({rotated.shape[2]}x{rotated.shape[1]})"
+                
+            elif mode == "arbitrary":
+                # Arbitrary angle rotation using affine transformation
+                import math
+                
+                # Normalize angle to [0, 360)
+                actual_angle = angle % 360.0
+                if actual_angle > 180:
+                    actual_angle -= 360
+                
+                if abs(actual_angle) < 0.1:
+                    # No rotation needed
+                    rotated = image
+                    info = f"No rotation applied (angle too small: {actual_angle:.1f}°)"
+                else:
+                    # Convert to radians
+                    angle_rad = math.radians(actual_angle)
+                    
+                    # Create rotation matrix
+                    cos_a = math.cos(angle_rad)
+                    sin_a = math.sin(angle_rad)
+                    
+                    # Calculate new image dimensions to contain the rotated image
+                    new_width = int(abs(width * cos_a) + abs(height * sin_a))
+                    new_height = int(abs(width * sin_a) + abs(height * cos_a))
+                    
+                    # Create affine transformation grid
+                    # Note: This is a simplified rotation - for production use torchvision.transforms
+                    # For now, we'll use a basic implementation
+                    
+                    center_x, center_y = width / 2, height / 2
+                    new_center_x, new_center_y = new_width / 2, new_height / 2
+                    
+                    # Create output tensor
+                    rotated = torch.full((batch_size, new_height, new_width, channels), 
+                                       background_color, dtype=image.dtype, device=image.device)
+                    
+                    # Simple nearest neighbor rotation (for demo purposes)
+                    for b in range(batch_size):
+                        for y in range(new_height):
+                            for x in range(new_width):
+                                # Translate to center
+                                tx = x - new_center_x
+                                ty = y - new_center_y
+                                
+                                # Rotate back to original coordinates
+                                orig_x = int(tx * cos_a + ty * sin_a + center_x)
+                                orig_y = int(-tx * sin_a + ty * cos_a + center_y)
+                                
+                                # Check bounds and copy pixel
+                                if 0 <= orig_x < width and 0 <= orig_y < height:
+                                    rotated[b, y, x] = image[b, orig_y, orig_x]
+                    
+                    # Auto-crop to remove black borders if requested
+                    if auto_crop and abs(actual_angle) > 1.0:
+                        # Find the largest inscribed rectangle
+                        crop_factor = min(abs(cos_a), abs(sin_a)) if abs(cos_a) > 0.1 and abs(sin_a) > 0.1 else 0.7
+                        crop_width = int(width * crop_factor)
+                        crop_height = int(height * crop_factor)
+                        
+                        # Center crop
+                        start_x = (new_width - crop_width) // 2
+                        start_y = (new_height - crop_height) // 2
+                        rotated = rotated[:, start_y:start_y+crop_height, start_x:start_x+crop_width]
+                        
+                        info = f"Rotated by {actual_angle:.1f}° and auto-cropped to {crop_width}x{crop_height}"
+                    else:
+                        info = f"Rotated by {actual_angle:.1f}° to {new_width}x{new_height}"
+            
+            else:
+                rotated = image
+                actual_angle = 0.0
+                info = "No rotation applied"
+            
+            return (rotated, actual_angle, info)
+            
+        except Exception as e:
+            error_msg = f"Rotation failed: {str(e)}"
+            return (image, 0.0, error_msg)
+
+
+class ImageBlend(ImageProcessingNode):
+    """
+    Professional image blending with multiple blend modes and opacity control.
+    
+    Features:
+    - Multiple blend modes (normal, multiply, screen, overlay, soft light)
+    - Opacity control with proper alpha compositing
+    - Automatic size matching with multiple resize strategies
+    - Performance optimized batch processing
+    """
+    
+    _BLEND_MODES = (
+        intern_string("normal"),
+        intern_string("multiply"),
+        intern_string("screen"), 
+        intern_string("overlay"),
+        intern_string("soft_light"),
+        intern_string("hard_light"),
+        intern_string("difference"),
+        intern_string("exclusion")
+    )
+    
+    _SIZE_MODES = (
+        intern_string("resize_to_first"),
+        intern_string("resize_to_second"),
+        intern_string("resize_to_larger"),
+        intern_string("resize_to_smaller"),
+        intern_string("crop_to_smaller")
+    )
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
+        return {
+            "required": {
+                "image1": ("IMAGE", {
+                    "tooltip": "Base image (background) in ComfyUI format [B,H,W,C]"
+                }),
+                "image2": ("IMAGE", {
+                    "tooltip": "Blend image (foreground) in ComfyUI format [B,H,W,C]"
+                }),
+                "blend_mode": (cls._BLEND_MODES, {
+                    "default": "normal",
+                    "tooltip": "Blend mode: normal (alpha), multiply (darken), screen (lighten), overlay, soft/hard light, difference, exclusion"
+                }),
+                "opacity": ("FLOAT", {
+                    "default": 0.5,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.01,
+                    "tooltip": "Blend opacity (0.0 = only image1, 1.0 = full blend effect)"
+                })
+            },
+            "optional": {
+                "size_mode": (cls._SIZE_MODES, {
+                    "default": "resize_to_first",
+                    "tooltip": "How to handle size differences: resize or crop to match dimensions"
+                }),
+                "validate_input": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Enable input validation for safety"
+                })
+            }
+        }
+    
+    RETURN_TYPES = ("IMAGE", "STRING")
+    RETURN_NAMES = ("image", "blend_info")
+    FUNCTION = "blend_images"
+    DESCRIPTION = "Professional image blending with multiple modes and automatic size matching"
+    
+    @performance_monitor
+    @cached_operation
+    def blend_images(self, image1, image2, blend_mode: str, opacity: float, 
+                     size_mode: str = "resize_to_first", validate_input: bool = True):
+        """Blend two images with professional quality and multiple blend modes"""
+        
+        if validate_input:
+            validation1 = self.validate_image_inputs(image1)
+            if not validation1["valid"]:
+                return (image1, f"Error in image1: {validation1['error']}")
+            
+            validation2 = self.validate_image_inputs(image2)  
+            if not validation2["valid"]:
+                return (image1, f"Error in image2: {validation2['error']}")
+        
+        torch = get_torch()
+        if torch is None:
+            return (image1, "Error: PyTorch not available for image blending")
+        
+        try:
+            # Get image dimensions
+            b1, h1, w1, c1 = image1.shape
+            b2, h2, w2, c2 = image2.shape
+            
+            # Handle size differences
+            if (h1, w1) != (h2, w2):
+                if size_mode == "resize_to_first":
+                    target_h, target_w = h1, w1
+                    img2_resized = torch.nn.functional.interpolate(
+                        image2.permute(0, 3, 1, 2), size=(target_h, target_w), 
+                        mode='bilinear', align_corners=False
+                    ).permute(0, 2, 3, 1)
+                    img1_final = image1
+                elif size_mode == "resize_to_second":
+                    target_h, target_w = h2, w2
+                    img1_final = torch.nn.functional.interpolate(
+                        image1.permute(0, 3, 1, 2), size=(target_h, target_w),
+                        mode='bilinear', align_corners=False
+                    ).permute(0, 2, 3, 1)
+                    img2_resized = image2
+                elif size_mode == "resize_to_larger":
+                    if h1 * w1 >= h2 * w2:
+                        target_h, target_w = h1, w1
+                        img1_final = image1
+                        img2_resized = torch.nn.functional.interpolate(
+                            image2.permute(0, 3, 1, 2), size=(target_h, target_w),
+                            mode='bilinear', align_corners=False
+                        ).permute(0, 2, 3, 1)
+                    else:
+                        target_h, target_w = h2, w2
+                        img1_final = torch.nn.functional.interpolate(
+                            image1.permute(0, 3, 1, 2), size=(target_h, target_w),
+                            mode='bilinear', align_corners=False
+                        ).permute(0, 2, 3, 1)
+                        img2_resized = image2
+                elif size_mode == "resize_to_smaller":
+                    if h1 * w1 <= h2 * w2:
+                        target_h, target_w = h1, w1
+                        img1_final = image1
+                        img2_resized = torch.nn.functional.interpolate(
+                            image2.permute(0, 3, 1, 2), size=(target_h, target_w),
+                            mode='bilinear', align_corners=False
+                        ).permute(0, 2, 3, 1)
+                    else:
+                        target_h, target_w = h2, w2
+                        img1_final = torch.nn.functional.interpolate(
+                            image1.permute(0, 3, 1, 2), size=(target_h, target_w),
+                            mode='bilinear', align_corners=False
+                        ).permute(0, 2, 3, 1)
+                        img2_resized = image2
+                elif size_mode == "crop_to_smaller":
+                    target_h = min(h1, h2)
+                    target_w = min(w1, w2)
+                    img1_final = image1[:, :target_h, :target_w]
+                    img2_resized = image2[:, :target_h, :target_w]
+                else:
+                    # Default to resize_to_first
+                    target_h, target_w = h1, w1
+                    img2_resized = torch.nn.functional.interpolate(
+                        image2.permute(0, 3, 1, 2), size=(target_h, target_w),
+                        mode='bilinear', align_corners=False
+                    ).permute(0, 2, 3, 1)
+                    img1_final = image1
+            else:
+                img1_final = image1
+                img2_resized = image2
+                target_h, target_w = h1, w1
+            
+            # Handle batch size differences  
+            target_batch = max(b1, b2)
+            if b1 < target_batch:
+                img1_final = img1_final.repeat(target_batch // b1, 1, 1, 1)
+            if img2_resized.shape[0] < target_batch:
+                img2_resized = img2_resized.repeat(target_batch // img2_resized.shape[0], 1, 1, 1)
+            
+            # Apply blend mode
+            if blend_mode == "normal":
+                # Standard alpha blending
+                blended = img1_final * (1.0 - opacity) + img2_resized * opacity
+                
+            elif blend_mode == "multiply":
+                # Multiply blend mode (darker)
+                multiply_result = img1_final * img2_resized
+                blended = img1_final * (1.0 - opacity) + multiply_result * opacity
+                
+            elif blend_mode == "screen":
+                # Screen blend mode (lighter)
+                screen_result = 1.0 - (1.0 - img1_final) * (1.0 - img2_resized)
+                blended = img1_final * (1.0 - opacity) + screen_result * opacity
+                
+            elif blend_mode == "overlay":
+                # Overlay blend mode
+                mask = img1_final <= 0.5
+                overlay_result = torch.where(
+                    mask,
+                    2.0 * img1_final * img2_resized,
+                    1.0 - 2.0 * (1.0 - img1_final) * (1.0 - img2_resized)
+                )
+                blended = img1_final * (1.0 - opacity) + overlay_result * opacity
+                
+            elif blend_mode == "soft_light":
+                # Soft light blend mode  
+                mask = img2_resized <= 0.5
+                soft_light_result = torch.where(
+                    mask,
+                    img1_final - (1.0 - 2.0 * img2_resized) * img1_final * (1.0 - img1_final),
+                    img1_final + (2.0 * img2_resized - 1.0) * (torch.sqrt(img1_final) - img1_final)
+                )
+                blended = img1_final * (1.0 - opacity) + soft_light_result * opacity
+                
+            elif blend_mode == "hard_light":
+                # Hard light blend mode
+                mask = img2_resized <= 0.5
+                hard_light_result = torch.where(
+                    mask,
+                    2.0 * img1_final * img2_resized,
+                    1.0 - 2.0 * (1.0 - img1_final) * (1.0 - img2_resized)
+                )
+                blended = img1_final * (1.0 - opacity) + hard_light_result * opacity
+                
+            elif blend_mode == "difference":
+                # Difference blend mode
+                difference_result = torch.abs(img1_final - img2_resized)
+                blended = img1_final * (1.0 - opacity) + difference_result * opacity
+                
+            elif blend_mode == "exclusion":
+                # Exclusion blend mode  
+                exclusion_result = img1_final + img2_resized - 2.0 * img1_final * img2_resized
+                blended = img1_final * (1.0 - opacity) + exclusion_result * opacity
+                
+            else:
+                # Fallback to normal blend
+                blended = img1_final * (1.0 - opacity) + img2_resized * opacity
+            
+            # Ensure values are in valid range [0,1]
+            blended = torch.clamp(blended, 0.0, 1.0)
+            
+            info = f"Blended {target_w}x{target_h} images using {blend_mode} mode at {opacity:.1%} opacity"
+            if (h1, w1) != (h2, w2):
+                info += f" (size mode: {size_mode})"
+            
+            return (blended, info)
+            
+        except Exception as e:
+            error_msg = f"Blend failed: {str(e)}"
+            return (image1, error_msg)
+
+
+class ImageSplit(ImageProcessingNode):
+    """
+    Professional image splitting into regular grid tiles with efficient tensor operations.
+    
+    Features:
+    - Split images into NxM regular grids
+    - Configurable tile sizes and overlap
+    - Efficient PyTorch tensor operations
+    - Batch processing support
+    - Multiple output formats (individual tiles or tile grids)
+    """
+    
+    _SPLIT_MODES = (
+        intern_string("grid"),
+        intern_string("tiles"), 
+        intern_string("strips_horizontal"),
+        intern_string("strips_vertical")
+    )
+    
+    _OUTPUT_MODES = (
+        intern_string("separate"),
+        intern_string("batch"),
+        intern_string("grid_image")
+    )
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
+        return {
+            "required": {
+                "image": ("IMAGE", {
+                    "tooltip": "Input image tensor in ComfyUI format [B,H,W,C]"
+                }),
+                "mode": (cls._SPLIT_MODES, {
+                    "default": "grid",
+                    "tooltip": "Split mode: grid (NxM tiles), tiles (fixed size), horizontal/vertical strips"
+                }),
+                "rows": ("INT", {
+                    "default": 2,
+                    "min": 1,
+                    "max": 32,
+                    "step": 1,
+                    "tooltip": "Number of rows for grid mode"
+                }),
+                "cols": ("INT", {
+                    "default": 2,
+                    "min": 1,
+                    "max": 32,
+                    "step": 1,
+                    "tooltip": "Number of columns for grid mode"
+                })
+            },
+            "optional": {
+                "tile_width": ("INT", {
+                    "default": 256,
+                    "min": 1,
+                    "max": 2048,
+                    "step": 1,
+                    "tooltip": "Fixed tile width (used in tiles mode)"
+                }),
+                "tile_height": ("INT", {
+                    "default": 256,
+                    "min": 1,
+                    "max": 2048,
+                    "step": 1,
+                    "tooltip": "Fixed tile height (used in tiles mode)"
+                }),
+                "overlap": ("INT", {
+                    "default": 0,
+                    "min": 0,
+                    "max": 256,
+                    "step": 1,
+                    "tooltip": "Overlap between tiles in pixels (for seamless processing)"
+                }),
+                "output_mode": (cls._OUTPUT_MODES, {
+                    "default": "batch",
+                    "tooltip": "Output format: separate (individual), batch (stacked), grid_image (assembled)"
+                }),
+                "validate_input": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Enable input validation"
+                })
+            }
+        }
+    
+    RETURN_TYPES = ("IMAGE", "INT", "INT", "STRING")
+    RETURN_NAMES = ("tiles", "tile_count", "tiles_per_row", "split_info")
+    FUNCTION = "split_image"
+    DESCRIPTION = "Split images into regular grid tiles with efficient tensor operations"
+    
+    @performance_monitor
+    @cached_operation
+    def split_image(self, image, mode: str, rows: int, cols: int, 
+                    tile_width: int = 256, tile_height: int = 256, overlap: int = 0,
+                    output_mode: str = "batch", validate_input: bool = True):
+        """Split image into tiles using efficient PyTorch operations"""
+        
+        if validate_input:
+            validation = self.validate_image_inputs(image)
+            if not validation["valid"]:
+                return (image, 0, 0, f"Error: {validation['error']}")
+        
+        torch = get_torch()
+        if torch is None:
+            return (image, 0, 0, "Error: PyTorch not available for image splitting")
+        
+        try:
+            batch_size, height, width, channels = image.shape
+            
+            if mode == "grid":
+                # Split into regular NxM grid
+                tile_h = height // rows
+                tile_w = width // cols
+                
+                # Calculate effective dimensions (may be smaller if image doesn't divide evenly)
+                effective_h = tile_h * rows
+                effective_w = tile_w * cols
+                
+                # Crop image to fit grid exactly
+                cropped_image = image[:, :effective_h, :effective_w, :]
+                
+                # Reshape to separate tiles: [B, rows, tile_h, cols, tile_w, C]
+                reshaped = cropped_image.view(batch_size, rows, tile_h, cols, tile_w, channels)
+                
+                # Reorder to: [B, rows, cols, tile_h, tile_w, C]
+                tiles_6d = reshaped.permute(0, 1, 3, 2, 4, 5)
+                
+                # Flatten to tiles: [B*rows*cols, tile_h, tile_w, C]
+                tiles = tiles_6d.contiguous().view(batch_size * rows * cols, tile_h, tile_w, channels)
+                
+                tile_count = rows * cols
+                tiles_per_row = cols
+                info = f"Split {width}x{height} into {rows}x{cols} grid ({tile_w}x{tile_h} tiles)"
+                
+            elif mode == "tiles":
+                # Split into fixed-size tiles with optional overlap
+                step_h = max(1, tile_height - overlap)
+                step_w = max(1, tile_width - overlap)
+                
+                tiles_list = []
+                row_count = 0
+                
+                for y in range(0, height - tile_height + 1, step_h):
+                    col_count = 0
+                    for x in range(0, width - tile_width + 1, step_w):
+                        tile = image[:, y:y+tile_height, x:x+tile_width, :]
+                        tiles_list.append(tile)
+                        col_count += 1
+                    row_count += 1
+                
+                if tiles_list:
+                    tiles = torch.cat(tiles_list, dim=0)
+                    tile_count = len(tiles_list) // batch_size
+                    tiles_per_row = col_count
+                    info = f"Split into {tile_count} tiles of {tile_width}x{tile_height} (overlap: {overlap}px)"
+                else:
+                    tiles = image[:1, :tile_height, :tile_width, :] # Fallback single tile
+                    tile_count = 1
+                    tiles_per_row = 1
+                    info = f"Image too small for tiling, returned single {tile_width}x{tile_height} tile"
+                    
+            elif mode == "strips_horizontal":
+                # Split into horizontal strips
+                strip_height = height // rows
+                tiles_list = []
+                
+                for i in range(rows):
+                    y_start = i * strip_height
+                    y_end = (i + 1) * strip_height if i < rows - 1 else height
+                    strip = image[:, y_start:y_end, :, :]
+                    tiles_list.append(strip)
+                
+                tiles = torch.cat(tiles_list, dim=0)
+                tile_count = rows
+                tiles_per_row = 1
+                info = f"Split into {rows} horizontal strips"
+                
+            elif mode == "strips_vertical":
+                # Split into vertical strips  
+                strip_width = width // cols
+                tiles_list = []
+                
+                for i in range(cols):
+                    x_start = i * strip_width
+                    x_end = (i + 1) * strip_width if i < cols - 1 else width
+                    strip = image[:, :, x_start:x_end, :]
+                    tiles_list.append(strip)
+                
+                tiles = torch.cat(tiles_list, dim=0)
+                tile_count = cols
+                tiles_per_row = cols
+                info = f"Split into {cols} vertical strips"
+                
+            else:
+                # Fallback to no split
+                tiles = image
+                tile_count = 1
+                tiles_per_row = 1
+                info = "No splitting applied"
+            
+            # Handle output mode
+            if output_mode == "separate":
+                # Keep tiles as separate batch items (already done)
+                pass
+            elif output_mode == "batch":
+                # Stack all tiles into batch dimension (already done)
+                pass
+            elif output_mode == "grid_image":
+                # Reassemble tiles into a single grid image for visualization
+                if mode == "grid" and tile_count > 1:
+                    # Reshape back to grid layout: [B, rows, cols, tile_h, tile_w, C]
+                    grid_6d = tiles.view(batch_size, rows, cols, tiles.shape[1], tiles.shape[2], channels)
+                    
+                    # Merge tiles: [B, rows*tile_h, cols*tile_w, C]
+                    grid_image = grid_6d.permute(0, 1, 3, 2, 4, 5).contiguous().view(
+                        batch_size, rows * tiles.shape[1], cols * tiles.shape[2], channels
+                    )
+                    tiles = grid_image
+                    info += " (assembled as grid image)"
+            
+            return (tiles, tile_count, tiles_per_row, info)
+            
+        except Exception as e:
+            error_msg = f"Split failed: {str(e)}"
+            return (image, 0, 0, error_msg)
+
+
+class ImageTile(ImageProcessingNode):
+    """
+    Professional image tiling for creating repeated patterns and texture mapping.
+    
+    Features:
+    - Multiple tiling patterns (repeat, mirror, flip)
+    - Seamless edge handling for textures
+    - Efficient tensor operations with broadcasting
+    - Custom tile arrangements and layouts
+    - Performance optimized batch processing
+    """
+    
+    _TILE_MODES = (
+        intern_string("repeat"),
+        intern_string("mirror_x"),
+        intern_string("mirror_y"), 
+        intern_string("mirror_both"),
+        intern_string("flip_x"),
+        intern_string("flip_y"),
+        intern_string("rotate_90"),
+        intern_string("checkerboard")
+    )
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
+        return {
+            "required": {
+                "image": ("IMAGE", {
+                    "tooltip": "Input image tensor to tile [B,H,W,C]"
+                }),
+                "tiles_x": ("INT", {
+                    "default": 2,
+                    "min": 1,
+                    "max": 16,
+                    "step": 1,
+                    "tooltip": "Number of horizontal tile repetitions"
+                }),
+                "tiles_y": ("INT", {
+                    "default": 2,
+                    "min": 1,
+                    "max": 16,
+                    "step": 1,
+                    "tooltip": "Number of vertical tile repetitions"
+                }),
+                "mode": (cls._TILE_MODES, {
+                    "default": "repeat",
+                    "tooltip": "Tiling pattern: repeat, mirror, flip, rotate, or checkerboard"
+                })
+            },
+            "optional": {
+                "seamless": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "Apply edge blending for seamless tiling (reduces seam visibility)"
+                }),
+                "blend_width": ("INT", {
+                    "default": 8,
+                    "min": 1,
+                    "max": 64,
+                    "step": 1,
+                    "tooltip": "Width of blend region for seamless tiling (pixels)"
+                }),
+                "validate_input": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Enable input validation"
+                })
+            }
+        }
+    
+    RETURN_TYPES = ("IMAGE", "INT", "INT", "STRING")
+    RETURN_NAMES = ("tiled_image", "output_width", "output_height", "tile_info")
+    FUNCTION = "tile_image"
+    DESCRIPTION = "Create tiled patterns from images with seamless edge handling"
+    
+    @performance_monitor
+    @cached_operation
+    def tile_image(self, image, tiles_x: int, tiles_y: int, mode: str,
+                   seamless: bool = False, blend_width: int = 8, validate_input: bool = True):
+        """Create tiled image patterns using efficient PyTorch operations"""
+        
+        if validate_input:
+            validation = self.validate_image_inputs(image)
+            if not validation["valid"]:
+                return (image, 0, 0, f"Error: {validation['error']}")
+        
+        torch = get_torch()
+        if torch is None:
+            return (image, 0, 0, "Error: PyTorch not available for image tiling")
+        
+        try:
+            batch_size, height, width, channels = image.shape
+            
+            # Create tile variations based on mode
+            if mode == "repeat":
+                # Simple repetition using torch.tile
+                tiled = image.repeat(1, tiles_y, tiles_x, 1)
+                
+            elif mode == "mirror_x":
+                # Mirror horizontally for each tile
+                tiles_row = []
+                for x in range(tiles_x):
+                    if x % 2 == 0:
+                        tiles_row.append(image)
+                    else:
+                        tiles_row.append(image.flip(2))  # Flip width dimension
+                row = torch.cat(tiles_row, dim=2)
+                tiled = row.repeat(1, tiles_y, 1, 1)
+                
+            elif mode == "mirror_y":
+                # Mirror vertically for each tile
+                tiles_col = []
+                for y in range(tiles_y):
+                    if y % 2 == 0:
+                        tiles_col.append(image)
+                    else:
+                        tiles_col.append(image.flip(1))  # Flip height dimension
+                tiled = torch.cat(tiles_col, dim=1)
+                tiled = tiled.repeat(1, 1, tiles_x, 1)
+                
+            elif mode == "mirror_both":
+                # Mirror both horizontally and vertically
+                tiles_grid = []
+                for y in range(tiles_y):
+                    tiles_row = []
+                    for x in range(tiles_x):
+                        tile = image
+                        if x % 2 == 1:
+                            tile = tile.flip(2)  # Mirror X
+                        if y % 2 == 1:
+                            tile = tile.flip(1)  # Mirror Y
+                        tiles_row.append(tile)
+                    row = torch.cat(tiles_row, dim=2)
+                    tiles_grid.append(row)
+                tiled = torch.cat(tiles_grid, dim=1)
+                
+            elif mode == "flip_x":
+                # Alternate flipping horizontally
+                tiles_row = []
+                for x in range(tiles_x):
+                    if x % 2 == 0:
+                        tiles_row.append(image)
+                    else:
+                        tiles_row.append(image.flip(2))
+                row = torch.cat(tiles_row, dim=2)
+                tiled = row.repeat(1, tiles_y, 1, 1)
+                
+            elif mode == "flip_y":
+                # Alternate flipping vertically  
+                tiles_col = []
+                for y in range(tiles_y):
+                    if y % 2 == 0:
+                        tiles_col.append(image)
+                    else:
+                        tiles_col.append(image.flip(1))
+                tiled = torch.cat(tiles_col, dim=1)
+                tiled = tiled.repeat(1, 1, tiles_x, 1)
+                
+            elif mode == "rotate_90":
+                # Rotate tiles by 90 degrees in sequence
+                tiles_grid = []
+                for y in range(tiles_y):
+                    tiles_row = []
+                    for x in range(tiles_x):
+                        rotation = (x + y) % 4
+                        tile = image
+                        for _ in range(rotation):
+                            # Rotate 90 degrees clockwise: transpose + flip
+                            tile = tile.transpose(1, 2).flip(1)
+                        tiles_row.append(tile)
+                    row = torch.cat(tiles_row, dim=2)
+                    tiles_grid.append(row)
+                tiled = torch.cat(tiles_grid, dim=1)
+                
+            elif mode == "checkerboard":
+                # Checkerboard pattern with original and flipped tiles
+                tiles_grid = []
+                for y in range(tiles_y):
+                    tiles_row = []
+                    for x in range(tiles_x):
+                        if (x + y) % 2 == 0:
+                            tiles_row.append(image)
+                        else:
+                            # Flip both dimensions for checkerboard
+                            tiles_row.append(image.flip(1).flip(2))
+                    row = torch.cat(tiles_row, dim=2)
+                    tiles_grid.append(row)
+                tiled = torch.cat(tiles_grid, dim=1)
+                
+            else:
+                # Fallback to simple repeat
+                tiled = image.repeat(1, tiles_y, tiles_x, 1)
+            
+            # Apply seamless blending if requested
+            if seamless and blend_width > 0 and (tiles_x > 1 or tiles_y > 1):
+                tiled = self._apply_seamless_blending(tiled, width, height, tiles_x, tiles_y, blend_width)
+            
+            output_height, output_width = tiled.shape[1], tiled.shape[2]
+            
+            info = f"Tiled {width}x{height} into {tiles_x}x{tiles_y} pattern using {mode} mode"
+            if seamless:
+                info += f" (seamless blend: {blend_width}px)"
+            info += f" -> {output_width}x{output_height}"
+            
+            return (tiled, output_width, output_height, info)
+            
+        except Exception as e:
+            error_msg = f"Tiling failed: {str(e)}"
+            return (image, 0, 0, error_msg)
+    
+    def _apply_seamless_blending(self, tiled, tile_width, tile_height, tiles_x, tiles_y, blend_width):
+        """Apply edge blending to reduce seam visibility in tiled patterns"""
+        torch = get_torch()
+        
+        try:
+            # Create blend masks for horizontal and vertical seams
+            batch_size, total_height, total_width, channels = tiled.shape
+            
+            # Horizontal seam blending
+            if tiles_y > 1:
+                for y in range(1, tiles_y):
+                    seam_y = y * tile_height
+                    
+                    # Create blend region
+                    start_y = max(0, seam_y - blend_width // 2)
+                    end_y = min(total_height, seam_y + blend_width // 2)
+                    
+                    if end_y > start_y:
+                        # Create smooth transition weights
+                        blend_region_height = end_y - start_y
+                        weights = torch.linspace(1.0, 0.0, blend_region_height, device=tiled.device)
+                        weights = weights.view(1, -1, 1, 1)
+                        
+                        # Get regions above and below seam
+                        above_region = tiled[:, start_y:end_y, :, :]
+                        below_start = (seam_y - blend_width // 2) % tile_height
+                        below_region = tiled[:, below_start:below_start + blend_region_height, :, :]
+                        
+                        if below_region.shape[1] == above_region.shape[1]:
+                            # Blend the regions
+                            blended = above_region * weights + below_region * (1 - weights)
+                            tiled[:, start_y:end_y, :, :] = blended
+            
+            # Vertical seam blending
+            if tiles_x > 1:
+                for x in range(1, tiles_x):
+                    seam_x = x * tile_width
+                    
+                    # Create blend region
+                    start_x = max(0, seam_x - blend_width // 2)
+                    end_x = min(total_width, seam_x + blend_width // 2)
+                    
+                    if end_x > start_x:
+                        # Create smooth transition weights
+                        blend_region_width = end_x - start_x
+                        weights = torch.linspace(1.0, 0.0, blend_region_width, device=tiled.device)
+                        weights = weights.view(1, 1, -1, 1)
+                        
+                        # Get regions left and right of seam
+                        left_region = tiled[:, :, start_x:end_x, :]
+                        right_start = (seam_x - blend_width // 2) % tile_width
+                        right_region = tiled[:, :, right_start:right_start + blend_region_width, :]
+                        
+                        if right_region.shape[2] == left_region.shape[2]:
+                            # Blend the regions
+                            blended = left_region * weights + right_region * (1 - weights)
+                            tiled[:, :, start_x:end_x, :] = blended
+            
+            return tiled
+            
+        except Exception:
+            # If blending fails, return unblended result
+            return tiled

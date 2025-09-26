@@ -1,0 +1,161 @@
+{
+  "last_node_id": 8,
+  "last_link_id": 7,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "XDEV_PromptCombiner",
+      "pos": [100, 100],
+      "size": {"0": 400, "1": 380},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "combined_prompt", "type": "STRING", "links": [1], "shape": 3},
+        {"name": "combination_info", "type": "STRING", "links": null, "shape": 3},
+        {"name": "total_prompts", "type": "INT", "links": null, "shape": 3}
+      ],
+      "properties": {"Node name for S&R": "XDEV_PromptCombiner"},
+      "widgets_values": [
+        "beautiful landscape", 
+        "dramatic lighting", 
+        "concatenate", 
+        "comma", 
+        "highly detailed", 
+        "professional photography", 
+        1.0, 1.0, 1.0, 1.0, 
+        ", ", 
+        true
+      ]
+    },
+    {
+      "id": 2,
+      "type": "XDEV_PromptWeighter",
+      "pos": [550, 100],
+      "size": {"0": 400, "1": 280},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "prompt", "type": "STRING", "link": 1}
+      ],
+      "outputs": [
+        {"name": "weighted_prompt", "type": "STRING", "links": [2], "shape": 3},
+        {"name": "operation_info", "type": "STRING", "links": null, "shape": 3},
+        {"name": "weights_modified", "type": "INT", "links": null, "shape": 3}
+      ],
+      "properties": {"Node name for S&R": "XDEV_PromptWeighter"},
+      "widgets_values": [
+        "add_emphasis", 
+        1.3, 
+        "dramatic lighting", 
+        1.1, 
+        true
+      ]
+    },
+    {
+      "id": 3,
+      "type": "XDEV_PromptCleaner",
+      "pos": [1000, 100],
+      "size": {"0": 400, "1": 320},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "prompt", "type": "STRING", "link": 2}
+      ],
+      "outputs": [
+        {"name": "cleaned_prompt", "type": "STRING", "links": [3], "shape": 3},
+        {"name": "cleanup_info", "type": "STRING", "links": null, "shape": 3},
+        {"name": "changes_made", "type": "INT", "links": null, "shape": 3}
+      ],
+      "properties": {"Node name for S&R": "XDEV_PromptCleaner"},
+      "widgets_values": [
+        true, true, true, true, 
+        "none", false, 1000, true
+      ]
+    },
+    {
+      "id": 4,
+      "type": "XDEV_PromptAnalyzer",
+      "pos": [100, 500],
+      "size": {"0": 400, "1": 260},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "prompt", "type": "STRING", "link": 3}
+      ],
+      "outputs": [
+        {"name": "analysis_report", "type": "STRING", "links": [4], "shape": 3},
+        {"name": "statistics", "type": "STRING", "links": null, "shape": 3},
+        {"name": "word_count", "type": "INT", "links": null, "shape": 3},
+        {"name": "complexity_score", "type": "FLOAT", "links": null, "shape": 3}
+      ],
+      "properties": {"Node name for S&R": "XDEV_PromptAnalyzer"},
+      "widgets_values": [
+        "comprehensive", 
+        true, true, true
+      ]
+    },
+    {
+      "id": 5,
+      "type": "XDEV_PromptRandomizer",
+      "pos": [550, 500],
+      "size": {"0": 400, "1": 300},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "prompt", "type": "STRING", "link": 3}
+      ],
+      "outputs": [
+        {"name": "randomized_prompt", "type": "STRING", "links": [5], "shape": 3},
+        {"name": "randomization_info", "type": "STRING", "links": null, "shape": 3},
+        {"name": "seed_used", "type": "INT", "links": null, "shape": 3}
+      ],
+      "properties": {"Node name for S&R": "XDEV_PromptRandomizer"},
+      "widgets_values": [
+        "add_variations", 
+        0.7, 
+        12345, 
+        true, 
+        "quality", 
+        true
+      ]
+    },
+    {
+      "id": 6,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 500],
+      "size": {"0": 400, "1": 300},
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 4},
+        {"name": "input_2", "type": "*", "link": 5}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": [
+        "detailed", 
+        true, true, true, 
+        "analysis_report"
+      ]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "STRING"],
+    [2, 2, 0, 3, 0, "STRING"],
+    [3, 3, 0, 4, 0, "STRING"],
+    [3, 3, 0, 5, 0, "STRING"],
+    [4, 4, 0, 6, 0, "*"],
+    [5, 5, 0, 6, 1, "*"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

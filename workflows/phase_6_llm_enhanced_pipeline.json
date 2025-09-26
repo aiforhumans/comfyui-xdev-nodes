@@ -1,0 +1,201 @@
+{
+  "last_node_id": 8,
+  "last_link_id": 12,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "XDEV_LLMPromptAssistant",
+      "pos": [100, 100],
+      "size": {"0": 320, "1": 400},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "enhanced_prompt", "type": "STRING", "links": [1], "slot_index": 0},
+        {"name": "original_prompt", "type": "STRING", "links": null},
+        {"name": "enhancement_info", "type": "STRING", "links": [2], "slot_index": 2}
+      ],
+      "properties": {"Node name for S&R": "XDEV_LLMPromptAssistant"},
+      "widgets_values": [
+        "a beautiful landscape",
+        "generation",
+        "medium",
+        "",
+        "http://localhost:1234",
+        "auto-detect",
+        true
+      ],
+      "title": "LLM Prompt Assistant"
+    },
+    {
+      "id": 2,
+      "type": "XDEV_LLMPersonBuilder",
+      "pos": [500, 100],
+      "size": {"0": 320, "1": 480},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "base_prompt", "type": "STRING", "link": 1}
+      ],
+      "outputs": [
+        {"name": "character_prompt", "type": "STRING", "links": [3], "slot_index": 0},
+        {"name": "personality_analysis", "type": "STRING", "links": null},
+        {"name": "trait_summary", "type": "STRING", "links": [4], "slot_index": 2},
+        {"name": "enhancement_info", "type": "STRING", "links": null}
+      ],
+      "properties": {"Node name for S&R": "XDEV_LLMPersonBuilder"},
+      "widgets_values": [
+        "hero",
+        "brave, loyal, determined",
+        "medieval",
+        "",
+        "",
+        "medium",
+        "http://localhost:1234",
+        "auto-detect",
+        true
+      ],
+      "title": "LLM Character Builder"
+    },
+    {
+      "id": 3,
+      "type": "XDEV_LLMStyleBuilder",
+      "pos": [900, 100],
+      "size": {"0": 320, "1": 520},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "base_prompt", "type": "STRING", "link": 3}
+      ],
+      "outputs": [
+        {"name": "style_prompt", "type": "STRING", "links": [5], "slot_index": 0},
+        {"name": "style_analysis", "type": "STRING", "links": null},
+        {"name": "coherence_report", "type": "STRING", "links": [6], "slot_index": 2},
+        {"name": "enhancement_info", "type": "STRING", "links": null}
+      ],
+      "properties": {"Node name for S&R": "XDEV_LLMStyleBuilder"},
+      "widgets_values": [
+        "renaissance",
+        "oil painting",
+        "dramatic",
+        "rich",
+        "chiaroscuro",
+        "",
+        "",
+        "medium",
+        "http://localhost:1234",
+        "auto-detect",
+        true
+      ],
+      "title": "LLM Style Builder"
+    },
+    {
+      "id": 4,
+      "type": "XDEV_LLMContextualBuilder",
+      "pos": [1300, 100],
+      "size": {"0": 320, "1": 440},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "base_prompt", "type": "STRING", "link": 5}
+      ],
+      "outputs": [
+        {"name": "contextual_prompt", "type": "STRING", "links": [7], "slot_index": 0},
+        {"name": "prompt_breakdown", "type": "STRING", "links": null},
+        {"name": "generation_info", "type": "STRING", "links": [8], "slot_index": 2}
+      ],
+      "properties": {"Node name for S&R": "XDEV_LLMContextualBuilder"},
+      "widgets_values": [
+        "scene",
+        "cinematic",
+        "heroic",
+        "",
+        "http://localhost:1234",
+        "auto-detect",
+        true
+      ],
+      "title": "LLM Contextual Builder"
+    },
+    {
+      "id": 5,
+      "type": "XDEV_OutputDev",
+      "pos": [1700, 100],
+      "size": {"0": 320, "1": 200},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 7},
+        {"name": "input_2", "type": "*", "link": 2},
+        {"name": "input_3", "type": "*", "link": 4}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": [
+        "detailed",
+        true,
+        true
+      ],
+      "title": "Final Output Analysis"
+    },
+    {
+      "id": 6,
+      "type": "XDEV_OutputDev",
+      "pos": [1700, 350],
+      "size": {"0": 320, "1": 160},
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 6},
+        {"name": "input_2", "type": "*", "link": 8}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": [
+        "summary",
+        false,
+        true
+      ],
+      "title": "Analysis Reports"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "STRING"],
+    [2, 1, 2, 5, 1, "STRING"],
+    [3, 2, 0, 3, 0, "STRING"],
+    [4, 2, 2, 5, 2, "STRING"],
+    [5, 3, 0, 4, 0, "STRING"],
+    [6, 3, 2, 6, 0, "STRING"],
+    [7, 4, 0, 5, 0, "STRING"],
+    [8, 4, 2, 6, 1, "STRING"]
+  ],
+  "groups": [
+    {
+      "title": "Phase 6: LLM-Enhanced Prompt Engineering Pipeline",
+      "bounding": [50, 50, 2000, 600],
+      "color": "#3f789e",
+      "font_size": 24,
+      "locked": false
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [-40, 30]
+    },
+    "info": {
+      "name": "Phase 6 LLM Enhanced Prompt Pipeline",
+      "author": "XDev Nodes",
+      "description": "Demonstrates Phase 6 LLM-enhanced prompt tools working together: PromptAssistant → PersonBuilder → StyleBuilder → ContextualBuilder → Analysis. Requires LM Studio or compatible local LLM server.",
+      "version": "0.3.0",
+      "created": "2024-12-28",
+      "modified": "2024-12-28"
+    }
+  }
+}

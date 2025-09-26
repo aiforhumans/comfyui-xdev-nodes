@@ -1,0 +1,178 @@
+{
+  "last_node_id": 6,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "XDEV_LLMSDXLPhotoEnhancer",
+      "pos": [100, 100],
+      "size": {"0": 400, "1": 380},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "sdxl_prompt", "type": "STRING", "links": [1], "slot_index": 0},
+        {"name": "negative_prompt", "type": "STRING", "links": [2], "slot_index": 1},
+        {"name": "settings_json", "type": "STRING", "links": [3], "slot_index": 2},
+        {"name": "enhancement_notes", "type": "STRING", "links": [4], "slot_index": 3}
+      ],
+      "properties": {"Node name for S&R": "XDEV_LLMSDXLPhotoEnhancer"},
+      "widgets_values": [
+        "Portrait of a young woman reading by a window, cozy living room, soft morning light, contemplative mood",
+        "portrait",
+        "http://localhost:1234",
+        "auto-detect",
+        "Use natural film stock aesthetic, avoid harsh lighting",
+        true,
+        true
+      ],
+      "title": "SDXL Photo Enhancer"
+    },
+    {
+      "id": 2,
+      "type": "XDEV_OutputDev",
+      "pos": [600, 100],
+      "size": {"0": 350, "1": 180},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 1},
+        {"name": "input_2", "type": "*", "link": 2}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": [
+        "detailed",
+        true,
+        true
+      ],
+      "title": "SDXL Prompts Output"
+    },
+    {
+      "id": 3,
+      "type": "XDEV_OutputDev",
+      "pos": [600, 320],
+      "size": {"0": 350, "1": 160},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 3},
+        {"name": "input_2", "type": "*", "link": 4}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": [
+        "summary",
+        false,
+        true
+      ],
+      "title": "Technical Settings & Notes"
+    },
+    {
+      "id": 4,
+      "type": "XDEV_LLMSDXLPhotoEnhancer",
+      "pos": [100, 520],
+      "size": {"0": 400, "1": 380},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "sdxl_prompt", "type": "STRING", "links": [5], "slot_index": 0},
+        {"name": "negative_prompt", "type": "STRING", "links": [6], "slot_index": 1},
+        {"name": "settings_json", "type": "STRING", "links": [7], "slot_index": 2},
+        {"name": "enhancement_notes", "type": "STRING", "links": [8], "slot_index": 3}
+      ],
+      "properties": {"Node name for S&R": "XDEV_LLMSDXLPhotoEnhancer"},
+      "widgets_values": [
+        "Street photography at night, man with umbrella crossing wet street, neon lights reflecting on pavement, urban atmosphere",
+        "landscape",
+        "http://localhost:1234",
+        "auto-detect",
+        "Cinematic street photography, film noir aesthetic, dramatic lighting",
+        true,
+        true
+      ],
+      "title": "SDXL Night Street Photo"
+    },
+    {
+      "id": 5,
+      "type": "XDEV_OutputDev",
+      "pos": [600, 520],
+      "size": {"0": 350, "1": 180},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 5},
+        {"name": "input_2", "type": "*", "link": 6}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": [
+        "detailed",
+        true,
+        true
+      ],
+      "title": "Night Scene Prompts"
+    },
+    {
+      "id": 6,
+      "type": "XDEV_OutputDev",
+      "pos": [600, 740],
+      "size": {"0": 350, "1": 160},
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 7},
+        {"name": "input_2", "type": "*", "link": 8}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": [
+        "summary",
+        false,
+        true
+      ],
+      "title": "Night Scene Technical"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "STRING"],
+    [2, 1, 1, 2, 1, "STRING"],
+    [3, 1, 2, 3, 0, "STRING"],
+    [4, 1, 3, 3, 1, "STRING"],
+    [5, 4, 0, 5, 0, "STRING"],
+    [6, 4, 1, 5, 1, "STRING"],
+    [7, 4, 2, 6, 0, "STRING"],
+    [8, 4, 3, 6, 1, "STRING"]
+  ],
+  "groups": [
+    {
+      "title": "SDXL Photo Enhancement Pipeline",
+      "bounding": [50, 50, 950, 900],
+      "color": "#3f789e",
+      "font_size": 24,
+      "locked": false
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.75,
+      "offset": [20, 20]
+    },
+    "info": {
+      "name": "SDXL Photo Enhancer Demo",
+      "author": "XDev Nodes",
+      "description": "Demonstrates the new SDXL Photo Enhancer node that converts simple briefs into professional SDXL prompts with structured format, negative prompts, and technical settings. Uses the comprehensive system prompt template for photorealistic image generation.",
+      "version": "0.3.0",
+      "created": "2024-12-28",
+      "modified": "2024-12-28"
+    }
+  }
+}

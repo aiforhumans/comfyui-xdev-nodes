@@ -8,9 +8,9 @@
 
 A **production-ready starter kit** for building and publishing **ComfyUI custom nodes** with professional-grade patterns, comprehensive validation, rich documentation, and complete GitHub standards.
 
-> 🚀 **NEW**: Complete development toolkit with 8 professional nodes including VAE tools, universal type testing, and comprehensive debugging infrastructure.
+> 🚀 **NEW**: LLM-Enhanced Prompt Tools with 34 professional nodes including AI-powered character creation, intelligent style generation, contextual prompts, and comprehensive LM Studio integration.
 
-> 🔧 **ENHANCED**: Advanced input validation, rich tooltips, error handling, and professional development patterns inspired by enterprise-grade ComfyUI frameworks.
+> 🔧 **ENHANCED**: Complete AI workflow toolkit with OpenAI-compatible API support, automatic server discovery, configuration presets, and robust error handling for local Language Models.
 
 ---
 
@@ -148,6 +148,92 @@ Open an example workflow from `workflows/` to test.
 - **Purpose**: Generate test data of any ComfyUI type for testing and debugging
 - **Inputs**:
   - `output_type` - Data type: `["STRING", "INT", "FLOAT", "BOOLEAN", "IMAGE", "LATENT", "MASK", "MODEL", "CONDITIONING", "LIST", "DICT", "MOCK_TENSOR"]`
+
+## 🚀 Phase 4: Advanced Prompt Engineering Suite (NEW!)
+
+### 📝 Prompt Generation & Manipulation
+
+#### XDEV_PromptMatrix (XDev) 
+**Category**: `XDev/Prompts/Generation` | **Combination matrix generator**
+- **Purpose**: Generate all combinations from prompt components using `|` syntax
+- **Features**: 4 modes (all_combinations, pairwise, sequential, random_sample), intelligent filtering
+- **Example**: `"portrait | professional | artistic"` → 8 combinations
+
+#### XDEV_PromptInterpolator (XDev)
+**Category**: `XDev/Prompts/Transformation` | **Smooth prompt blending**
+- **Purpose**: Interpolate between two prompts with ratio control
+- **Features**: 4 methods (linear, cosine, weighted_blend, token_merge), multi-step support
+- **Example**: Blend "sunny day" → "stormy night" at 70% weight
+
+#### XDEV_PromptScheduler (XDev)
+**Category**: `XDev/Prompts/Scheduling` | **Dynamic prompt changes**
+- **Purpose**: Step-based prompt scheduling with ComfyUI syntax
+- **Features**: `[from:to:when]` syntax, alternatives `[option1|option2]`, nested schedules
+- **Example**: `"[morning:evening:10] with [calm|storm]"`
+
+### 🎯 Prompt Enhancement & Weighting
+
+#### XDEV_PromptAttention (XDev)
+**Category**: `XDev/Prompts/Enhancement` | **Attention weight control**
+- **Purpose**: ComfyUI-style attention weight manipulation
+- **Features**: 5 operations, bracket syntax `(word:1.2)`, batch processing, weight analysis
+- **Example**: Emphasize "professional" → `(professional:1.3)`
+
+#### XDEV_PromptCombiner (XDev)
+**Category**: `XDev/Prompts/Generation` | **Multi-prompt blending**
+- **Purpose**: Combine multiple prompts with advanced strategies
+- **Features**: 4 modes (simple, weighted, interleaved, random), custom separators
+- **Example**: Blend 3 prompts with different weights and strategies
+
+#### XDEV_PromptWeighter (XDev)
+**Category**: `XDev/Prompts/Enhancement` | **Batch weight operations**
+- **Purpose**: Apply weight operations to keyword lists
+- **Features**: 5 operations (emphasize, de-emphasize, balance, normalize, analyze)
+
+### 🧠 Advanced Reasoning & Examples
+
+#### XDEV_PromptChainOfThought (XDev)
+**Category**: `XDev/Prompts/Reasoning` | **Structured thinking**
+- **Purpose**: Generate reasoning chains for better AI responses
+- **Features**: 5 templates (step_by_step, problem_solution, cause_effect, creative_process, analysis_synthesis)
+- **Example**: Convert simple prompt into structured reasoning chain
+
+#### XDEV_PromptFewShot (XDev)
+**Category**: `XDev/Prompts/Examples` | **Intelligent example selection**
+- **Purpose**: Add relevant examples to enhance prompt effectiveness
+- **Features**: Built-in library (50+ examples), similarity matching, 3 selection modes
+- **Example**: Automatically find 3 most relevant examples for any prompt
+
+### 🏗️ Specialized Builders
+
+#### XDEV_PersonBuilder (XDev)
+**Category**: `XDev/Prompts/Builders` | **Character generation**
+- **Purpose**: Generate detailed person descriptions with traits
+- **Features**: Age, gender, personality, appearance, profession, custom traits
+- **Example**: Create professional portrait character with specific attributes
+
+#### XDEV_StyleBuilder (XDev)
+**Category**: `XDev/Prompts/Builders` | **Art style generation**
+- **Purpose**: Generate comprehensive art style descriptions
+- **Features**: Medium, era, color palette, lighting, composition, texture
+- **Example**: Build "digital painting, vibrant colors, dramatic lighting" style
+
+### 🧹 Prompt Optimization
+
+#### XDEV_PromptCleaner (XDev)
+**Category**: `XDev/Prompts/Utilities` | **Text optimization**
+- **Purpose**: Clean and optimize prompts for better results
+- **Features**: Remove duplicates, fix punctuation, normalize spacing, custom replacements
+
+#### XDEV_PromptAnalyzer (XDev)
+**Category**: `XDev/Prompts/Analysis` | **Comprehensive analysis**
+- **Purpose**: Analyze prompt structure and provide optimization suggestions
+- **Features**: Word counts, readability, attention weights, keyword extraction
+
+#### XDEV_PromptRandomizer (XDev)
+**Category**: `XDev/Prompts/Generation` | **Creative variation**
+- **Purpose**: Generate creative variations of existing prompts
+- **Features**: 5 modes (shuffle, synonym, insert, style, creative), controlled randomness
   - `output_mode` - Generation mode: `["simple", "realistic", "stress_test"]`
   - `custom_value` (STRING, optional) - Custom value to convert to target type
   - `size_parameter` (INT) - Size for images, lists, tensor dimensions
@@ -202,6 +288,77 @@ Open an example workflow from `workflows/` to test.
   - **Latent Analysis**: Shape, memory usage, and value range validation
   - **Debug Information**: Comprehensive latent property reporting
   - **ComfyUI Compatible**: Proper IMAGE output format (0-1 range validation)
+
+## 🤖 Phase 5: LM Studio Local API Integration (NEW!)
+
+### XDEV_LMStudioChat (XDev)
+**Category**: `XDev/LLM/Integration` | **Local LLM connectivity**
+
+- **Purpose**: Connect to LM Studio and other local Language Model servers for chat completions
+- **Inputs**:
+  - `prompt` (STRING, multiline) - The user message to send to the LLM
+  - `server_url` (STRING) - LM Studio server URL (default: http://localhost:1234)
+  - `model` (STRING) - Model name or ID (auto-detected if available)
+  - `preset` - Configuration preset: `["creative", "balanced", "focused", "precise", "custom"]`
+  - `system_prompt` (STRING, multiline, optional) - System message to set LLM behavior
+  - `message_history` (STRING, optional) - Previous conversation history in JSON format
+  - `temperature` (FLOAT, 0.0-2.0) - Response randomness (0=deterministic, 2=very random)
+  - `max_tokens` (INT, 1-8192) - Maximum number of tokens to generate
+  - `top_p` (FLOAT, 0.0-1.0) - Nucleus sampling threshold
+  - `stream` (BOOLEAN) - Enable streaming responses (experimental)
+  - `auto_detect_server` (BOOLEAN) - Automatically detect running LM Studio servers
+- **Outputs**:
+  - `response` (STRING) - The LLM's generated response
+  - `full_conversation` (STRING) - Complete conversation history in JSON format
+  - `server_info` (STRING) - Server status, available models, and connection details
+  - `generation_stats` (STRING) - Performance metrics and generation statistics
+- **Features**:
+  - **OpenAI-Compatible API**: Full support for OpenAI chat completions format
+  - **Automatic Server Discovery**: Scans common ports (1234, 8000, 8080, 11434) for running servers
+  - **Configuration Presets**: 5 presets for different use cases (creative, balanced, focused, precise, custom)
+  - **Message History Management**: Supports conversation context and system prompts
+  - **Robust Error Handling**: Graceful fallbacks and comprehensive error messages
+  - **HTTP Client Fallbacks**: Supports both httpx and requests with automatic fallback
+  - **Performance Monitoring**: Built-in performance tracking and caching
+  - **Local Privacy**: All data stays on your machine, no cloud dependencies
+
+## 🧠 Phase 6: LLM-Enhanced Prompt Tools (LATEST!)
+
+Building on Phase 5's LM Studio integration, Phase 6 adds **4 new AI-powered prompt tools** that leverage local LLMs for intelligent prompt enhancement.
+
+### XDEV_LLMPromptAssistant (XDev)
+**Category**: `XDev/LLM/PromptTools` | **AI-powered prompt enhancement**
+
+- **Purpose**: Enhance any prompt with AI analysis and intelligent improvements
+- **Features**: 5 enhancement levels, 8 task types, context analysis, fallback handling
+- **Outputs**: `(enhanced_prompt, original_prompt, enhancement_info)`
+
+### XDEV_LLMContextualBuilder (XDev)  
+**Category**: `XDev/LLM/PromptTools` | **Context-aware prompt building**
+
+- **Purpose**: Build contextual prompts with scene analysis and mood integration
+- **Features**: 6 context types, 5 style modes, 7 mood options, coherence checking
+- **Outputs**: `(contextual_prompt, prompt_breakdown, generation_info)`
+
+### XDEV_LLMPersonBuilder (XDev)
+**Category**: `XDev/LLM/Character` | **AI-enhanced character creation**
+
+- **Purpose**: Create rich characters with AI-powered personality analysis
+- **Features**: 8 character types, personality validation, trait consistency, dynamic evolution
+- **Outputs**: `(character_prompt, personality_analysis, trait_summary, enhancement_info)`
+
+### XDEV_LLMStyleBuilder (XDev)
+**Category**: `XDev/LLM/Style` | **Intelligent artistic style generation**
+
+- **Purpose**: Generate artistic styles with AI coherence analysis
+- **Features**: 15 art styles, 12 mediums, historical awareness, style coherence checking
+- **Outputs**: `(style_prompt, style_analysis, coherence_report, enhancement_info)`
+
+**Phase 6 Architecture**:
+- **Unified LLM Framework**: Consistent API integration across all tools
+- **Enhanced Original Nodes**: PersonBuilder and StyleBuilder now have LLM variants
+- **Performance Optimized**: All nodes use `@performance_monitor` and caching
+- **Graceful Fallbacks**: Works with or without LLM connectivity
 
 ---
 
@@ -260,9 +417,47 @@ tests/
     bug_report.md
     feature_request.md
   pull_request_template.md
-docs/
-  how_to_pick_types.png
+docs/                           # 📚 Comprehensive Documentation
+  00_Overview.md                # Project overview and architecture
+  01_Node_Anatomy.md            # Complete node structure guide
+  02_Datatypes.md               # ComfyUI type system reference
+  03_Images_Latents_Masks.md    # Advanced image processing
+  04_Inputs_Advanced.md         # Complex input patterns
+  05_JS_Extensions.md           # Frontend development guide
+  06_Packaging_and_Registry.md  # Publishing and distribution
+  07_Testing_CI.md              # Testing strategies and CI/CD
+  08_Troubleshooting.md         # Common issues and solutions
+  09_Configuration_Testing.md   # Configuration and testing infrastructure
+  how_to_pick_types.png         # Visual type selection guide
 ```
+
+---
+
+## 📚 Comprehensive Documentation
+
+The `docs/` folder contains extensive guides for all aspects of ComfyUI development:
+
+### Getting Started
+- **[📋 Overview](docs/00_Overview.md)** - Project architecture and development philosophy
+- **[🧬 Node Anatomy](docs/01_Node_Anatomy.md)** - Complete node structure and patterns
+- **[🔢 Datatypes](docs/02_Datatypes.md)** - ComfyUI type system with examples
+
+### Advanced Development  
+- **[🖼️ Images, Latents & Masks](docs/03_Images_Latents_Masks.md)** - Advanced image processing techniques
+- **[⚙️ Advanced Inputs](docs/04_Inputs_Advanced.md)** - Complex input patterns and validation
+- **[🌐 JS Extensions](docs/05_JS_Extensions.md)** - Frontend development and custom widgets
+
+### Production & Distribution
+- **[📦 Packaging & Registry](docs/06_Packaging_and_Registry.md)** - Publishing to ComfyUI registry
+- **[🧪 Testing & CI](docs/07_Testing_CI.md)** - Testing strategies and continuous integration
+- **[🔧 Configuration & Testing](docs/09_Configuration_Testing.md)** - Infrastructure setup and validation
+
+### Troubleshooting  
+- **[🚨 Troubleshooting](docs/08_Troubleshooting.md)** - Common issues and solutions
+- **[📊 Type Selection Guide](docs/how_to_pick_types.png)** - Visual flowchart for choosing types
+
+### Quick References
+Each document includes practical examples, code snippets, and real-world patterns used in production ComfyUI extensions.
 
 ---
 
