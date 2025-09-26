@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-xdev-nodes"
+version = "0.1.0"
+description = "Xtremedev custom nodes for ComfyUI"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
