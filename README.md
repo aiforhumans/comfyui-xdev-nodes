@@ -1,9 +1,30 @@
 # ComfyUI XDev Nodes — Expanded
 
-A full learning-and-starter kit for **ComfyUI custom node development**. It contains:
-- A clean Python package layout with example nodes
-- Frontend JS extension scaffolding (WEB_DIRECTORY) and docs/help pages
-- Unit tests, dev scripts, and CI-ready structure
-- Packaging metadata (`pyproject.toml`) ready for Comfy **Registry** and ComfyUI **Manager**
+A clean, CI‑ready starter kit for **ComfyUI custom node development**. Includes:
 
-> Drop this folder into `ComfyUI/custom_nodes/` (or symlink it there) and start building.
+- Minimal Python nodes with clear INPUT/RETURN metadata
+- Image/text utilities
+- Optional frontend `web/` folder (served by ComfyUI)
+- Packaging metadata compatible with the ComfyUI Registry
+- Tests you can adapt for your CI
+
+## Install (local dev)
+
+```bash
+git clone https://github.com/aiforhumans/comfyui-xdev-nodes
+cd comfyui-xdev-nodes
+# Developer install
+pip install -e .
+```
+
+Then link/copy this folder into your `ComfyUI/custom_nodes/` directory (or use ComfyUI Manager).
+
+## Nodes
+
+- **HelloString** — returns a constant greeting.
+- **AnyPassthrough** — demonstrates the `ANY` datatype; returns input unchanged.
+- **PickByBrightness** — picks brightest/darkest image from batch.
+- **AppendSuffix** — appends a suffix to text.
+
+## Notes
+- `image.py` gracefully degrades if `torch` is not available (falls back to NumPy / pure Python).

@@ -1,0 +1,1 @@
+# Placeholder package for optional web assets (served via WEB_DIRECTORY).

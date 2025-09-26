@@ -1,28 +1,29 @@
+from __future__ import annotations
+from typing import Dict, Tuple, Any
+
 class HelloString:
-    """
-    A trivial example node that returns a constant string.
-    """
+    """A trivial example node that returns a constant string."""
+
     @classmethod
-    def INPUT_TYPES(cls):
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
         return {"required": {}}
 
     RETURN_TYPES = ("STRING",)
     FUNCTION = "hello"
     CATEGORY = "XDev/Basic"
 
-    def hello(self):
+    def hello(self) -> Tuple[str]:
         return ("Hello ComfyUI!",)
 
 
 class AnyPassthrough:
-    """
-    Demonstrates the 'ANY' datatype: accepts any input and returns it unchanged.
-    """
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {"required": {"value": ("*", {})}}  # also works with ("ANY", {})
+    """Demonstrates the `ANY` datatype: accepts any input and returns it unchanged."""
 
-    RETURN_TYPES = ("*",)  # pass-through of the same type
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
+        return {"required": {"value": ("*", {})}}
+
+    RETURN_TYPES = ("*",)
     FUNCTION = "do_it"
     CATEGORY = "XDev/Basic"
 

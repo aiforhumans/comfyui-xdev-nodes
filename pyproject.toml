@@ -1,24 +1,22 @@
 [project]
 name = "comfyui-xdev-nodes"
-version = "0.1.0"
+version = "0.1.1"
 description = "Expanded resource + starter kit for building ComfyUI custom nodes."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-dependencies = []
+classifiers = [
+  "Operating System :: OS Independent"
+]
 
 [project.urls]
 Homepage = "https://github.com/aiforhumans/comfyui-xdev-nodes"
+Repository = "https://github.com/aiforhumans/comfyui-xdev-nodes"
+"Bug Tracker" = "https://github.com/aiforhumans/comfyui-xdev-nodes/issues"
 
 [tool.comfy]
-PublisherId = ""        # e.g. "yourname"
+PublisherId = "aiforhumans"
 DisplayName = "XDev Nodes (Expanded)"
 Icon = ""
-
-[tool.pytest.ini_options]
-pythonpath = ["."]
-addopts = "-q"
-
-[tool.ruff]
-line-length = 100
-select = ["E","F","I","UP"]
+Banner = ""
+requires-comfyui = ">=1.0.0"

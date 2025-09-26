@@ -1,9 +1,11 @@
+from __future__ import annotations
+from typing import Dict, Tuple, Any
+
 class AppendSuffix:
-    """
-    Simple STRING transformer used in tests and examples.
-    """
+    """Append a suffix to the input text."""
+
     @classmethod
-    def INPUT_TYPES(cls):
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
         return {
             "required": {
                 "text": ("STRING", {"default": ""}),
@@ -15,5 +17,5 @@ class AppendSuffix:
     FUNCTION = "run"
     CATEGORY = "XDev/Text"
 
-    def run(self, text: str, suffix: str):
+    def run(self, text: str, suffix: str) -> Tuple[str]:
         return (f"{text}{suffix}",)

@@ -2,6 +2,7 @@ from .nodes.basic import HelloString, AnyPassthrough
 from .nodes.image import PickByBrightness
 from .nodes.text import AppendSuffix
 
+# If you add frontend assets, keep this path relative to this package root.
 WEB_DIRECTORY = "./web"
 
 NODE_CLASS_MAPPINGS = {
