@@ -1,15 +1,24 @@
 [project]
 name = "comfyui-xdev-nodes"
 version = "0.1.0"
-description = "Xtremedev custom nodes for ComfyUI"
+description = "Expanded resource + starter kit for building ComfyUI custom nodes."
 readme = "README.md"
 requires-python = ">=3.10"
+license = { text = "MIT" }
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/aiforhumans/comfyui-xdev-nodes"
+
+[tool.comfy]
+PublisherId = ""        # e.g. "yourname"
+DisplayName = "XDev Nodes (Expanded)"
+Icon = ""
+
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+pythonpath = ["."]
 addopts = "-q"
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+select = ["E","F","I","UP"]
