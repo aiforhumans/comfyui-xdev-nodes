@@ -1,0 +1,76 @@
+{
+  "last_node_id": 5,
+  "last_link_id": 4,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "XDEV_InputDev",
+      "pos": [50, 50],
+      "size": {"0": 400, "1": 200},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "generated_data", "type": "*", "links": [1], "shape": 3, "slot_index": 0},
+        {"name": "metadata", "type": "STRING", "links": [2], "shape": 3, "slot_index": 1}
+      ],
+      "properties": {},
+      "widgets_values": ["STRING", "realistic", "Hello from Input Dev!", 512, 42, true]
+    },
+    {
+      "id": 2,
+      "type": "XDEV_OutputDev",
+      "pos": [550, 50],
+      "size": {"0": 400, "1": 300},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 1},
+        {"name": "input_2", "type": "*", "link": 2}
+      ],
+      "properties": {},
+      "widgets_values": [null, null, null, "detailed", false, false]
+    },
+    {
+      "id": 3,
+      "type": "XDEV_InputDev",
+      "pos": [50, 350],
+      "size": {"0": 400, "1": 200},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "outputs": [
+        {"name": "generated_data", "type": "*", "links": [3], "shape": 3, "slot_index": 0},
+        {"name": "metadata", "type": "STRING", "links": [4], "shape": 3, "slot_index": 1}
+      ],
+      "properties": {},
+      "widgets_values": ["IMAGE", "realistic", "", 256, 123, true]
+    },
+    {
+      "id": 4,
+      "type": "XDEV_OutputDev",
+      "pos": [550, 350],
+      "size": {"0": 400, "1": 300},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 3},
+        {"name": "input_2", "type": "*", "link": 4}
+      ],
+      "properties": {},
+      "widgets_values": [null, null, null, "full", true, false]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "*"],
+    [2, 1, 1, 2, 1, "STRING"],
+    [3, 3, 0, 4, 0, "*"],
+    [4, 3, 1, 4, 1, "STRING"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

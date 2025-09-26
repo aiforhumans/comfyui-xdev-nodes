@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2024-12-26
+
+### Added
+- **Complete Development Toolkit**: Expanded from 4 to 8 professional nodes
+- **VAE Tools**: New `VAERoundTrip` and `VAEPreview` nodes for complete VAE workflow testing
+  - VAERoundTrip: Full LATENT→DECODE→ENCODE→LATENT cycle with quality analysis
+  - VAEPreview: Quick latent visualization with comprehensive analysis
+- **Universal Testing Infrastructure**: Enhanced development nodes
+  - OutputDev: Universal debugging output accepting all 18 ComfyUI types
+  - InputDev: Test data generator for 12 core ComfyUI types
+- **Advanced Type Compatibility**: Complete support for all ComfyUI data types
+- **Professional Workflows**: Example chains for VAE testing and type validation
+- **Enhanced Documentation**: Comprehensive README with all 8 nodes documented
+
+### Changed
+- Updated project description to reflect complete toolkit nature
+- Enhanced README with comprehensive node documentation and use cases
+- Bumped version to 0.2.0 for major feature additions
+
+### Technical
+- All nodes follow ComfyUI official patterns (validated against ComfyUI source)
+- Proper type definitions matching VAEDecode/VAEEncode standards
+- Professional error handling and graceful fallbacks
+- Memory analysis and performance monitoring capabilities
+
+## [0.1.1] - 2024-12-19
+
 ### Added
 - Comprehensive GitHub standards implementation
 - Professional development patterns and validation

@@ -8,7 +8,9 @@
 
 A **production-ready starter kit** for building and publishing **ComfyUI custom nodes** with professional-grade patterns, comprehensive validation, rich documentation, and complete GitHub standards.
 
-> 🚀 **NEW**: Enhanced with comprehensive input validation, rich tooltips, error handling, and professional development patterns inspired by enterprise-grade ComfyUI frameworks.
+> 🚀 **NEW**: Complete development toolkit with 8 professional nodes including VAE tools, universal type testing, and comprehensive debugging infrastructure.
+
+> 🔧 **ENHANCED**: Advanced input validation, rich tooltips, error handling, and professional development patterns inspired by enterprise-grade ComfyUI frameworks.
 
 ---
 
@@ -26,6 +28,17 @@ A **production-ready starter kit** for building and publishing **ComfyUI custom 
 - **AnyPassthrough** - Type-safe passthrough with comprehensive checks
 - **AppendSuffix** - Text processing with multiline support and validation
 - **PickByBrightness** - Advanced image processing with multiple algorithms (torch/numpy/python fallbacks)
+- **OutputDev** - Universal debugging output accepting all 18 ComfyUI types
+- **InputDev** - Test data generator for 12 core ComfyUI types
+- **VAERoundTrip** - Complete VAE encode/decode cycle testing
+- **VAEPreview** - Quick latent visualization and analysis
+
+### Complete Development Toolkit
+- 🎯 **Universal Type Testing** - InputDev generates, OutputDev analyzes all 18 ComfyUI types
+- 🔄 **VAE Operations** - Complete encode/decode cycle testing and quick preview tools
+- 🔍 **Advanced Debugging** - Multi-input comparison, memory analysis, file export
+- 📊 **Professional Validation** - Type checking, error handling, processing statistics
+- ⚡ **Performance Monitoring** - Memory usage, processing time, efficiency metrics
 
 ### Professional Infrastructure
 - 🏗️ **GitHub Standards** - Complete CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md
@@ -52,6 +65,8 @@ Start ComfyUI. Nodes appear under:
 - `XDev/Basic`
 - `XDev/Text`
 - `XDev/Image`
+- `XDev/Development`
+- `XDev/VAE Tools`
 
 Open an example workflow from `workflows/` to test.
 
@@ -108,6 +123,86 @@ Open an example workflow from `workflows/` to test.
   - **Multiple Algorithms**: Average, luminance, perceived brightness, channel max
   - **Professional Validation**: Comprehensive input checking and error handling
 
+### 5) 🔍 OutputDev (XDev) 
+**Category**: `XDev/Development` | **Universal debugging output**
+
+- **Purpose**: Universal debugging and analysis node for any ComfyUI data type
+- **Inputs**:
+  - `input_1` (ANY) - Primary input accepting any ComfyUI data type
+  - `input_2` (ANY, optional) - Secondary input for comparison
+  - `input_3` (ANY, optional) - Tertiary input for comparison
+  - `display_level` - Analysis detail: `["summary", "detailed", "full"]`
+  - `save_to_file` (BOOLEAN) - Export analysis to timestamped file
+  - `compare_inputs` (BOOLEAN) - Compare multiple inputs when connected
+- **Outputs**: None (OUTPUT_NODE - terminates workflow)
+- **Features**:
+  - **Enhanced Type Compatibility**: Explicitly supports LATENT, MODEL, CONDITIONING, MASK, and all ComfyUI types
+  - **Multi-Input Comparison**: Compare up to 3 different data streams simultaneously
+  - **Memory Analysis**: Display tensor memory usage and statistics for all tensor types
+  - **Content Preview**: Safe preview of actual data values with statistics
+  - **File Export**: Save detailed analysis to timestamped text files
+
+### 6) 🎯 InputDev (XDev)
+**Category**: `XDev/Development` | **Universal test data generator**
+
+- **Purpose**: Generate test data of any ComfyUI type for testing and debugging
+- **Inputs**:
+  - `output_type` - Data type: `["STRING", "INT", "FLOAT", "BOOLEAN", "IMAGE", "LATENT", "MASK", "MODEL", "CONDITIONING", "LIST", "DICT", "MOCK_TENSOR"]`
+  - `output_mode` - Generation mode: `["simple", "realistic", "stress_test"]`
+  - `custom_value` (STRING, optional) - Custom value to convert to target type
+  - `size_parameter` (INT) - Size for images, lists, tensor dimensions
+  - `seed` (INT) - Random seed for reproducible generation
+  - `include_metadata` (BOOLEAN) - Include descriptive metadata output
+- **Outputs**:
+  - `generated_data` (ANY) - Generated data of specified type
+  - `metadata` (STRING) - Description of generated data
+- **Features**:
+  - **12 Data Types**: Generate all core ComfyUI types including LATENT, MODEL, CONDITIONING, MASK
+  - **3 Generation Modes**: Simple (minimal), Realistic (typical), Stress Test (edge cases)
+  - **Reproducible**: Seed-based generation for consistent test results
+  - **Custom Values**: Convert custom input to any target type
+  - **ComfyUI Compatible**: Proper tensor formats, LATENT dicts, MODEL objects, CONDITIONING arrays
+
+### 7) 🔄 VAE Round-Trip (XDev)
+**Category**: `XDev/VAE Tools` | **Complete VAE encode/decode cycle**
+
+- **Purpose**: Perform complete VAE round-trip: LATENT → DECODE → ENCODE → LATENT
+- **Inputs**:
+  - `latent` (LATENT) - Input latent to decode and re-encode
+  - `vae` (VAE) - VAE model for decoding/encoding operations
+  - `show_stats` (BOOLEAN) - Display processing statistics
+  - `quality_check` (BOOLEAN) - Compare input vs output latent quality
+  - `decode_only` (BOOLEAN) - Only decode without re-encoding
+- **Outputs**:
+  - `decoded_image` (IMAGE) - Visual representation of latent
+  - `reencoded_latent` (LATENT) - Re-encoded latent for comparison
+  - `process_info` (STRING) - Detailed processing statistics
+- **Features**:
+  - **Complete VAE Testing**: Full encode/decode cycle validation
+  - **Quality Analysis**: Compare original vs round-trip latents
+  - **Memory Monitoring**: Track memory usage during processing
+  - **Visual Inspection**: See what your latents actually represent
+  - **Performance Metrics**: Processing time and efficiency statistics
+
+### 8) 👁️ VAE Preview (XDev)  
+**Category**: `XDev/VAE Tools` | **Quick latent preview**
+
+- **Purpose**: Fast LATENT → IMAGE decoding for visual inspection and debugging
+- **Inputs**:
+  - `latent` (LATENT) - Input latent to decode and preview
+  - `vae` (VAE) - VAE model for decoding operations
+  - `add_info_text` (BOOLEAN) - Add informational overlay
+  - `preview_mode` - Processing level: `["full", "fast", "minimal"]`
+- **Outputs**:
+  - `preview_image` (IMAGE) - Decoded preview image
+  - `latent_info` (STRING) - Analysis of latent properties
+- **Features**:
+  - **Lightweight Preview**: Quick visualization without full processing
+  - **Multiple Modes**: Full analysis, fast preview, or minimal decode
+  - **Latent Analysis**: Shape, memory usage, and value range validation
+  - **Debug Information**: Comprehensive latent property reporting
+  - **ComfyUI Compatible**: Proper IMAGE output format (0-1 range validation)
+
 ---
 
 ## How ComfyUI discovers your nodes
@@ -149,6 +244,8 @@ xdev_nodes/
     basic.py                    # HelloString, AnyPassthrough
     image.py                    # PickByBrightness (torch/NumPy/Python fallback)
     text.py                     # AppendSuffix
+    dev_nodes.py                # OutputDev, InputDev (universal debugging/testing)
+    vae_tools.py                # VAERoundTrip, VAEPreview (VAE operations)
   web/
     __init__.py                 # optional frontend assets
 workflows/
@@ -228,12 +325,59 @@ docs/how_to_pick_types.png
 
 ## Example Workflows
 
+### Basic Node Testing
 - `workflows/hello_string_save.json`
   - Chain: `XDEV_HelloString → SaveText`
 - `workflows/pick_by_brightness_preview.json`
   - Chain: `LoadImage(s) → XDEV_PickByBrightness → PreviewImage`
 
+### Advanced Development Workflows  
+- **Universal Type Testing**: `XDEV_InputDev → XDEV_OutputDev`
+  - Test any ComfyUI data type generation and analysis
+- **VAE Complete Cycle**: `VAELoader → XDEV_InputDev(LATENT) → XDEV_VAERoundTrip → XDEV_OutputDev`
+  - Full VAE encode/decode testing with analysis
+- **Quick VAE Preview**: `XDEV_InputDev(LATENT) → XDEV_VAEPreview`
+  - Fast latent visualization for debugging
+
+### Recommended Testing Chain
+```
+VAELoader → XDEV_InputDev → XDEV_VAERoundTrip → XDEV_OutputDev
+    ↓              ↓              ↓              ↓
+   VAE          LATENT      IMAGE+LATENT     Analysis
+```
+
 These are **illustrative**; tweak to your ComfyUI version/plugins.
+
+---
+
+## 🎯 Development Use Cases
+
+### Universal Type Testing
+Use **InputDev** and **OutputDev** for comprehensive type compatibility testing:
+- Generate any ComfyUI type with realistic or stress-test data
+- Analyze output from any node with detailed statistics
+- Compare multiple data streams with side-by-side analysis
+- Export detailed analysis to timestamped files
+
+### VAE Development & Debugging
+Use **VAE tools** for encode/decode workflow validation:
+- **VAEPreview**: Quick latent visualization during development
+- **VAERoundTrip**: Complete cycle testing with quality analysis
+- Test VAE compatibility, memory usage, and processing efficiency
+- Validate proper IMAGE format output (0-1 range checking)
+
+### Node Development Patterns
+Learn from our **professional node examples**:
+- **Comprehensive Validation**: See `AppendSuffix` for input validation patterns
+- **Fallback Systems**: Study `PickByBrightness` for torch/numpy/python fallbacks  
+- **Error Handling**: All nodes demonstrate graceful error recovery
+- **Rich Documentation**: Every input has detailed tooltips and help text
+
+### Testing & Debugging Workflows
+- **Type Chain Testing**: `InputDev(TYPE) → YourNode → OutputDev`
+- **VAE Workflow Testing**: `VAELoader → InputDev(LATENT) → YourVAENode → VAERoundTrip`
+- **Multi-Input Analysis**: Connect multiple outputs to `OutputDev` for comparison
+- **Performance Profiling**: Use processing statistics and memory analysis
 
 ---
 
@@ -366,7 +510,7 @@ MIT — see `LICENSE`.
 
 ## Kort in het Nederlands (samenvatting)
 
-Dit is een **startpakket** voor ComfyUI-nodes.  
-Zet de map in `ComfyUI/custom_nodes/`, herstart ComfyUI, en je ziet de nodes in de UI.  
-Voorbeelden, workflows, tests en CI zijn inbegrepen.  
+Dit is een **complete ontwikkeltoolkit** voor ComfyUI-nodes met 8 professionele nodes.  
+Zet de map in `ComfyUI/custom_nodes/`, herstart ComfyUI, en je ziet alle nodes in de UI.  
+Inclusief VAE-tools, universele type-testing, debugging, voorbeelden, workflows, tests en CI.  
 Nieuwe node? Kopieer een voorbeeld, pas `INPUT_TYPES`/`RETURN_TYPES`/`FUNCTION` aan, registreer in `__init__.py`, klaar.

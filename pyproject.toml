@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-xdev-nodes"
-version = "0.1.1"
-description = "Expanded resource + starter kit for building ComfyUI custom nodes."
+version = "0.2.0"
+description = "Complete ComfyUI development toolkit with 8 professional nodes including VAE tools, universal type testing, and comprehensive debugging infrastructure."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -16,7 +16,7 @@ Repository = "https://github.com/aiforhumans/comfyui-xdev-nodes"
 
 [tool.comfy]
 PublisherId = "aiforhumans"
-DisplayName = "XDev Nodes (Expanded)"
+DisplayName = "XDev Nodes - Complete Toolkit"
 Icon = ""
 Banner = ""
 requires-comfyui = ">=1.0.0"

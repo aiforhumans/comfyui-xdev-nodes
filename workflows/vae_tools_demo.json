@@ -1,0 +1,149 @@
+{
+  "last_node_id": 8,
+  "last_link_id": 10,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "XDEV_InputDev",
+      "pos": [50, 50],
+      "size": {"0": 350, "1": 220},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "generated_data", "type": "*", "links": [1, 4], "shape": 3, "slot_index": 0},
+        {"name": "metadata", "type": "STRING", "links": [], "shape": 3, "slot_index": 1}
+      ],
+      "properties": {},
+      "widgets_values": ["LATENT", "realistic", "", 512, 42, true],
+      "title": "Test LATENT Generator"
+    },
+    {
+      "id": 2,
+      "type": "LoadVAE",
+      "pos": [50, 320],
+      "size": {"0": 350, "1": 60},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {"name": "VAE", "type": "VAE", "links": [2, 5], "shape": 3, "slot_index": 0}
+      ],
+      "properties": {},
+      "widgets_values": ["vae-ft-mse-840000-ema-pruned.ckpt"],
+      "title": "Load VAE Model"
+    },
+    {
+      "id": 3,
+      "type": "XDEV_VAERoundTrip",
+      "pos": [450, 50],
+      "size": {"0": 400, "1": 200},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "latent", "type": "LATENT", "link": 1},
+        {"name": "vae", "type": "VAE", "link": 2}
+      ],
+      "outputs": [
+        {"name": "decoded_image", "type": "IMAGE", "links": [3], "shape": 3, "slot_index": 0},
+        {"name": "reencoded_latent", "type": "LATENT", "links": [6], "shape": 3, "slot_index": 1},
+        {"name": "process_info", "type": "STRING", "links": [7], "shape": 3, "slot_index": 2}
+      ],
+      "properties": {},
+      "widgets_values": [true, true, false],
+      "title": "VAE Round-Trip Analysis"
+    },
+    {
+      "id": 4,
+      "type": "PreviewImage",
+      "pos": [900, 50],
+      "size": {"0": 300, "1": 300},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 3}
+      ],
+      "properties": {},
+      "title": "Decoded Image Preview"
+    },
+    {
+      "id": 5,
+      "type": "XDEV_VAEPreview",
+      "pos": [450, 320],
+      "size": {"0": 400, "1": 150},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "latent", "type": "LATENT", "link": 4},
+        {"name": "vae", "type": "VAE", "link": 5}
+      ],
+      "outputs": [
+        {"name": "preview_image", "type": "IMAGE", "links": [8], "shape": 3, "slot_index": 0},
+        {"name": "latent_info", "type": "STRING", "links": [9], "shape": 3, "slot_index": 1}
+      ],
+      "properties": {},
+      "widgets_values": [true, "full"],
+      "title": "Quick VAE Preview"
+    },
+    {
+      "id": 6,
+      "type": "PreviewImage",
+      "pos": [900, 380],
+      "size": {"0": 300, "1": 300},
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 8}
+      ],
+      "properties": {},
+      "title": "Preview Image (Quick)"
+    },
+    {
+      "id": 7,
+      "type": "XDEV_OutputDev",
+      "pos": [450, 550],
+      "size": {"0": 400, "1": 300},
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 6},
+        {"name": "input_2", "type": "*", "link": 7},
+        {"name": "input_3", "type": "*", "link": 9}
+      ],
+      "properties": {},
+      "widgets_values": [null, null, null, "detailed", false, true],
+      "title": "Analysis Results"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 3, 0, "LATENT"],
+    [2, 2, 0, 3, 1, "VAE"],
+    [3, 3, 0, 4, 0, "IMAGE"],
+    [4, 1, 0, 5, 0, "LATENT"],
+    [5, 2, 0, 5, 1, "VAE"],
+    [6, 3, 1, 7, 0, "*"],
+    [7, 3, 2, 7, 1, "*"],
+    [8, 5, 0, 6, 0, "IMAGE"],
+    [9, 5, 1, 7, 2, "*"]
+  ],
+  "groups": [
+    {
+      "title": "VAE Tools Demo Workflow",
+      "bounding": [30, 20, 1200, 900],
+      "color": "#3f789e"
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.9,
+      "offset": [50, 30]
+    }
+  },
+  "version": 0.4
+}
