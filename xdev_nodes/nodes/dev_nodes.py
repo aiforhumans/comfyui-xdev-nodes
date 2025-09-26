@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Dict, Tuple, Any, Union, List
 import json
+import sys
 
 class OutputDev:
     """
@@ -9,6 +10,28 @@ class OutputDev:
     This development node can receive and display information about any type of 
     ComfyUI data including IMAGE, STRING, INT, FLOAT, LATENT, MODEL, CONDITIONING, etc.
     Perfect for workflow debugging and connection testing.
+    
+    Class methods
+    -------------
+    INPUT_TYPES (dict):
+        Defines input parameters with advanced configurations including lazy evaluation.
+    check_lazy_status:
+        Controls lazy evaluation for performance optimization.
+    IS_CHANGED:
+        Controls when the node is re-executed for caching optimization.
+
+    Attributes
+    ----------
+    RETURN_TYPES (`tuple`):
+        Returns analysis results as strings.
+    RETURN_NAMES (`tuple`):
+        Human-readable names for each output.
+    FUNCTION (`str`):
+        Entry-point method name for execution.
+    OUTPUT_NODE (`bool`):
+        Marks this as an output node for workflow execution.
+    CATEGORY (`str`):
+        UI category placement.
     """
 
     @classmethod
@@ -340,7 +363,29 @@ class InputDev:
                     "default": 0,
                     "min": 0,
                     "max": 1000000,
-                    "tooltip": "Seed for reproducible random data generation"
+                    "step": 1,
+                    "display": "number",
+                    "tooltip": "Seed for reproducible random data generation",
+                    "lazy": True
+                }),
+                "batch_size": ("INT", {
+                    "default": 1,
+                    "min": 1,
+                    "max": 64,
+                    "step": 1,
+                    "display": "slider",
+                    "tooltip": "Number of items to generate (for batch data types)",
+                    "lazy": True
+                }),
+                "quality_factor": ("FLOAT", {
+                    "default": 1.0,
+                    "min": 0.1,
+                    "max": 2.0,
+                    "step": 0.1,
+                    "round": 0.01,
+                    "display": "slider",
+                    "tooltip": "Quality multiplier for generated data complexity",
+                    "lazy": True
                 }),
                 "include_metadata": ("BOOLEAN", {
                     "default": True,
@@ -355,9 +400,29 @@ class InputDev:
     CATEGORY = "XDev/Development"
     DESCRIPTION = "Universal test data generator - creates any ComfyUI data type for connection testing"
 
+    def check_lazy_status(self, output_type, output_mode="realistic", custom_value="", 
+                         size_parameter=512, seed=0, batch_size=1, quality_factor=1.0, include_metadata=True):
+        """
+        Control lazy evaluation for performance optimization.
+        
+        Only evaluate expensive parameters when actually needed for data generation.
+        For simple output types, we don't need complex parameters.
+        """
+        # For simple types, we don't need expensive parameters
+        if output_type in ["STRING", "INT", "FLOAT", "BOOLEAN"]:
+            return []  # No lazy params needed
+        
+        # For complex types, we need all parameters
+        if output_type in ["IMAGE", "LATENT", "MOCK_TENSOR"]:
+            return ["seed", "batch_size", "quality_factor", "size_parameter"]
+        
+        # For other types, we need basic parameters
+        return ["seed", "batch_size"]
+
     def generate_data(self, output_type: str, output_mode: str = "realistic", 
                      custom_value: str = "", size_parameter: int = 512, 
-                     seed: int = 0, include_metadata: bool = True):
+                     seed: int = 0, batch_size: int = 1, quality_factor: float = 1.0, 
+                     include_metadata: bool = True):
         """
         Generate test data of the specified type.
         

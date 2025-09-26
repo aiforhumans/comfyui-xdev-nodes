@@ -2,471 +2,113 @@
 
 ## Project Overview
 
-This is a **complete ComfyUI development toolkit** with 8 professional nodes for building and testing ComfyUI extensions. ComfyUI uses a graph-based workflow system where nodes process data through INPUT/OUTPUT connections.
+Complete ComfyUI development toolkit with **10 professional nodes** demonstrating best practices for ComfyUI extension development. ComfyUI uses a graph-based workflow system where nodes process data through INPUT/OUTPUT connections.
 
-**Current Status (v0.2.0)**: Production-ready toolkit with universal type testing, VAE operations, comprehensive debugging, and professional development patterns.
+**Status**: v0.2.0 + Phase 1 foundation nodes (TextCase, MathBasic). Production-ready with performance optimizations and comprehensive debugging infrastructure.
 
-### Core Architecture
+### Core Architecture & Critical Knowledge
 
-- **Node Registration**: All nodes must be registered in `xdev_nodes/__init__.py` via `NODE_CLASS_MAPPINGS` and `NODE_DISPLAY_NAME_MAPPINGS`
-- **Package Structure**: Nodes go in `xdev_nodes/nodes/`, web assets in `xdev_nodes/web/`
-- **ComfyUI Integration**: Uses `pyproject.toml` with `[tool.comfy]` section for registry metadata
+- **Node Registration**: All nodes registered in `xdev_nodes/__init__.py` with debug logging and API endpoints
+- **Functional Grouping**: Related nodes share files in `xdev_nodes/nodes/` (basic.py, text.py, math.py, image.py, dev_nodes.py, vae_tools.py) - NOT one-file-per-node
+- **Performance Layer**: Centralized utilities in `xdev_nodes/utils.py` with lazy imports, caching, and optimized operations
+- **Universal Testing Architecture**: Use `InputDev(TYPE) → YourNode → OutputDev` pattern for testing ANY node with ANY type
+- **Development Workflow**: Use `scripts/dev-link.ps1` to symlink into ComfyUI, then `pytest tests/ -q` to validate
 
-### Node Implementation Patterns
+## Essential XDev Patterns
 
-ComfyUI supports two patterns for node development:
+### Performance & Error Patterns
+**Precomputed Constants** (TextCase, MathBasic examples):
+```python
+# TextCase: 9 case methods with O(1) lookup
+_CASE_METHODS = {
+    "lower": lambda text: text.lower(),
+    "camel": lambda text: text[0].lower() + text.title().replace(" ", "")[1:] if text else "",
+    # ... 7 more
+}
 
-#### V1 Pattern (Traditional - Used in this project)
+# MathBasic: operator mapping prevents runtime lookups
+_OPERATIONS = {"add": operator.add, "multiply": operator.mul, ...}
+```
+
+**Graceful Fallbacks** (image.py pattern):
+```python
+# Always handle missing torch gracefully - numpy/pure Python fallbacks
+try: import torch; HAS_TORCH = True
+except: torch = None; HAS_TORCH = False
+```
+
+### Node Implementation Standard
+
+**XDev Enhanced Pattern** (TextCase/MathBasic examples):
 ```python
 class NodeName:
+    # Precompute operations/constants at class level
+    _CONSTANTS = {"key": "value"}
+    
     @classmethod
     def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
-        return {"required": {"param": ("TYPE", {"default": value})}}
+        return {
+            "required": {"param": ("TYPE", {"tooltip": "Descriptive tooltip"})},
+            "optional": {
+                "validate_input": ("BOOLEAN", {"default": True, "tooltip": "Enable validation"})
+            }
+        }
     
-    RETURN_TYPES = ("TYPE",)
+    RETURN_TYPES = ("TYPE", "STRING")
+    RETURN_NAMES = ("result", "metadata") 
     FUNCTION = "method_name"
     CATEGORY = "XDev/Subcategory"
+    DESCRIPTION = "One-line description for API endpoints"
     
-    def method_name(self, param):
-        return (result,)  # Always return tuple
+    def _validate_inputs(self, param) -> Dict[str, Any]:
+        """Required validation pattern with detailed errors"""
+        if not isinstance(param, expected_type):
+            return {"valid": False, "error": f"Expected {expected_type}, got {type(param).__name__}"}
+        return {"valid": True, "error": None}
+    
+    def method_name(self, param, validate_input=True):
+        if validate_input:
+            validation = self._validate_inputs(param)
+            if not validation["valid"]: 
+                return (f"Error: {validation['error']}", "validation_failed")
+        # Always return tuple matching RETURN_TYPES
+        return (result, metadata_string)
 ```
 
-#### V3 Pattern (Modern ComfyExtension)
-```python
-from comfy_api.latest.io import ComfyExtension, ComfyNode, Schema, Input, Output
+**Critical XDev Patterns**:
+- Use `from ..utils import` for shared functionality (lazy imports, validation)
+- All tooltips required - this is educational toolkit
+- Graceful fallbacks: torch → numpy → pure Python (see image.py)
+- Performance-first: precompute constants, cache validations
 
-class ModernNode(ComfyNode):
-    def define_schema(self) -> Schema:
-        return Schema(
-            node_id="MODERN_Node",
-            display_name="Modern Node",
-            category="Category",
-            inputs=[Input("param", "TYPE", default=value)],
-            outputs=[Output("result", "TYPE")]
-        )
-    
-    async def execute(self, param):
-        return (result,)
-
-async def comfy_entrypoint() -> ComfyExtension:
-    return ComfyExtension([ModernNode])
-```
-
-### Critical ComfyUI Datatypes
+### Critical ComfyUI Datatypes & XDev Testing
 
 - **IMAGE**: `torch.Tensor [B,H,W,C]` in 0-1 range (RGB)
-- **LATENT**: `dict["samples": Tensor [B,C,H,W]]` - compressed image representation
+- **LATENT**: `dict["samples": Tensor [B,C,H,W]]` - compressed image representation  
 - **VAE**: Model object for encode/decode operations
 - **STRING**: Standard Python string
 - **"*"**: ANY type for passthrough nodes (used in InputDev/OutputDev)
 - **Dropdown**: `(["option1","option2"], {"default":"option1"})`
 
-### Complete Node Architecture (8 Nodes)
-
-**Basic Nodes**: HelloString, AnyPassthrough, AppendSuffix, PickByBrightness
-**Development Nodes**: InputDev (universal generator), OutputDev (universal analyzer)  
-**VAE Tools**: VAERoundTrip (encode/decode cycle), VAEPreview (quick visualization)
-
-## Advanced pyproject.toml Configuration
-Beyond basic metadata, ComfyUI extensions support:
-```toml
-[tool.comfy]
-PublisherId = "your-publisher-id"
-DisplayName = "Extension Display Name"
-Icon = "https://raw.githubusercontent.com/.../icon.png"
-Banner = "https://raw.githubusercontent.com/.../banner.png"
-requires-comfyui = ">=1.0.0"
-web = "web"  # Web directory for frontend assets
-includes = ["models", "docs"]  # Additional directories to include
-
-# Model dependencies (auto-downloaded by ComfyUI Manager)
-[[tool.comfy.models]]
-location = "checkpoints"
-model_url = "https://huggingface.co/model/download"
-
-# Frontend package compatibility
-comfyui-frontend-package = ">=1.0.0"
-```
-
-## Project-Specific Patterns
-
-### Universal Type Testing Architecture
-This project implements a comprehensive testing framework:
-- **InputDev**: Generates 12 ComfyUI data types with reproducible seeds
-- **OutputDev**: Analyzes any ComfyUI type with multi-input comparison
-- **VAE Workflow**: Complete encode/decode testing with quality analysis
-- **Type Chain Testing**: `InputDev(TYPE) → YourNode → OutputDev` pattern
-
-### Professional Input Validation
-All nodes implement detailed validation with informative error messages:
-```python
-def _validate_inputs(self, param1, param2) -> Dict[str, Any]:
-    if not isinstance(param1, str):
-        return {
-            "valid": False, 
-            "error": f"Parameter must be string, got {type(param1).__name__}"
-        }
-    return {"valid": True, "error": None}
-```
-
-### Robust Fallbacks
-See `xdev_nodes/nodes/image.py` - implements torch → numpy → pure Python fallbacks:
-```python
-# Always handle missing torch gracefully
-try:
-    import torch
-except Exception:
-    torch = None
-```
-
-### Node ID Conventions
-- All node IDs use `XDEV_` prefix (prevents conflicts)
-- Display names include `(XDev)` suffix
-- Categories use `XDev/Subcategory` pattern
-
-### Web Extensions
-- `xdev_nodes/web/js/xdev.js` adds right-click menu items
-- Individual node docs in `xdev_nodes/web/docs/XDEV_NodeName.md`
-- `WEB_DIRECTORY = "./web"` in `__init__.py` enables web assets
-
-### Type Annotations
-- Use `from __future__ import annotations` for forward references
-- Type hint method parameters but ComfyUI ignores them at runtime
-- `RETURN_TYPES` and `INPUT_TYPES` are the authoritative type definitions
-
-## Key Integration Points
-
-### ComfyUI Discovery
-ComfyUI scans `custom_nodes/` folders and imports packages, looking for:
-- `NODE_CLASS_MAPPINGS`: `{"INTERNAL_ID": PythonClass}`
-- `NODE_DISPLAY_NAME_MAPPINGS`: `{"INTERNAL_ID": "UI Display Name"}`
-- Optional `WEB_DIRECTORY` for frontend assets
-
-### Workflow Files
-- `.json` files in `workflows/` are ComfyUI workflow examples
-- Reference nodes by their `INTERNAL_ID` from mappings
-- Test workflows by loading in ComfyUI UI
-
-### Error Handling
-- ComfyUI expects nodes to return tuples matching `RETURN_TYPES`
-- Exceptions crash the workflow - handle gracefully
-- Use fallback implementations when dependencies missing
+**XDev Universal Testing Pattern**: Use `InputDev(TYPE) → YourNode → OutputDev` for testing any node with any data type. InputDev generates 12 ComfyUI types, OutputDev analyzes everything.
 
 ## Development Workflows
 
 ### Local Development Setup
-```bash
-# Use dev-link scripts for symlinked development
-scripts/dev-link.ps1  # Windows
-scripts/dev-link.sh   # Unix
-# Creates symlink in ComfyUI/custom_nodes/
-```
+Use symlink for live development: `scripts/dev-link.ps1 $ComfyUI_Path`
 
-### Testing
-- `pytest -q` runs all tests
-- Tests are minimal: import validation (`test_imports.py`) + basic functionality (`test_basic_nodes.py`)
-- No ComfyUI runtime required for tests
+### Testing Strategy  
+- `pytest tests/ -q` - runs all tests (no ComfyUI runtime needed)
+- Universal testing: `InputDev(TYPE) → YourNode → OutputDev`
+- Tests validate imports + basic functionality only
 
-### Registry Publishing
-- Bump version in `pyproject.toml`
-- Update `[tool.comfy]` metadata (PublisherId, DisplayName, requires-comfyui)
-- CI runs on push/PR to main/master
+### Adding New Nodes
+1. Add to appropriate file in `xdev_nodes/nodes/` (functional grouping)
+2. Register in `NODE_CLASS_MAPPINGS` + `NODE_DISPLAY_NAME_MAPPINGS` in `__init__.py`
+3. Use `XDEV_` prefix, `(XDev)` suffix, `XDev/Category` pattern
+4. Create test workflow in `workflows/`
 
-## Common Tasks
+## Current Architecture (10 Nodes)
 
-### Adding New Node
-1. Create class in appropriate `xdev_nodes/nodes/*.py` file
-2. Add to both mappings in `xdev_nodes/__init__.py`
-3. Add workflow test in `workflows/`
-4. Restart ComfyUI to see changes
-
-### Testing Node Workflows
-- **Universal Testing**: `InputDev(TYPE) → YourNode → OutputDev`
-- **VAE Testing**: `VAELoader → InputDev(LATENT) → YourVAENode → VAERoundTrip`
-- **Type Validation**: Use OutputDev to analyze any node's outputs
-
-### Web Extension
-- Modify `xdev_nodes/web/js/xdev.js` for UI interactions
-- Add node docs to `xdev_nodes/web/docs/`
-- Use `nodeData?.name?.startsWith?.("XDEV_")` for node filtering
-
-## Path Management & Integration
-
-### Official Path Patterns
-```python
-# ComfyUI uses folder_paths for asset management
-import folder_paths
-
-# Get custom nodes directories
-custom_paths = folder_paths.get_folder_paths("custom_nodes")
-
-# Model directories (checkpoints, loras, controlnet, etc.)
-model_paths = folder_paths.folder_names_and_paths
-
-# Web directory registration (automatic via WEB_DIRECTORY or pyproject.toml)
-WEB_DIRECTORY = "./web"  # V1 pattern
-# or in pyproject.toml: web = "web"  # V3 pattern
-```
-
-### Internationalization Support
-```python
-# Add locales/ directory for translations
-# ComfyUI auto-discovers and serves via /i18n endpoint
-locales/
-  en/
-    common.json
-  es/
-    common.json
-```
-
-### Workflow Template Discovery
-```python
-# Place example workflows in standard directories
-example_workflows/  # or examples/, workflow/, workflows/
-  basic_usage.json
-  advanced_example.json
-# Auto-served via /workflow_templates endpoint
-```
-
-## Path Management & Integration
-
-### Official Path Patterns
-```python
-# ComfyUI uses folder_paths for asset management
-import folder_paths
-
-# Get custom nodes directories
-custom_paths = folder_paths.get_folder_paths("custom_nodes")
-
-# Model directories (checkpoints, loras, controlnet, etc.)
-model_paths = folder_paths.folder_names_and_paths
-
-# Web directory registration (automatic via WEB_DIRECTORY or pyproject.toml)
-WEB_DIRECTORY = "./web"  # V1 pattern
-# or in pyproject.toml: web = "web"  # V3 pattern
-```
-
-### Internationalization Support
-```python
-# Add locales/ directory for translations
-# ComfyUI auto-discovers and serves via /i18n endpoint
-locales/
-  en/
-    common.json
-  es/
-    common.json
-```
-
-### Workflow Template Discovery
-```python
-# Place example workflows in standard directories
-example_workflows/  # or examples/, workflow/, workflows/
-  basic_usage.json
-  advanced_example.json
-# Auto-served via /workflow_templates endpoint
-```
-
-### Testing Strategy
-- Keep tests lightweight - no ComfyUI runtime dependency
-- Test import mechanics and basic node functionality
-- Use example workflows for integration testing
-
-### VAE Tools Architecture
-```python
-# VAERoundTrip: Complete LATENT → IMAGE → LATENT cycle
-INPUT_TYPES: ("LATENT", "VAE") → RETURN_TYPES: ("IMAGE", "LATENT", "STRING")
-
-# VAEPreview: Quick LATENT → IMAGE visualization
-INPUT_TYPES: ("LATENT", "VAE") → RETURN_TYPES: ("IMAGE", "STRING")
-```
-
-### Universal Type Generation & Analysis
-```python
-# InputDev generates 12 types: STRING, INT, FLOAT, BOOLEAN, IMAGE, LATENT, etc.
-result, metadata = InputDev().generate_data("LATENT", "realistic", seed=42)
-
-# OutputDev accepts ANY type, analyzes everything including memory usage
-OutputDev().analyze_and_display(any_data, display_level="full")
-```
-
-## Advanced Node Features
-
-### Hidden Inputs
-ComfyUI provides special hidden inputs for advanced functionality:
-```python
-# Available hidden inputs
-"hidden": {
-    "unique_id": "UNIQUE_ID",      # Node instance ID
-    "prompt": "PROMPT",            # Full workflow prompt
-    "extra_pnginfo": "EXTRA_PNGINFO",  # Metadata for PNG output
-    "auth_token": "AUTH_TOKEN_COMFY_ORG",  # API authentication
-    "api_key": "API_KEY_COMFY_ORG"  # Alternative auth method
-}
-```
-
-### Lazy Evaluation
-Optimize performance with lazy input evaluation:
-```python
-def check_lazy_status(self, **kwargs):
-    # Return list of input names that need evaluation
-    return ["input_name"] if condition else []
-
-# Mark inputs as lazy in INPUT_TYPES
-"input_name": ("TYPE", {"lazy": True})
-```
-
-### Output Nodes
-Force execution of nodes that produce final results:
-```python
-OUTPUT_NODE = True  # V1 pattern
-# or in V3 Schema: is_output_node=True
-```
-
-### API Node Patterns
-For nodes that call external APIs:
-```python
-# V3 pattern with polling operations
-async def execute(self, input_data, auth_token=None):
-    client = ApiClient(auth_token=auth_token)
-    operation = await client.start_async_task(input_data)
-    return await operation.wait_for_completion()
-
-# Mark as API node in schema
-is_api_node = True
-```
-
-## Workflow Testing & CI Details
-
-### Testing Strategy
-- Keep tests lightweight - no ComfyUI runtime dependency
-- Test import mechanics and basic node functionality (`test_basic_nodes.py`)
-- Use example workflows for integration testing
-
-### VAE Tools Architecture
-```python
-# VAERoundTrip: Complete LATENT → IMAGE → LATENT cycle
-INPUT_TYPES: ("LATENT", "VAE") → RETURN_TYPES: ("IMAGE", "LATENT", "STRING")
-
-# VAEPreview: Quick LATENT → IMAGE visualization
-INPUT_TYPES: ("LATENT", "VAE") → RETURN_TYPES: ("IMAGE", "STRING")
-```
-
-### Universal Type Generation & Analysis
-```python
-# InputDev generates 12 types: STRING, INT, FLOAT, BOOLEAN, IMAGE, LATENT, etc.
-result, metadata = InputDev().generate_data("LATENT", "realistic", seed=42)
-
-# OutputDev accepts ANY type, analyzes everything including memory usage
-OutputDev().analyze_and_display(any_data, display_level="full")
-```
-
-## Professional Node Development Patterns
-
-### Comprehensive Input Validation
-All XDev nodes implement detailed validation with informative error messages:
-```python
-def _validate_inputs(self, param1, param2) -> Dict[str, Any]:
-    if not isinstance(param1, str):
-        return {
-            "valid": False, 
-            "error": f"Parameter must be string, got {type(param1).__name__}"
-        }
-    return {"valid": True, "error": None}
-```
-
-### Rich Tooltip Documentation
-Every input parameter includes comprehensive tooltips:
-```python
-"text": ("STRING", {
-    "default": "",
-    "multiline": True,
-    "tooltip": "The original text content to process. Supports multiline input for complex operations. Leave empty to process suffix only."
-})
-```
-
-### Enhanced Output Patterns
-Nodes return multiple outputs for better workflow integration:
-```python
-RETURN_TYPES = ("STRING", "INT", "STRING")
-RETURN_NAMES = ("processed_text", "character_count", "processing_info")
-```
-
-### Smart Caching Implementation
-Proper ComfyUI cache management with `IS_CHANGED`:
-```python
-@classmethod
-def IS_CHANGED(cls, text, suffix, validate_input=True):
-    return f"{text}_{suffix}_{validate_input}"
-```
-
-### Robust Error Handling
-Graceful degradation instead of exceptions:
-```python
-try:
-    result = self.process(input_data)
-    return (result, len(result), "Success")
-except Exception as e:
-    error_msg = f"Error processing: {str(e)}"
-    return (error_msg, len(error_msg), f"Error: {str(e)}")
-```
-
-### Enhanced Output Patterns
-Nodes return multiple outputs for better workflow integration:
-```python
-RETURN_TYPES = ("STRING", "INT", "STRING")
-RETURN_NAMES = ("processed_text", "character_count", "processing_info")
-```
-
-### Smart Caching Implementation
-Proper ComfyUI cache management with `IS_CHANGED`:
-```python
-@classmethod
-def IS_CHANGED(cls, text, suffix, validate_input=True):
-    return f"{text}_{suffix}_{validate_input}"
-```
-
-### Professional Documentation System
-Rich markdown documentation for web interface:
-- Comprehensive feature descriptions with examples
-- Parameter tables with detailed explanations
-- Usage patterns and integration examples
-- Troubleshooting guides and performance tips
-- Algorithm explanations and comparison tables
-
-## Development Workflows
-
-### Local Development Setup
-```bash
-# Use dev-link scripts for symlinked development
-scripts/dev-link.ps1  # Windows
-scripts/dev-link.sh   # Unix
-# Creates symlink in ComfyUI/custom_nodes/
-```
-
-### Testing
-- `pytest -q` runs all tests
-- Tests are minimal: import validation (`test_imports.py`) + basic functionality (`test_basic_nodes.py`)
-- No ComfyUI runtime required for tests
-
-### Registry Publishing
-- Bump version in `pyproject.toml`
-- Update `[tool.comfy]` metadata (PublisherId, DisplayName, requires-comfyui)
-- CI runs on push/PR to main/master
-
-## Key Integration Points
-
-### ComfyUI Discovery
-ComfyUI scans `custom_nodes/` folders and imports packages, looking for:
-- `NODE_CLASS_MAPPINGS`: `{"INTERNAL_ID": PythonClass}`
-- `NODE_DISPLAY_NAME_MAPPINGS`: `{"INTERNAL_ID": "UI Display Name"}`
-- Optional `WEB_DIRECTORY` for frontend assets
-
-### Workflow Files
-- `.json` files in `workflows/` are ComfyUI workflow examples
-- Reference nodes by their `INTERNAL_ID` from mappings
-- Test workflows by loading in ComfyUI UI
-
-### Error Handling
-- ComfyUI expects nodes to return tuples matching `RETURN_TYPES`
-- Exceptions crash the workflow - handle gracefully
-- Use fallback implementations when dependencies missing
+**Phase 1 Complete**: TextCase (9 case formats), MathBasic (7 operations)
+**Original Toolkit**: HelloString, AnyPassthrough, AppendSuffix, PickByBrightness, InputDev/OutputDev, VAERoundTrip/VAEPreview

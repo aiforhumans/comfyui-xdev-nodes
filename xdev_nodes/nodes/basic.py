@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Dict, Tuple, Any
-import datetime
+from datetime import datetime
+from ..utils import efficient_data_analysis, get_object_size, validate_choice
 
 class HelloString:
     """
@@ -21,7 +22,8 @@ class HelloString:
                 "custom_message": ("STRING", {
                     "default": "",
                     "multiline": False,
-                    "tooltip": "Optional custom message to append to the greeting. Leave empty to use default ComfyUI greeting."
+                    "tooltip": "Optional custom message to append to the greeting. Leave empty to use default ComfyUI greeting.",
+                    "lazy": True
                 }),
                 "include_timestamp": ("BOOLEAN", {
                     "default": False,
@@ -40,42 +42,36 @@ class HelloString:
     CATEGORY = "XDev/Basic"
     DESCRIPTION = "Enhanced greeting generator with customizable formatting and optional timestamp"
 
+    # Precompute static greetings for better performance
+    _GREETINGS = {
+        "formal": "Greetings from ComfyUI!",
+        "casual": "Hey there from ComfyUI! 👋",
+        "technical": "ComfyUI Node System: Status Active",
+        "simple": "Hello ComfyUI!"
+    }
+
     def hello(self, custom_message: str = "", include_timestamp: bool = False, format_style: str = "simple") -> Tuple[str, str]:
         """
         Generate customized greeting message with optional enhancements.
-        
-        Args:
-            custom_message: Optional custom text to append
-            include_timestamp: Whether to include current timestamp
-            format_style: Formatting style for the greeting
-            
-        Returns:
-            Tuple of (greeting_message, metadata_info)
+        Optimized for performance with precomputed greetings and minimal string operations.
         """
         try:
-            # Base greeting based on style
-            if format_style == "formal":
-                base_greeting = "Greetings from ComfyUI!"
-            elif format_style == "casual":
-                base_greeting = "Hey there from ComfyUI! 👋"
-            elif format_style == "technical":
-                base_greeting = "ComfyUI Node System: Status Active"
-            else:  # simple
-                base_greeting = "Hello ComfyUI!"
+            # Use precomputed greeting for better performance
+            base_greeting = self._GREETINGS.get(format_style, self._GREETINGS["simple"])
             
-            # Add custom message if provided
-            if custom_message.strip():
-                greeting = f"{base_greeting} {custom_message.strip()}"
-            else:
-                greeting = base_greeting
+            # Efficiently build greeting with minimal string operations
+            greeting_parts = [base_greeting]
+            if custom_message and (stripped := custom_message.strip()):
+                greeting_parts.append(stripped)
             
-            # Add timestamp if requested
+            # Handle timestamp efficiently
             metadata = f"Format: {format_style}"
             if include_timestamp:
-                timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                greeting = f"{greeting} (Generated: {timestamp})"
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                greeting_parts.append(f"(Generated: {timestamp})")
                 metadata += f", Timestamp: {timestamp}"
             
+            greeting = " ".join(greeting_parts)
             return (greeting, metadata)
             
         except Exception as e:
@@ -84,9 +80,9 @@ class HelloString:
     
     @classmethod
     def IS_CHANGED(cls, custom_message="", include_timestamp=False, format_style="simple"):
-        # Include timestamp in cache key when timestamp is enabled to ensure refresh
+        # Optimized cache key generation - only compute timestamp when needed
         if include_timestamp:
-            return datetime.datetime.now().isoformat()
+            return datetime.now().isoformat()
         return f"{custom_message}_{format_style}"
 
 
@@ -136,36 +132,32 @@ class AnyPassthrough:
     def process(self, value, analysis_level: str = "basic", show_content_preview: bool = False, track_performance: bool = False):
         """
         Process any input data with comprehensive analysis and safe passthrough.
-        
-        Args:
-            value: Any input data to pass through
-            analysis_level: Level of analysis detail
-            show_content_preview: Whether to show data content preview
-            track_performance: Whether to track performance metrics
-            
-        Returns:
-            Tuple of (original_data, analysis_report, performance_info)
+        Optimized for performance with lazy imports and efficient timing.
         """
-        import time
-        start_time = time.time() if track_performance else None
+        # Lazy import for better startup performance
+        start_time = None
+        if track_performance:
+            from time import perf_counter
+            start_time = perf_counter()
         
         try:
             # Generate data analysis report
             data_report = self._generate_data_report(value, analysis_level, show_content_preview)
             
             # Generate performance info if requested
-            if track_performance:
-                end_time = time.time()
+            if track_performance and start_time is not None:
+                from time import perf_counter
+                end_time = perf_counter()
                 processing_time = (end_time - start_time) * 1000  # Convert to ms
                 performance_info = f"Processing time: {processing_time:.2f}ms"
                 
-                # Add memory info if available
+                # Add memory info if available (lazy import for optional dependency)
                 try:
                     import psutil
-                    memory_mb = psutil.Process().memory_info().rss / 1024 / 1024
+                    memory_mb = psutil.Process().memory_info().rss / (1024 * 1024)
                     performance_info += f" | Memory: {memory_mb:.1f}MB"
-                except ImportError:
-                    performance_info += " | Memory: N/A (psutil not available)"
+                except (ImportError, Exception):
+                    performance_info += " | Memory: N/A"
             else:
                 performance_info = "Performance tracking disabled"
             

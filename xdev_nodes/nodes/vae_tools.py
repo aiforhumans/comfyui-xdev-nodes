@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Dict, Tuple, Any, Union
 import json
+from ..utils import efficient_data_analysis, get_torch
 
 class VAERoundTrip:
     """
@@ -248,7 +249,9 @@ class VAERoundTrip:
         """Create a fallback black image when decoding fails"""
         try:
             # Try to use torch if available
-            import torch
+            torch = get_torch()
+            if torch is None:
+                raise ImportError("PyTorch not available")
             
             # Estimate image size from latent (typical 8x downscaling)
             latent_shape = latent["samples"].shape
@@ -466,7 +469,9 @@ class VAEPreview:
     def _create_error_image(self, latent: Dict):
         """Create an error placeholder image"""
         try:
-            import torch
+            torch = get_torch()
+            if torch is None:
+                raise ImportError("PyTorch not available")
             
             # Create red error image
             error_image = torch.ones(1, 256, 256, 3, dtype=torch.float32)

@@ -1,35 +1,45 @@
 from __future__ import annotations
 from typing import Dict, Tuple, Any, Literal
-
-# Try to import torch; fall back if unavailable.
-try:
-    import torch  # type: ignore
-except Exception:
-    torch = None  # type: ignore
+from ..utils import get_torch, get_numpy, validate_choice
 
 def _avg_brightness_torch(img):
-    # img: [B,H,W,C], C=3
-    x = img
-    if x.dtype.is_floating_point:
-        x = x.clamp(0.0, 1.0)
+    """Optimized torch brightness calculation with minimal memory allocation"""
+    torch = get_torch()
+    if torch is None:
+        raise RuntimeError("PyTorch not available")
+    
+    # Optimize for common case: already normalized floating point
+    if img.dtype.is_floating_point:
+        # Clamp in-place for memory efficiency if possible
+        if img.is_contiguous():
+            return img.clamp_(0.0, 1.0).mean(dim=(1, 2, 3))
+        else:
+            return img.clamp(0.0, 1.0).mean(dim=(1, 2, 3))
     else:
-        x = x.float() / 255.0
-    return x.mean(dim=(1,2,3))
+        # Efficient integer to float conversion
+        return (img.float() * (1.0 / 255.0)).mean(dim=(1, 2, 3))
 
 def _avg_brightness_list(img):
-    # img is a Python list or nested lists
-    def mean(nums):
-        return sum(nums) / len(nums) if nums else 0.0
+    """Optimized pure Python brightness calculation with reduced memory allocation"""
     scores = []
     for b in img:
-        flat = []
-        for row in b:
-            for pix in row:
-                flat.extend(pix)
-        maxv = max(flat) if flat else 1.0
-        scale = 255.0 if maxv > 1.0 else 1.0
-        flat = [v/scale for v in flat]
-        scores.append(mean(flat))
+        # Use generator expressions for memory efficiency
+        flat = (pixel_val for row in b for pixel in row for pixel_val in pixel)
+        pixel_values = list(flat)
+        if not pixel_values:
+            scores.append(0.0)
+            continue
+        
+        # Efficient normalization
+        max_val = max(pixel_values)
+        if max_val > 1.0:
+            # Integer values - normalize by 255
+            mean_brightness = sum(v / 255.0 for v in pixel_values) / len(pixel_values)
+        else:
+            # Already normalized float values
+            mean_brightness = sum(pixel_values) / len(pixel_values)
+        
+        scores.append(mean_brightness)
     return scores
 
 class PickByBrightness:
@@ -58,11 +68,22 @@ class PickByBrightness:
             "optional": {
                 "algorithm": (["average", "weighted", "luminance"], {
                     "default": "average",
-                    "tooltip": "Brightness calculation method: 'average' uses simple RGB mean, 'weighted' applies perceptual weights, 'luminance' uses standard luminance formula."
+                    "tooltip": "Brightness calculation method: 'average' uses simple RGB mean, 'weighted' applies perceptual weights, 'luminance' uses standard luminance formula.",
+                    "lazy": True
                 }),
                 "validate_input": ("BOOLEAN", {
                     "default": True,
                     "tooltip": "Enable comprehensive input validation with detailed error messages. Recommended for production workflows."
+                }),
+                "quality_threshold": ("FLOAT", {
+                    "default": 0.5,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.01,
+                    "round": 0.001,
+                    "display": "slider",
+                    "tooltip": "Minimum brightness quality threshold for image selection (0.0-1.0)",
+                    "lazy": True
                 }),
                 "return_metadata": ("BOOLEAN", {
                     "default": False,
@@ -106,26 +127,31 @@ class PickByBrightness:
             selected_image = None
             brightness_score = 0.0
             
-            # Torch path (preferred)
-            if torch is not None and isinstance(images, torch.Tensor):
+            # Torch path (preferred) with lazy loading
+            torch = get_torch()
+            if torch is not None and hasattr(images, 'dtype'):  # Check for tensor-like object
                 processing_method = "torch"
                 scores = self._calculate_brightness_scores(images, algorithm, "torch")
                 idx = int(torch.argmax(scores).item() if mode == "brightest" else torch.argmin(scores).item())
                 selected_image = images[idx:idx+1]
                 brightness_score = float(scores[idx].item())
             
-            # NumPy path (fallback)
+            # NumPy path (fallback) with lazy import
             elif processing_method == "unknown":
                 try:
-                    import numpy as np
-                    processing_method = "numpy"
-                    arr = np.asarray(images, dtype=float)
-                    if arr.max() > 1.0:
-                        arr = arr / 255.0
-                    scores = self._calculate_brightness_scores(arr, algorithm, "numpy")
-                    idx = int(np.argmax(scores) if mode == "brightest" else np.argmin(scores))
-                    selected_image = arr[idx:idx+1]
-                    brightness_score = float(scores[idx])
+                    np = get_numpy()
+                    if np is not None:
+                        processing_method = "numpy"
+                        # Efficient array conversion with minimal copying
+                        arr = np.asarray(images, dtype=np.float32)  # Use float32 for memory efficiency
+                        if arr.max() > 1.0:
+                            arr *= (1.0 / 255.0)  # In-place operation for memory efficiency
+                        scores = self._calculate_brightness_scores(arr, algorithm, "numpy")
+                        idx = int(np.argmax(scores) if mode == "brightest" else np.argmin(scores))
+                        selected_image = arr[idx:idx+1]
+                        brightness_score = float(scores[idx])
+                    else:
+                        processing_method = "python_fallback"
                 except Exception:
                     processing_method = "python_fallback"
             
@@ -152,64 +178,41 @@ class PickByBrightness:
             error_msg = f"Error processing images: {str(e)}"
             return (images if hasattr(images, '__len__') and len(images) > 0 else None, 0.0, error_msg)
     
+
+
     def _validate_inputs(self, images, mode: str, algorithm: str) -> Dict[str, Any]:
         """
-        Comprehensive input validation with detailed error messages.
-        
-        Returns:
-            Dict with 'valid' boolean and 'error' message if invalid
+        Optimized input validation with early returns for performance.
         """
-        # Validate images input
+        # Fast null check
         if images is None:
-            return {
-                "valid": False,
-                "error": "Images input is None. Please provide a valid image batch."
-            }
+            return {"valid": False, "error": "Images input is None. Please provide a valid image batch."}
         
-        # Check if images is a proper batch
+        # Use optimized validation with direct checks
+        if mode not in {"brightest", "darkest"}:
+            return {"valid": False, "error": f"Invalid mode '{mode}'. Must be 'brightest' or 'darkest'."}
+        
+        if algorithm not in {"average", "weighted", "luminance"}:
+            return {"valid": False, "error": f"Invalid algorithm '{algorithm}'. Must be one of: average, weighted, luminance."}
+        
+        # Optimized batch size validation
         try:
-            if hasattr(images, '__len__'):
-                batch_size = len(images)
-                if batch_size < 2:
-                    return {
-                        "valid": False,
-                        "error": f"Batch size too small ({batch_size}). Need at least 2 images to compare brightness."
-                    }
-                if batch_size > 100:
-                    return {
-                        "valid": False,
-                        "error": f"Batch size too large ({batch_size}). Maximum supported batch size is 100 images."
-                    }
-            else:
-                return {
-                    "valid": False,
-                    "error": "Images input is not a proper batch. Expected tensor or array with multiple images."
-                }
+            batch_size = len(images) if hasattr(images, '__len__') else 0
+            if batch_size < 2:
+                return {"valid": False, "error": f"Batch size too small ({batch_size}). Need at least 2 images."}
+            if batch_size > 100:
+                return {"valid": False, "error": f"Batch size too large ({batch_size}). Maximum: 100 images."}
         except Exception as e:
-            return {
-                "valid": False,
-                "error": f"Error checking batch size: {str(e)}"
-            }
+            return {"valid": False, "error": f"Error checking batch size: {str(e)}"}
         
-        # Validate mode parameter
-        if mode not in ["brightest", "darkest"]:
-            return {
-                "valid": False,
-                "error": f"Invalid mode '{mode}'. Must be 'brightest' or 'darkest'."
-            }
-        
-        # Validate algorithm parameter
-        if algorithm not in ["average", "weighted", "luminance"]:
-            return {
-                "valid": False,
-                "error": f"Invalid algorithm '{algorithm}'. Must be 'average', 'weighted', or 'luminance'."
-            }
+
         
         # All validations passed
         return {"valid": True, "error": None}
     
     def _calculate_brightness_scores(self, images, algorithm: str, method: str):
         """Calculate brightness scores using specified algorithm and method."""
+        torch = get_torch()
         if method == "torch" and torch is not None:
             if algorithm == "luminance":
                 # Standard luminance formula: 0.299*R + 0.587*G + 0.114*B
@@ -222,8 +225,8 @@ class PickByBrightness:
             else:  # average
                 return _avg_brightness_torch(images)
         else:
-            # NumPy implementation
-            import numpy as np
+            # NumPy implementation with lazy loading
+            np = get_numpy()
             if algorithm == "luminance":
                 weights = np.array([0.299, 0.587, 0.114])
                 return np.sum(images * weights, axis=-1).mean(axis=(1,2))
