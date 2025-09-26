@@ -141,33 +141,12 @@ class BaseXDevNode(ValidationMixin, CachingMixin, ErrorHandlingMixin, ABC):
         """Define input types - must be implemented by subclasses"""
         pass
     
-    @property
-    @abstractmethod
-    def RETURN_TYPES(self) -> Tuple[str, ...]:
-        """Define return types - must be implemented by subclasses"""
-        pass
-    
-    @property  
-    @abstractmethod
-    def RETURN_NAMES(self) -> Tuple[str, ...]:
-        """Define return names - must be implemented by subclasses"""
-        pass
-    
-    @property
-    @abstractmethod
-    def FUNCTION(self) -> str:
-        """Define function name - must be implemented by subclasses"""
-        pass
-    
-    @property
-    def CATEGORY(self) -> str:
-        """Default category for XDev nodes"""
-        return "XDev/Base"
-    
-    @property
-    def DESCRIPTION(self) -> str:
-        """Default description"""
-        return f"XDev node: {self.__class__.__name__}"
+    # ComfyUI expects these as class attributes, not properties
+    RETURN_TYPES = ("STRING",)  # Default, should be overridden
+    RETURN_NAMES = ("output",)  # Default, should be overridden  
+    FUNCTION = "execute"        # Default, should be overridden
+    CATEGORY = "XDev/Base"      # Default category
+    DESCRIPTION = "XDev base node"  # Default description
     
     def validate_all_inputs(self, **kwargs) -> Dict[str, Any]:
         """Validate all inputs using defined validation rules"""
@@ -185,9 +164,7 @@ class BaseXDevNode(ValidationMixin, CachingMixin, ErrorHandlingMixin, ABC):
 class TextProcessingNode(BaseXDevNode):
     """Base class for text processing nodes"""
     
-    @property
-    def CATEGORY(self) -> str:
-        return "XDev/Text"
+    CATEGORY = "XDev/Text"
     
     def validate_text_inputs(self, text: str, **kwargs) -> Dict[str, Any]:
         """Common text validation"""
@@ -199,9 +176,7 @@ class TextProcessingNode(BaseXDevNode):
 class MathProcessingNode(BaseXDevNode):
     """Base class for mathematical operation nodes"""
     
-    @property
-    def CATEGORY(self) -> str:
-        return "XDev/Math"
+    CATEGORY = "XDev/Math"
     
     def validate_numeric_inputs(self, **kwargs) -> Dict[str, Any]:
         """Common numeric validation"""
@@ -215,9 +190,7 @@ class MathProcessingNode(BaseXDevNode):
 class ImageProcessingNode(BaseXDevNode):
     """Base class for image processing nodes"""
     
-    @property
-    def CATEGORY(self) -> str:
-        return "XDev/Image"
+    CATEGORY = "XDev/Image"
     
     def validate_image_inputs(self, image: Any, **kwargs) -> Dict[str, Any]:
         """Common image validation"""
