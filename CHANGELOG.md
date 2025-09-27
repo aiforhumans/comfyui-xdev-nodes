@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2024-12-27
+
+### Enhanced
+- **🧠 Intelligent OutputDev Analysis**: Major enhancement to OutputDev node's object analysis capabilities
+  - **ComfyUI Object Detection**: Automatically detects MODEL, CLIP, VAE, CONDITIONING, LATENT objects
+  - **Specialized Analysis**: Provides meaningful information about model properties, device, dtype, configuration
+  - **Enhanced Object Information**: Shows model class names, parameter counts, memory usage, and technical details
+  - **Improved Debugging**: No more generic "list" or "dict" analysis - shows actual ComfyUI object types
+  - **Better User Experience**: Professional-grade debugging output with comprehensive object insights
+
+### Technical
+- Added `_detect_comfyui_type()` method for intelligent object type detection
+- Added specialized analysis methods for each ComfyUI object type
+- Enhanced `_analyze_single_input()` with ComfyUI-aware processing
+- Improved error handling and graceful fallbacks for unknown object types
+
 ## [0.2.0] - 2024-12-26
 
 ### Added

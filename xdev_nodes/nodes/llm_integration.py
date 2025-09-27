@@ -1029,6 +1029,432 @@ class LLMContextualBuilder(ValidationMixin):
         return "\n".join(breakdown)
 
 
+class LLMDevFramework(ValidationMixin):
+    """
+    LLM-DEV Framework - Development-focused LLM interaction node.
+    
+    Features:
+    - Simple system instruction + prompt interface
+    - Raw request/response tracking for development
+    - Minimal configuration for rapid testing
+    - Clean development workflow integration
+    """
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
+        return {
+            "required": {
+                "system_instruction": ("STRING", {
+                    "multiline": True,
+                    "default": "You are a helpful assistant. Provide clear, accurate, and concise responses.",
+                    "tooltip": "System instruction that defines the LLM's behavior and role"
+                }),
+                "prompt": ("STRING", {
+                    "multiline": True,
+                    "default": "Hello, please introduce yourself and explain what you can help with.",
+                    "tooltip": "User prompt or query to send to the LLM"
+                }),
+                "server_url": ("STRING", {
+                    "default": "http://localhost:1234",
+                    "tooltip": "LM Studio or compatible server URL"
+                }),
+                "model_name": ("STRING", {
+                    "default": "local-model",
+                    "tooltip": "Model name to use on the server"
+                })
+            },
+            "optional": {
+                "temperature": ("FLOAT", {
+                    "default": 0.7,
+                    "min": 0.0,
+                    "max": 2.0,
+                    "step": 0.1,
+                    "tooltip": "Response creativity (0.0=deterministic, 2.0=very creative)"
+                }),
+                "max_tokens": ("INT", {
+                    "default": 1024,
+                    "min": 50,
+                    "max": 8192,
+                    "step": 50,
+                    "tooltip": "Maximum response length in tokens"
+                }),
+                "validate_input": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Enable input validation"
+                })
+            }
+        }
+    
+    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_NAMES = ("response", "request_made")
+    FUNCTION = "dev_llm_call"
+    CATEGORY = "XDev/LLM/Development"
+    DESCRIPTION = "LLM-DEV Framework - Simple system instruction + prompt interface for development and testing"
+    
+    @performance_monitor("llm_dev_framework")
+    def dev_llm_call(
+        self,
+        system_instruction: str,
+        prompt: str,
+        server_url: str,
+        model_name: str,
+        temperature: float = 0.7,
+        max_tokens: int = 1024,
+        validate_input: bool = True
+    ) -> Tuple[str, str]:
+        """Execute LLM call with development tracking."""
+        
+        if validate_input:
+            if not prompt.strip():
+                return ("", "Error: Prompt cannot be empty")
+            if not system_instruction.strip():
+                return ("", "Error: System instruction cannot be empty")
+        
+        try:
+            # Initialize LLM framework
+            llm_framework = LLMPromptFramework(server_url, model_name)
+            llm_client = llm_framework._get_llm_client()
+            
+            # Build request details for tracking
+            request_details = self._build_request_details(
+                system_instruction, prompt, server_url, model_name, temperature, max_tokens
+            )
+            
+            # Make LLM call
+            response = llm_client.generate_response(
+                prompt=prompt,
+                server_url=server_url,
+                model=model_name,
+                preset="custom",
+                system_prompt=system_instruction,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                top_p=0.9,
+                validate_input=True
+            )
+            
+            # Extract response
+            if isinstance(response, tuple) and len(response) >= 1:
+                llm_response = response[0].strip()
+                generation_stats = response[3] if len(response) > 3 else "No stats available"
+                
+                # Update request details with response info
+                request_made = self._build_request_summary(request_details, llm_response, generation_stats)
+                
+                return (llm_response, request_made)
+            else:
+                raise Exception("Invalid LLM response format")
+            
+        except Exception as e:
+            error_msg = f"LLM-DEV Framework error: {str(e)}"
+            request_made = self._build_error_request_summary(
+                system_instruction, prompt, server_url, model_name, str(e)
+            )
+            return (error_msg, request_made)
+    
+    def _build_request_details(
+        self, 
+        system_instruction: str, 
+        prompt: str, 
+        server_url: str, 
+        model_name: str,
+        temperature: float,
+        max_tokens: int
+    ) -> Dict[str, Any]:
+        """Build detailed request information for tracking."""
+        
+        import time
+        
+        return {
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "server_url": server_url,
+            "model_name": model_name,
+            "system_instruction": system_instruction[:100] + "..." if len(system_instruction) > 100 else system_instruction,
+            "prompt": prompt[:100] + "..." if len(prompt) > 100 else prompt,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "system_length": len(system_instruction),
+            "prompt_length": len(prompt)
+        }
+    
+    def _build_request_summary(self, request_details: Dict[str, Any], response: str, stats: str) -> str:
+        """Build comprehensive request summary."""
+        
+        summary_parts = [
+            f"🕐 Timestamp: {request_details['timestamp']}",
+            f"🌐 Server: {request_details['server_url']}",
+            f"🤖 Model: {request_details['model_name']}",
+            f"🎛️ Settings: temp={request_details['temperature']}, max_tokens={request_details['max_tokens']}",
+            "",
+            f"📥 System Instruction ({request_details['system_length']} chars):",
+            f"   {request_details['system_instruction']}",
+            "",
+            f"📝 Prompt ({request_details['prompt_length']} chars):",
+            f"   {request_details['prompt']}",
+            "",
+            f"📤 Response ({len(response)} chars):",
+            f"   {response[:150]}{'...' if len(response) > 150 else ''}",
+            "",
+            f"📊 Generation Stats: {stats}"
+        ]
+        
+        return "\n".join(summary_parts)
+    
+    def _build_error_request_summary(
+        self, 
+        system_instruction: str, 
+        prompt: str, 
+        server_url: str, 
+        model_name: str,
+        error: str
+    ) -> str:
+        """Build error request summary for debugging."""
+        
+        import time
+        
+        summary_parts = [
+            f"❌ ERROR - {time.strftime('%Y-%m-%d %H:%M:%S')}",
+            f"🌐 Server: {server_url}",
+            f"🤖 Model: {model_name}",
+            "",
+            f"📥 System Instruction ({len(system_instruction)} chars):",
+            f"   {system_instruction[:100]}{'...' if len(system_instruction) > 100 else ''}",
+            "",
+            f"📝 Prompt ({len(prompt)} chars):",
+            f"   {prompt[:100]}{'...' if len(prompt) > 100 else ''}",
+            "",
+            f"🚨 Error: {error}"
+        ]
+        
+        return "\n".join(summary_parts)
+
+
+class LLMSDXLExpertWriter(ValidationMixin):
+    """
+    Expert SDXL prompt writer for direct, concise prompt generation.
+    
+    Features:
+    - Streamlined USER_PROMPT + STYLE_SETTINGS + RULES analysis
+    - Single optimized SDXL prompt output
+    - Model-friendly, directly usable prompts
+    - Focused on efficiency and clarity
+    """
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
+        return {
+            "required": {
+                "user_prompt": ("STRING", {
+                    "multiline": True,
+                    "default": "young woman reading by a window",
+                    "tooltip": "Main subject/scene description - what you want to generate"
+                }),
+                "style_settings": ("STRING", {
+                    "multiline": True,
+                    "default": "natural lighting, soft colors, cozy atmosphere",
+                    "tooltip": "Visual style, lighting, mood, artistic direction"
+                }),
+                "rules": ("STRING", {
+                    "multiline": True,
+                    "default": "photorealistic, high quality, detailed, no anime style",
+                    "tooltip": "Technical requirements, constraints, what to avoid"
+                }),
+                "server_url": ("STRING", {
+                    "default": "http://localhost:1234",
+                    "tooltip": "LM Studio server URL"
+                }),
+                "model": ("STRING", {
+                    "default": "local-model",
+                    "tooltip": "Model name to use"
+                })
+            },
+            "optional": {
+                "temperature": ("FLOAT", {
+                    "default": 0.3,
+                    "min": 0.0,
+                    "max": 2.0,
+                    "step": 0.1,
+                    "tooltip": "LLM creativity level (lower = more consistent)"
+                }),
+                "max_tokens": ("INT", {
+                    "default": 800,
+                    "min": 100,
+                    "max": 4096,
+                    "step": 50,
+                    "tooltip": "Maximum response length"
+                }),
+                "fallback_on_error": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Return basic prompt if LLM fails"
+                }),
+                "validate_input": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Enable input validation"
+                })
+            }
+        }
+    
+    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_NAMES = ("sdxl_prompt", "generation_info")
+    FUNCTION = "write_sdxl_prompt"
+    CATEGORY = "XDev/LLM/SDXL"
+    DESCRIPTION = "Expert SDXL prompt writer - analyzes USER_PROMPT + STYLE_SETTINGS + RULES to produce optimized SDXL prompts"
+    
+    def __init__(self):
+        super().__init__()
+        self._expert_system_prompt = self._create_expert_system_prompt()
+    
+    def _create_expert_system_prompt(self) -> str:
+        """Create the expert SDXL prompt writing system prompt."""
+        return """You are an expert SDXL prompt writer for photorealistic images.
+
+GOAL
+- Analyze USER_PROMPT + STYLE_SETTINGS + RULES
+- Produce a single best SDXL prompt based on the user USER_PROMPT implementing STYLE_SETTINGS + RULES
+- Keep it concise, model-friendly, and directly usable
+
+ANALYSIS PROCESS
+1. Extract core subject/scene from USER_PROMPT
+2. Apply STYLE_SETTINGS for visual direction
+3. Integrate RULES as constraints and quality guidelines
+4. Optimize for SDXL model performance
+
+OUTPUT REQUIREMENTS
+- Single comma-separated prompt string
+- 50-150 words maximum
+- No explanations, just the optimized prompt
+- Include technical quality terms if specified in RULES
+- Maintain photorealistic focus unless STYLE_SETTINGS specify otherwise
+
+PROMPT STRUCTURE PRIORITY
+1. Main subject (from USER_PROMPT)
+2. Key descriptors (physical, emotional)
+3. Style/mood elements (from STYLE_SETTINGS)
+4. Technical quality (from RULES)
+5. Lighting/composition details
+6. Camera/lens specifications if relevant
+
+Return only the optimized SDXL prompt, nothing else."""
+    
+    @performance_monitor("sdxl_expert_writer")
+    def write_sdxl_prompt(
+        self,
+        user_prompt: str,
+        style_settings: str,
+        rules: str,
+        server_url: str,
+        model: str,
+        temperature: float = 0.3,
+        max_tokens: int = 800,
+        fallback_on_error: bool = True,
+        validate_input: bool = True
+    ) -> Tuple[str, str]:
+        """Write expert SDXL prompt based on user inputs."""
+        
+        if validate_input:
+            if not user_prompt.strip():
+                return ("", "Error: User prompt cannot be empty")
+        
+        try:
+            # Build analysis context
+            analysis_context = self._build_analysis_context(user_prompt, style_settings, rules)
+            
+            # Initialize LLM framework
+            llm_framework = LLMPromptFramework(server_url, model)
+            llm_client = llm_framework._get_llm_client()
+            
+            # Generate optimized SDXL prompt
+            response = llm_client.generate_response(
+                prompt=analysis_context,
+                server_url=server_url,
+                model=model,
+                preset="custom",
+                system_prompt=self._expert_system_prompt,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                top_p=0.9,
+                validate_input=True
+            )
+            
+            # Extract and clean the response
+            if isinstance(response, tuple) and len(response) >= 1:
+                sdxl_prompt = response[0].strip()
+                generation_stats = response[3] if len(response) > 3 else "Generation completed"
+                
+                # Clean up the prompt (remove quotes, extra formatting)
+                sdxl_prompt = self._clean_prompt_output(sdxl_prompt)
+                
+                generation_info = f"Expert SDXL prompt generated - {generation_stats}"
+                
+                return (sdxl_prompt, generation_info)
+            else:
+                raise Exception("Invalid LLM response format")
+            
+        except Exception as e:
+            error_info = f"SDXL expert writing failed: {str(e)}"
+            
+            if fallback_on_error:
+                # Generate basic fallback prompt
+                fallback_prompt = self._generate_expert_fallback(user_prompt, style_settings, rules)
+                return (fallback_prompt, f"Used fallback - {error_info}")
+            else:
+                return ("", error_info)
+    
+    def _build_analysis_context(self, user_prompt: str, style_settings: str, rules: str) -> str:
+        """Build the context for SDXL prompt analysis."""
+        
+        context_parts = [
+            f"USER_PROMPT: {user_prompt.strip()}",
+            f"STYLE_SETTINGS: {style_settings.strip()}",
+            f"RULES: {rules.strip()}"
+        ]
+        
+        return "\n\n".join(context_parts)
+    
+    def _clean_prompt_output(self, prompt: str) -> str:
+        """Clean and optimize the prompt output."""
+        
+        # Remove common formatting artifacts
+        prompt = prompt.strip()
+        prompt = prompt.strip('"\'')
+        prompt = prompt.replace('\n', ', ')
+        prompt = prompt.replace('  ', ' ')
+        
+        # Remove common prefixes/suffixes
+        unwanted_prefixes = ["prompt:", "sdxl prompt:", "optimized prompt:", "here is", "here's"]
+        for prefix in unwanted_prefixes:
+            if prompt.lower().startswith(prefix):
+                prompt = prompt[len(prefix):].strip(': ')
+        
+        return prompt.strip()
+    
+    def _generate_expert_fallback(self, user_prompt: str, style_settings: str, rules: str) -> str:
+        """Generate a basic expert fallback when LLM fails."""
+        
+        # Combine inputs intelligently
+        prompt_parts = [user_prompt.strip()]
+        
+        if style_settings.strip():
+            prompt_parts.append(style_settings.strip())
+        
+        # Add quality terms from rules
+        if rules.strip():
+            quality_terms = []
+            rule_words = rules.lower().split()
+            
+            quality_keywords = ["photorealistic", "high quality", "detailed", "professional", "8k", "4k", "hdr"]
+            for keyword in quality_keywords:
+                if any(word in keyword or keyword in word for word in rule_words):
+                    quality_terms.append(keyword)
+            
+            if quality_terms:
+                prompt_parts.extend(quality_terms)
+            else:
+                prompt_parts.append("photorealistic, high quality, detailed")
+        
+        return ", ".join(prompt_parts)
+
+
 class LLMSDXLPhotoEnhancer(ValidationMixin):
     """
     Professional SDXL prompt enhancer for photorealistic images.
@@ -1068,6 +1494,32 @@ class LLMSDXLPhotoEnhancer(ValidationMixin):
                     "default": "",
                     "tooltip": "Additional style instructions (film stock, lighting preferences, etc.)"
                 }),
+                "custom_system_prompt": ("STRING", {
+                    "multiline": True,
+                    "default": "",
+                    "tooltip": "Override default system prompt - leave empty to use built-in SDXL expert prompt"
+                }),
+                "temperature": ("FLOAT", {
+                    "default": 0.4,
+                    "min": 0.0,
+                    "max": 2.0,
+                    "step": 0.1,
+                    "tooltip": "LLM creativity level (0.0=deterministic, 2.0=very creative)"
+                }),
+                "max_tokens": ("INT", {
+                    "default": 2000,
+                    "min": 100,
+                    "max": 8192,
+                    "step": 100,
+                    "tooltip": "Maximum tokens for LLM response"
+                }),
+                "top_p": ("FLOAT", {
+                    "default": 0.7,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.05,
+                    "tooltip": "Nucleus sampling threshold"
+                }),
                 "fallback_on_error": ("BOOLEAN", {
                     "default": True,
                     "tooltip": "Return basic prompt if LLM enhancement fails"
@@ -1093,6 +1545,10 @@ class LLMSDXLPhotoEnhancer(ValidationMixin):
         server_url: str,
         model: str,
         style_notes: str = "",
+        custom_system_prompt: str = "",
+        temperature: float = 0.4,
+        max_tokens: int = 2000,
+        top_p: float = 0.7,
         fallback_on_error: bool = True,
         validate_input: bool = True
     ) -> Tuple[str, str, str, str]:
@@ -1109,13 +1565,21 @@ class LLMSDXLPhotoEnhancer(ValidationMixin):
             # Initialize LLM framework
             llm_framework = LLMPromptFramework(server_url, model)
             
-            # Generate SDXL enhancement
-            enhanced_result, enhancement_info = llm_framework.enhance_prompt(
-                base_prompt=enhancement_context,
-                enhancement_type="sdxl_photo_enhancement",
-                context="",
-                additional_instructions=""
-            )
+            # Generate SDXL enhancement with custom settings
+            if custom_system_prompt.strip():
+                # Use custom system prompt and settings
+                enhanced_result, enhancement_info = self._enhance_with_custom_prompt(
+                    llm_framework, enhancement_context, custom_system_prompt,
+                    temperature, max_tokens, top_p
+                )
+            else:
+                # Use built-in SDXL enhancement
+                enhanced_result, enhancement_info = llm_framework.enhance_prompt(
+                    base_prompt=enhancement_context,
+                    enhancement_type="sdxl_photo_enhancement",
+                    context="",
+                    additional_instructions=""
+                )
             
             # Parse JSON response
             sdxl_prompt, negative_prompt, settings_json, notes = self._parse_sdxl_response(enhanced_result)
@@ -1133,6 +1597,48 @@ class LLMSDXLPhotoEnhancer(ValidationMixin):
                 return (fallback_prompt, fallback_negative, fallback_settings, error_info)
             else:
                 return ("", "", "", error_info)
+    
+    def _enhance_with_custom_prompt(
+        self, 
+        llm_framework: LLMPromptFramework, 
+        enhancement_context: str, 
+        custom_system_prompt: str,
+        temperature: float,
+        max_tokens: int,
+        top_p: float
+    ) -> Tuple[str, str]:
+        """Enhance prompt using custom system prompt and settings."""
+        
+        # Get the LLM client
+        llm_client = llm_framework._get_llm_client()
+        
+        # Make direct LLM request with custom system prompt using the correct method
+        try:
+            response = llm_client.generate_response(
+                prompt=enhancement_context,
+                server_url=llm_framework.server_url,
+                model=llm_framework.model,
+                preset="custom",
+                system_prompt=custom_system_prompt,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                top_p=top_p,
+                validate_input=True
+            )
+            
+            # Extract response and info - generate_response returns (response, conversation, server_info, stats)
+            if isinstance(response, tuple) and len(response) >= 4:
+                enhanced_text = response[0]  # Main LLM response
+                generation_stats = response[3]  # Generation statistics
+                generation_info = f"Custom enhancement completed - {generation_stats}"
+            else:
+                enhanced_text = str(response)
+                generation_info = "Custom enhancement completed"
+            
+            return enhanced_text, generation_info
+            
+        except Exception as e:
+            return enhancement_context, f"Custom enhancement failed: {str(e)}"
     
     def _build_enhancement_context(self, user_brief: str, aspect_ratio: str, style_notes: str) -> str:
         """Build the context for SDXL enhancement."""
@@ -1225,4 +1731,4 @@ class LLMSDXLPhotoEnhancer(ValidationMixin):
 
 
 # Export for node registration
-__all__ = ["LMStudioChat", "LLMPromptAssistant", "LLMContextualBuilder", "LLMSDXLPhotoEnhancer", "LLMPromptFramework"]
+__all__ = ["LMStudioChat", "LLMPromptAssistant", "LLMContextualBuilder", "LLMDevFramework", "LLMSDXLExpertWriter", "LLMSDXLPhotoEnhancer", "LLMPromptFramework"]

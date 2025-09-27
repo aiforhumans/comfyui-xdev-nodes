@@ -8,9 +8,9 @@
 
 A **production-ready starter kit** for building and publishing **ComfyUI custom nodes** with professional-grade patterns, comprehensive validation, rich documentation, and complete GitHub standards.
 
-> 🚀 **NEW**: LLM-Enhanced Prompt Tools with 34 professional nodes including AI-powered character creation, intelligent style generation, contextual prompts, and comprehensive LM Studio integration.
+> 🚀 **NEW**: LLM-Enhanced Prompt Tools with 37 professional nodes including AI-powered character creation, intelligent style generation, contextual prompts, and comprehensive LM Studio integration.
 
-> 🔧 **ENHANCED**: Complete AI workflow toolkit with OpenAI-compatible API support, automatic server discovery, configuration presets, and robust error handling for local Language Models.
+> 🔧 **ENHANCED**: OutputDev now provides intelligent ComfyUI object analysis - properly detects and analyzes MODEL, CLIP, VAE, CONDITIONING, and LATENT objects with detailed information instead of generic type reporting.
 
 ---
 
@@ -28,7 +28,7 @@ A **production-ready starter kit** for building and publishing **ComfyUI custom 
 - **AnyPassthrough** - Type-safe passthrough with comprehensive checks
 - **AppendSuffix** - Text processing with multiline support and validation
 - **PickByBrightness** - Advanced image processing with multiple algorithms (torch/numpy/python fallbacks)
-- **OutputDev** - Universal debugging output accepting all 18 ComfyUI types
+- **OutputDev** - Universal debugging output with intelligent ComfyUI object analysis (MODEL, CLIP, VAE, CONDITIONING)
 - **InputDev** - Test data generator for 12 core ComfyUI types
 - **VAERoundTrip** - Complete VAE encode/decode cycle testing
 - **VAEPreview** - Quick latent visualization and analysis
@@ -126,7 +126,7 @@ Open an example workflow from `workflows/` to test.
 ### 5) 🔍 OutputDev (XDev) 
 **Category**: `XDev/Development` | **Universal debugging output**
 
-- **Purpose**: Universal debugging and analysis node for any ComfyUI data type
+- **Purpose**: Universal debugging and analysis node with intelligent ComfyUI object detection
 - **Inputs**:
   - `input_1` (ANY) - Primary input accepting any ComfyUI data type
   - `input_2` (ANY, optional) - Secondary input for comparison
@@ -136,11 +136,13 @@ Open an example workflow from `workflows/` to test.
   - `compare_inputs` (BOOLEAN) - Compare multiple inputs when connected
 - **Outputs**: None (OUTPUT_NODE - terminates workflow)
 - **Features**:
-  - **Enhanced Type Compatibility**: Explicitly supports LATENT, MODEL, CONDITIONING, MASK, and all ComfyUI types
-  - **Multi-Input Comparison**: Compare up to 3 different data streams simultaneously
-  - **Memory Analysis**: Display tensor memory usage and statistics for all tensor types
-  - **Content Preview**: Safe preview of actual data values with statistics
-  - **File Export**: Save detailed analysis to timestamped text files
+  - **🧠 Intelligent ComfyUI Object Analysis**: Automatically detects and analyzes MODEL, CLIP, VAE, CONDITIONING, LATENT objects
+  - **📊 Enhanced Model Information**: Shows model class, device, dtype, parameter count, and configuration details
+  - **🎯 Specialized Object Handling**: Provides meaningful analysis instead of generic "list" or "dict" information
+  - **⚡ Multi-Input Comparison**: Compare up to 3 different data streams simultaneously
+  - **💾 Memory Analysis**: Display tensor memory usage and statistics for all tensor types
+  - **🔍 Content Preview**: Safe preview of actual data values with statistics
+  - **📁 File Export**: Save detailed analysis to timestamped text files
 
 ### 6) 🎯 InputDev (XDev)
 **Category**: `XDev/Development` | **Universal test data generator**

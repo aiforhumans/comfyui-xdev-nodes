@@ -54,7 +54,7 @@ from .nodes.prompt import (
 debug_print("✅ Prompt tools loaded")
 
 debug_print("Loading LLM integrations...")
-from .nodes.llm_integration import LMStudioChat, LLMPromptAssistant, LLMContextualBuilder, LLMSDXLPhotoEnhancer
+from .nodes.llm_integration import LMStudioChat, LLMPromptAssistant, LLMContextualBuilder, LLMSDXLPhotoEnhancer, LLMSDXLExpertWriter, LLMDevFramework
 debug_print("✅ LLM integrations loaded")
 
 # If you add frontend assets, keep this path relative to this package root.
@@ -100,6 +100,8 @@ NODE_CLASS_MAPPINGS = {
     "XDEV_LLMPromptAssistant": LLMPromptAssistant,
     "XDEV_LLMContextualBuilder": LLMContextualBuilder,
     "XDEV_LLMSDXLPhotoEnhancer": LLMSDXLPhotoEnhancer,
+    "XDEV_LLMSDXLExpertWriter": LLMSDXLExpertWriter,
+    "XDEV_LLMDevFramework": LLMDevFramework,
     # Phase 6 LLM-Enhanced Prompt Tools
     "XDEV_LLMPersonBuilder": LLMPersonBuilder,
     "XDEV_LLMStyleBuilder": LLMStyleBuilder,
@@ -148,6 +150,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "XDEV_LLMPromptAssistant": "LLM Prompt Assistant (XDev)",
     "XDEV_LLMContextualBuilder": "LLM Contextual Builder (XDev)",
     "XDEV_LLMSDXLPhotoEnhancer": "LLM SDXL Photo Enhancer (XDev)",
+    "XDEV_LLMSDXLExpertWriter": "LLM SDXL Expert Writer (XDev)",
+    "XDEV_LLMDevFramework": "LLM-DEV Framework (XDev)",
     "XDEV_LLMPersonBuilder": "LLM Person Builder (XDev)",
     "XDEV_LLMStyleBuilder": "LLM Style Builder (XDev)",
 }

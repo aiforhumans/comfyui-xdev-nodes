@@ -1,0 +1,100 @@
+{
+  "last_node_id": 4,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "XDEV_LLMSDXLPhotoEnhancer",
+      "pos": [100, 100],
+      "size": {"0": 400, "1": 600},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "sdxl_prompt", "type": "STRING", "links": [1]},
+        {"name": "negative_prompt", "type": "STRING", "links": null},
+        {"name": "settings_json", "type": "STRING", "links": null},
+        {"name": "enhancement_notes", "type": "STRING", "links": null}
+      ],
+      "properties": {"Node name for S&R": "XDEV_LLMSDXLPhotoEnhancer"},
+      "widgets_values": [
+        "portrait of a young artist in their studio",
+        "portrait",
+        "http://localhost:1234",
+        "local-model",
+        "Natural lighting, creative environment",
+        "You are a specialist in artistic portrait photography. Create SDXL prompts that capture the creative spirit of artists in their natural environment. Focus on authentic lighting, creative tools, and inspiring atmospheres.\n\nReturn JSON format:\n{\n  \"prompt\": \"detailed artistic portrait prompt\",\n  \"negative_prompt\": \"things to avoid\",\n  \"settings\": {\"width\": 832, \"height\": 1216, \"steps\": 30, \"cfg\": 6.0, \"sampler\": \"DPM++ 2M Karras\", \"seed\": 12345},\n  \"notes\": \"creative and technical notes\"\n}",
+        0.6,
+        1500,
+        0.8,
+        true,
+        true
+      ]
+    },
+    {
+      "id": 2,
+      "type": "XDEV_LLMSDXLPhotoEnhancer", 
+      "pos": [550, 100],
+      "size": {"0": 400, "1": 600},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "sdxl_prompt", "type": "STRING", "links": [2]},
+        {"name": "negative_prompt", "type": "STRING", "links": null},
+        {"name": "settings_json", "type": "STRING", "links": null},
+        {"name": "enhancement_notes", "type": "STRING", "links": null}
+      ],
+      "properties": {"Node name for S&R": "XDEV_LLMSDXLPhotoEnhancer"},
+      "widgets_values": [
+        "portrait of a young artist in their studio",
+        "portrait", 
+        "http://localhost:1234",
+        "local-model",
+        "Natural lighting, creative environment",
+        "",
+        0.4,
+        2000,
+        0.7,
+        true,
+        true
+      ]
+    },
+    {
+      "id": 3,
+      "type": "XDEV_OutputDev",
+      "pos": [100, 750],
+      "size": {"0": 350, "1": 200},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [{"name": "input", "type": "*", "link": 1}],
+      "outputs": [],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": ["Custom Artistic Portrait"]
+    },
+    {
+      "id": 4,
+      "type": "XDEV_OutputDev",
+      "pos": [550, 750],
+      "size": {"0": 350, "1": 200},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [{"name": "input", "type": "*", "link": 2}],
+      "outputs": [],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": ["Built-in SDXL Expert"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 3, 0, "STRING"],
+    [2, 2, 0, 4, 0, "STRING"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

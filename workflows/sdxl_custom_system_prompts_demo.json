@@ -1,0 +1,153 @@
+{
+  "last_node_id": 4,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "XDEV_LLMSDXLPhotoEnhancer",
+      "pos": [100, 100],
+      "size": {"0": 450, "1": 520},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "sdxl_prompt", "type": "STRING", "links": [1], "slot_index": 0},
+        {"name": "negative_prompt", "type": "STRING", "links": [2], "slot_index": 1},
+        {"name": "settings_json", "type": "STRING", "links": [3], "slot_index": 2},
+        {"name": "enhancement_notes", "type": "STRING", "links": [4], "slot_index": 3}
+      ],
+      "properties": {"Node name for S&R": "XDEV_LLMSDXLPhotoEnhancer"},
+      "widgets_values": [
+        "Portrait of a cyberpunk hacker in a neon-lit alley",
+        "portrait",
+        "http://localhost:1234",
+        "auto-detect",
+        "Dark atmosphere, neon lighting, futuristic aesthetic",
+        "You are an expert in cyberpunk and futuristic photography. Create detailed SDXL prompts that capture the essence of cyberpunk aesthetics with neon lighting, urban decay, and high-tech elements. Focus on creating atmospheric, moody images with strong contrast and vibrant neon colors.\n\nOutput format should be JSON:\n{\n  \"prompt\": \"detailed cyberpunk prompt\",\n  \"negative_prompt\": \"things to avoid\",\n  \"settings\": {\"width\": int, \"height\": int, \"steps\": int, \"cfg\": float, \"sampler\": \"string\", \"seed\": int},\n  \"notes\": \"explanation\"\n}",
+        0.8,
+        2500,
+        0.85,
+        true,
+        true
+      ],
+      "title": "Custom Cyberpunk SDXL Enhancer"
+    },
+    {
+      "id": 2,
+      "type": "XDEV_LLMSDXLPhotoEnhancer",
+      "pos": [100, 700],
+      "size": {"0": 450, "1": 380},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "sdxl_prompt", "type": "STRING", "links": [5], "slot_index": 0},
+        {"name": "negative_prompt", "type": "STRING", "links": [6], "slot_index": 1},
+        {"name": "settings_json", "type": "STRING", "links": [7], "slot_index": 2},
+        {"name": "enhancement_notes", "type": "STRING", "links": [8], "slot_index": 3}
+      ],
+      "properties": {"Node name for S&R": "XDEV_LLMSDXLPhotoEnhancer"},
+      "widgets_values": [
+        "Vintage film portrait of a woman in 1950s style",
+        "square",
+        "http://localhost:1234",
+        "auto-detect",
+        "Film grain, warm tones, classic Hollywood glamour",
+        "",
+        0.4,
+        2000,
+        0.7,
+        true,
+        true
+      ],
+      "title": "Built-in SDXL Expert (Default)"
+    },
+    {
+      "id": 3,
+      "type": "XDEV_OutputDev",
+      "pos": [650, 100],
+      "size": {"0": 400, "1": 200},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 1},
+        {"name": "input_2", "type": "*", "link": 2},
+        {"name": "input_3", "type": "*", "link": 3}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": [
+        "detailed",
+        true,
+        true
+      ],
+      "title": "Cyberpunk Results"
+    },
+    {
+      "id": 4,
+      "type": "XDEV_OutputDev",
+      "pos": [650, 700],
+      "size": {"0": 400, "1": 200},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 5},
+        {"name": "input_2", "type": "*", "link": 6},
+        {"name": "input_3", "type": "*", "link": 7}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": [
+        "detailed",
+        true,
+        true
+      ],
+      "title": "Vintage Film Results"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 3, 0, "STRING"],
+    [2, 1, 1, 3, 1, "STRING"],
+    [3, 1, 2, 3, 2, "STRING"],
+    [4, 1, 3, 3, 3, "STRING"],
+    [5, 2, 0, 4, 0, "STRING"],
+    [6, 2, 1, 4, 1, "STRING"],
+    [7, 2, 2, 4, 2, "STRING"],
+    [8, 2, 3, 4, 3, "STRING"]
+  ],
+  "groups": [
+    {
+      "title": "Custom vs Built-in System Prompts Comparison",
+      "bounding": [50, 50, 1050, 1000],
+      "color": "#3f789e",
+      "font_size": 24,
+      "locked": false
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [20, 30]
+    },
+    "info": {
+      "name": "SDXL Custom System Prompt Demo",
+      "author": "XDev Nodes",
+      "description": "Demonstrates the enhanced SDXL Photo Enhancer with custom system prompt options. Top node uses a custom cyberpunk-focused system prompt with higher creativity settings. Bottom node uses the built-in SDXL expert system prompt. Compare the different approaches and outputs.",
+      "version": "0.3.0",
+      "created": "2024-12-28",
+      "modified": "2024-12-28",
+      "features": [
+        "Custom system prompt override",
+        "Adjustable temperature, max_tokens, top_p",
+        "Built-in vs custom prompt comparison",
+        "Specialized genre prompts (cyberpunk example)",
+        "Backward compatibility with default settings"
+      ]
+    }
+  }
+}

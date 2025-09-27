@@ -36,31 +36,17 @@ class OutputDev:
 
     @classmethod
     def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
-        # Define all ComfyUI types that the OutputDev can accept
-        # Using a union type list instead of "*" for better compatibility
-        accepted_types = [
-            "STRING", "INT", "FLOAT", "BOOLEAN",
-            "IMAGE", "MASK", "LATENT", 
-            "MODEL", "CLIP", "VAE", "CONDITIONING",
-            "CONTROL_NET", "STYLE_MODEL", "UPSCALE_MODEL",
-            "SAMPLER", "SIGMAS", "NOISE",
-            "*"  # Keep * as fallback for any other types
-        ]
-        
         return {
             "required": {
-                "input_1": (accepted_types, {
-                    "forceInput": True,
+                "input_1": ("*", {
                     "tooltip": "Primary input - accepts any ComfyUI data type for analysis and display"
                 })
             },
             "optional": {
-                "input_2": (accepted_types, {
-                    "forceInput": True,
+                "input_2": ("*", {
                     "tooltip": "Optional secondary input for comparing multiple data streams"
                 }),
-                "input_3": (accepted_types, {
-                    "forceInput": True, 
+                "input_3": ("*", {
                     "tooltip": "Optional tertiary input for complex workflow debugging"
                 }),
                 "display_level": (["summary", "detailed", "full"], {
@@ -84,6 +70,15 @@ class OutputDev:
     FUNCTION = "analyze_and_display"
     CATEGORY = "XDev/Development"
     DESCRIPTION = "Universal debugging output node - accepts and analyzes any ComfyUI data type"
+    
+    @classmethod
+    def VALIDATE_INPUTS(cls, input_types):
+        """
+        Custom input validation that accepts any type.
+        This overrides ComfyUI's default type validation to allow any input type.
+        """
+        # Always return True to accept any type - this is a universal debugging node
+        return True
 
     def analyze_and_display(self, input_1, input_2=None, input_3=None, 
                           display_level: str = "detailed", save_to_file: bool = False, 
@@ -154,6 +149,13 @@ class OutputDev:
             print(f"Type: {data_type}")
             print(f"Module: {getattr(type(data), '__module__', 'unknown')}")
             
+            # Detect and analyze ComfyUI-specific data types
+            comfy_type = self._detect_comfyui_type(data)
+            if comfy_type:
+                print(f"ComfyUI Type: {comfy_type}")
+                self._analyze_comfyui_object(data, comfy_type, level)
+                return
+            
             # Size/shape information
             if hasattr(data, 'shape'):
                 shape = tuple(int(x) for x in data.shape)
@@ -172,6 +174,17 @@ class OutputDev:
             elif hasattr(data, '__len__') and not isinstance(data, str):
                 length = len(data)
                 print(f"Length: {length:,}")
+                
+                # Special handling for lists that might contain ComfyUI objects
+                if isinstance(data, list) and length > 0:
+                    first_item = data[0]
+                    first_type = self._detect_comfyui_type(first_item)
+                    if first_type:
+                        print(f"List contains: {first_type} objects")
+                        if level in ["detailed", "full"]:
+                            print(f"Analyzing first item:")
+                            self._analyze_comfyui_object(first_item, first_type, level)
+                    
             elif isinstance(data, str):
                 char_count = len(data)
                 word_count = len(data.split()) if data else 0
@@ -197,6 +210,250 @@ class OutputDev:
                 
         except Exception as e:
             print(f"❌ Analysis error: {e}")
+    
+    def _detect_comfyui_type(self, data: Any) -> str:
+        """Detect ComfyUI-specific data types"""
+        try:
+            # Check for common ComfyUI object patterns
+            class_name = type(data).__name__
+            module_name = getattr(type(data), '__module__', '')
+            
+            # Model detection
+            if 'model' in class_name.lower() or 'unet' in class_name.lower():
+                return "MODEL"
+            elif 'clip' in class_name.lower():
+                return "CLIP"
+            elif 'vae' in class_name.lower():
+                return "VAE"
+            elif 'condition' in class_name.lower() or hasattr(data, 'cond'):
+                return "CONDITIONING"
+            elif hasattr(data, 'samples') and hasattr(data, '__getitem__'):
+                return "LATENT"
+            elif hasattr(data, 'shape') and len(getattr(data, 'shape', [])) == 4:
+                # Could be IMAGE (B,H,W,C) or MASK
+                if hasattr(data, 'dtype'):
+                    return "IMAGE/TENSOR"
+            elif isinstance(data, dict):
+                # Check for common ComfyUI dict structures
+                if 'samples' in data:
+                    return "LATENT"
+                elif 'cond' in data or 'uncond' in data:
+                    return "CONDITIONING"
+            
+            return None
+        except Exception:
+            return None
+    
+    def _analyze_comfyui_object(self, data: Any, comfy_type: str, level: str):
+        """Analyze ComfyUI-specific objects in detail"""
+        try:
+            print(f"🎯 {comfy_type} Object Analysis:")
+            
+            if comfy_type == "MODEL":
+                self._analyze_model(data, level)
+            elif comfy_type == "CLIP":
+                self._analyze_clip(data, level)
+            elif comfy_type == "VAE":
+                self._analyze_vae(data, level)
+            elif comfy_type == "CONDITIONING":
+                self._analyze_conditioning(data, level)
+            elif comfy_type == "LATENT":
+                self._analyze_latent(data, level)
+            elif comfy_type == "IMAGE/TENSOR":
+                self._analyze_image_tensor(data, level)
+            else:
+                print(f"   Detected as {comfy_type} but no specific analyzer available")
+                self._analyze_generic_object(data, level)
+                
+        except Exception as e:
+            print(f"   ❌ ComfyUI object analysis error: {e}")
+    
+    def _analyze_model(self, model, level: str):
+        """Analyze MODEL objects"""
+        try:
+            print(f"   📱 Model Information:")
+            
+            # Try to get model properties
+            if hasattr(model, 'model'):
+                actual_model = model.model
+                print(f"   - Model Class: {type(actual_model).__name__}")
+                
+                if hasattr(actual_model, 'device'):
+                    print(f"   - Device: {actual_model.device}")
+                if hasattr(actual_model, 'dtype'):
+                    print(f"   - Data Type: {actual_model.dtype}")
+                    
+                # Try to get parameter count
+                if hasattr(actual_model, 'parameters'):
+                    try:
+                        param_count = sum(p.numel() for p in actual_model.parameters())
+                        print(f"   - Parameters: {param_count:,}")
+                    except:
+                        pass
+            
+            # Check for common model attributes
+            common_attrs = ['model_options', 'model_config', 'load_device', 'offload_device']
+            for attr in common_attrs:
+                if hasattr(model, attr):
+                    value = getattr(model, attr)
+                    print(f"   - {attr}: {type(value).__name__}")
+                    
+        except Exception as e:
+            print(f"   ❌ Model analysis error: {e}")
+    
+    def _analyze_clip(self, clip, level: str):
+        """Analyze CLIP objects"""
+        try:
+            print(f"   🖼️ CLIP Information:")
+            
+            if hasattr(clip, 'cond_stage_model'):
+                print(f"   - Conditioning Model: {type(clip.cond_stage_model).__name__}")
+            
+            if hasattr(clip, 'tokenizer'):
+                print(f"   - Tokenizer: Available")
+            
+            if hasattr(clip, 'load_device'):
+                print(f"   - Load Device: {clip.load_device}")
+                
+            # Check for common CLIP attributes
+            common_attrs = ['dtype', 'layer_idx']
+            for attr in common_attrs:
+                if hasattr(clip, attr):
+                    value = getattr(clip, attr)
+                    print(f"   - {attr}: {value}")
+                    
+        except Exception as e:
+            print(f"   ❌ CLIP analysis error: {e}")
+    
+    def _analyze_vae(self, vae, level: str):
+        """Analyze VAE objects"""
+        try:
+            print(f"   🎨 VAE Information:")
+            
+            if hasattr(vae, 'first_stage_model'):
+                print(f"   - VAE Model: {type(vae.first_stage_model).__name__}")
+                
+            if hasattr(vae, 'device'):
+                print(f"   - Device: {vae.device}")
+            if hasattr(vae, 'dtype'):
+                print(f"   - Data Type: {vae.dtype}")
+                
+            # Check for VAE-specific attributes
+            vae_attrs = ['scale_factor', 'load_device', 'offload_device']
+            for attr in vae_attrs:
+                if hasattr(vae, attr):
+                    value = getattr(vae, attr)
+                    print(f"   - {attr}: {value}")
+                    
+        except Exception as e:
+            print(f"   ❌ VAE analysis error: {e}")
+    
+    def _analyze_conditioning(self, cond, level: str):
+        """Analyze CONDITIONING objects"""
+        try:
+            print(f"   🎭 Conditioning Information:")
+            
+            if isinstance(cond, list):
+                print(f"   - Conditioning List Length: {len(cond)}")
+                if len(cond) > 0:
+                    first_cond = cond[0]
+                    if isinstance(first_cond, list) and len(first_cond) > 0:
+                        tensor = first_cond[0]
+                        if hasattr(tensor, 'shape'):
+                            print(f"   - Tensor Shape: {tensor.shape}")
+                        if hasattr(tensor, 'device'):
+                            print(f"   - Device: {tensor.device}")
+                        if hasattr(tensor, 'dtype'):
+                            print(f"   - Data Type: {tensor.dtype}")
+            elif isinstance(cond, dict):
+                print(f"   - Conditioning Dict Keys: {list(cond.keys())}")
+                if 'cond' in cond and hasattr(cond['cond'], 'shape'):
+                    print(f"   - Cond Tensor Shape: {cond['cond'].shape}")
+                    
+        except Exception as e:
+            print(f"   ❌ Conditioning analysis error: {e}")
+    
+    def _analyze_latent(self, latent, level: str):
+        """Analyze LATENT objects"""
+        try:
+            print(f"   🔮 Latent Information:")
+            
+            if isinstance(latent, dict) and 'samples' in latent:
+                samples = latent['samples']
+                if hasattr(samples, 'shape'):
+                    print(f"   - Samples Shape: {samples.shape}")
+                if hasattr(samples, 'device'):
+                    print(f"   - Device: {samples.device}")
+                if hasattr(samples, 'dtype'):
+                    print(f"   - Data Type: {samples.dtype}")
+                
+                # Calculate memory usage
+                if hasattr(samples, 'element_size') and hasattr(samples, 'numel'):
+                    memory_bytes = samples.element_size() * samples.numel()
+                    memory_mb = memory_bytes / (1024 * 1024)
+                    print(f"   - Memory Usage: {memory_mb:.2f} MB")
+                    
+        except Exception as e:
+            print(f"   ❌ Latent analysis error: {e}")
+    
+    def _analyze_image_tensor(self, tensor, level: str):
+        """Analyze IMAGE/TENSOR objects"""
+        try:
+            print(f"   🖼️ Image/Tensor Information:")
+            
+            if hasattr(tensor, 'shape'):
+                shape = tensor.shape
+                print(f"   - Shape: {shape}")
+                
+                if len(shape) == 4:  # Typical image format (B,H,W,C) or (B,C,H,W)
+                    batch, dim1, dim2, dim3 = shape
+                    print(f"   - Batch Size: {batch}")
+                    print(f"   - Dimensions: {dim1}×{dim2}×{dim3}")
+                    
+            if hasattr(tensor, 'dtype'):
+                print(f"   - Data Type: {tensor.dtype}")
+            if hasattr(tensor, 'device'):
+                print(f"   - Device: {tensor.device}")
+                
+            # Value range analysis
+            if level == "full" and hasattr(tensor, 'min') and hasattr(tensor, 'max'):
+                try:
+                    min_val = float(tensor.min())
+                    max_val = float(tensor.max())
+                    mean_val = float(tensor.mean())
+                    print(f"   - Value Range: {min_val:.4f} to {max_val:.4f}")
+                    print(f"   - Mean Value: {mean_val:.4f}")
+                except:
+                    pass
+                    
+        except Exception as e:
+            print(f"   ❌ Image/Tensor analysis error: {e}")
+    
+    def _analyze_generic_object(self, obj, level: str):
+        """Analyze generic objects with common attributes"""
+        try:
+            print(f"   🔍 Generic Object Analysis:")
+            
+            # List common attributes
+            interesting_attrs = []
+            for attr_name in dir(obj):
+                if not attr_name.startswith('_'):
+                    try:
+                        attr_value = getattr(obj, attr_name)
+                        if not callable(attr_value):
+                            interesting_attrs.append((attr_name, type(attr_value).__name__))
+                    except:
+                        pass
+            
+            if interesting_attrs:
+                print(f"   - Attributes ({len(interesting_attrs)}):")
+                for name, type_name in interesting_attrs[:10]:  # Limit to first 10
+                    print(f"     • {name}: {type_name}")
+                if len(interesting_attrs) > 10:
+                    print(f"     ... and {len(interesting_attrs) - 10} more")
+                    
+        except Exception as e:
+            print(f"   ❌ Generic object analysis error: {e}")
 
     def _show_content_preview(self, data: Any):
         """Show a safe preview of the data content"""
@@ -399,6 +656,14 @@ class InputDev:
     FUNCTION = "generate_data"
     CATEGORY = "XDev/Development"
     DESCRIPTION = "Universal test data generator - creates any ComfyUI data type for connection testing"
+    
+    @classmethod
+    def VALIDATE_INPUTS(cls, **kwargs):
+        """
+        Custom input validation for InputDev node.
+        Always returns True since this is a universal test data generator.
+        """
+        return True
 
     def check_lazy_status(self, output_type, output_mode="realistic", custom_value="", 
                          size_parameter=512, seed=0, batch_size=1, quality_factor=1.0, include_metadata=True):
