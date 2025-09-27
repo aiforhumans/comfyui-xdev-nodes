@@ -218,8 +218,17 @@ class OutputDev:
             class_name = type(data).__name__
             module_name = getattr(type(data), '__module__', '')
             
+            # Noise and Sampler detection (new)
+            if 'noise' in class_name.lower():
+                return "NOISE"
+            elif 'sampler' in class_name.lower():
+                return "SAMPLER"
+            elif 'scheduler' in class_name.lower():
+                return "SCHEDULER"
+            elif 'sigmas' in class_name.lower():
+                return "SIGMAS"
             # Model detection
-            if 'model' in class_name.lower() or 'unet' in class_name.lower():
+            elif 'model' in class_name.lower() or 'unet' in class_name.lower():
                 return "MODEL"
             elif 'clip' in class_name.lower():
                 return "CLIP"
@@ -234,15 +243,46 @@ class OutputDev:
                 if hasattr(data, 'dtype'):
                     return "IMAGE/TENSOR"
             elif isinstance(data, dict):
-                # Check for common ComfyUI dict structures
-                if 'samples' in data:
-                    return "LATENT"
-                elif 'cond' in data or 'uncond' in data:
-                    return "CONDITIONING"
+                # Enhanced dict structure detection
+                return self._analyze_dict_type(data)
             
             return None
         except Exception:
             return None
+    
+    def _analyze_dict_type(self, data: dict) -> str:
+        """Analyze dictionary to determine ComfyUI type"""
+        try:
+            keys = list(data.keys())
+            
+            # LATENT detection
+            if 'samples' in keys:
+                return "LATENT"
+            elif 'batch_index' in keys:
+                return "LATENT"  # Sometimes latents have batch_index
+            
+            # CONDITIONING detection
+            if any(key in keys for key in ['cond', 'uncond', 'conditioning']):
+                return "CONDITIONING"
+            elif len(keys) == 1 and isinstance(list(data.values())[0], list):
+                # Could be conditioning in list format
+                return "CONDITIONING"
+            
+            # Model/Pipeline configuration
+            if any(key in keys for key in ['model_type', 'config', 'state_dict']):
+                return "MODEL_CONFIG"
+            
+            # Check for workflow/node data
+            if any(key in keys for key in ['nodes', 'links', 'workflow']):
+                return "WORKFLOW"
+            
+            # Parameters or settings dict
+            if any(key in keys for key in ['steps', 'cfg', 'seed', 'sampler_name']):
+                return "PARAMETERS"
+            
+            return "DICT"  # Generic dict type
+        except Exception:
+            return "DICT"
     
     def _analyze_comfyui_object(self, data: Any, comfy_type: str, level: str):
         """Analyze ComfyUI-specific objects in detail"""
@@ -261,6 +301,16 @@ class OutputDev:
                 self._analyze_latent(data, level)
             elif comfy_type == "IMAGE/TENSOR":
                 self._analyze_image_tensor(data, level)
+            elif comfy_type == "NOISE":
+                self._analyze_noise(data, level)
+            elif comfy_type == "SAMPLER":
+                self._analyze_sampler(data, level)
+            elif comfy_type == "SCHEDULER":
+                self._analyze_scheduler(data, level)
+            elif comfy_type == "SIGMAS":
+                self._analyze_sigmas(data, level)
+            elif comfy_type in ["DICT", "MODEL_CONFIG", "WORKFLOW", "PARAMETERS"]:
+                self._analyze_enhanced_dict(data, comfy_type, level)
             else:
                 print(f"   Detected as {comfy_type} but no specific analyzer available")
                 self._analyze_generic_object(data, level)
@@ -429,6 +479,130 @@ class OutputDev:
         except Exception as e:
             print(f"   ❌ Image/Tensor analysis error: {e}")
     
+    def _analyze_noise(self, noise, level: str):
+        """Analyze NOISE objects (like Noise_RandomNoise)"""
+        try:
+            print(f"   🎲 Noise Information:")
+            
+            noise_class = type(noise).__name__
+            print(f"   - Noise Class: {noise_class}")
+            
+            # Check for common noise attributes
+            noise_attrs = ['seed', 'noise_type', 'normalize', 'device']
+            for attr in noise_attrs:
+                if hasattr(noise, attr):
+                    value = getattr(noise, attr)
+                    print(f"   - {attr}: {value}")
+            
+            # Check for callable methods
+            if hasattr(noise, 'generate_noise'):
+                print(f"   - Can Generate Noise: Yes")
+            if hasattr(noise, '__call__'):
+                print(f"   - Callable: Yes")
+                
+        except Exception as e:
+            print(f"   ❌ Noise analysis error: {e}")
+    
+    def _analyze_sampler(self, sampler, level: str):
+        """Analyze SAMPLER objects"""
+        try:
+            print(f"   🎯 Sampler Information:")
+            
+            sampler_class = type(sampler).__name__
+            print(f"   - Sampler Class: {sampler_class}")
+            
+            # Check for sampler attributes
+            sampler_attrs = ['sampler_name', 'steps', 'cfg', 'denoise', 'scheduler']
+            for attr in sampler_attrs:
+                if hasattr(sampler, attr):
+                    value = getattr(sampler, attr)
+                    print(f"   - {attr}: {value}")
+                    
+        except Exception as e:
+            print(f"   ❌ Sampler analysis error: {e}")
+    
+    def _analyze_scheduler(self, scheduler, level: str):
+        """Analyze SCHEDULER objects"""
+        try:
+            print(f"   📅 Scheduler Information:")
+            
+            scheduler_class = type(scheduler).__name__
+            print(f"   - Scheduler Class: {scheduler_class}")
+            
+            # Check for scheduler attributes
+            scheduler_attrs = ['schedule_name', 'steps', 'sigma_min', 'sigma_max']
+            for attr in scheduler_attrs:
+                if hasattr(scheduler, attr):
+                    value = getattr(scheduler, attr)
+                    print(f"   - {attr}: {value}")
+                    
+        except Exception as e:
+            print(f"   ❌ Scheduler analysis error: {e}")
+    
+    def _analyze_sigmas(self, sigmas, level: str):
+        """Analyze SIGMAS objects"""
+        try:
+            print(f"   📊 Sigmas Information:")
+            
+            if hasattr(sigmas, 'shape'):
+                print(f"   - Shape: {sigmas.shape}")
+            if hasattr(sigmas, 'dtype'):
+                print(f"   - Data Type: {sigmas.dtype}")
+            if hasattr(sigmas, 'device'):
+                print(f"   - Device: {sigmas.device}")
+                
+            # Show value range for sigmas
+            if level == "full" and hasattr(sigmas, 'min') and hasattr(sigmas, 'max'):
+                try:
+                    min_val = float(sigmas.min())
+                    max_val = float(sigmas.max())
+                    print(f"   - Value Range: {min_val:.6f} to {max_val:.6f}")
+                except:
+                    pass
+                    
+        except Exception as e:
+            print(f"   ❌ Sigmas analysis error: {e}")
+    
+    def _analyze_enhanced_dict(self, data: dict, dict_type: str, level: str):
+        """Analyze dictionary objects with enhanced type detection"""
+        try:
+            print(f"   📚 {dict_type} Information:")
+            
+            keys = list(data.keys())
+            print(f"   - Keys ({len(keys)}): {keys[:10]}")  # Show first 10 keys
+            if len(keys) > 10:
+                print(f"     ... and {len(keys) - 10} more keys")
+            
+            # Show values for each key with type information
+            if level in ["detailed", "full"] and len(keys) <= 10:
+                print(f"   - Key-Value Analysis:")
+                for key in keys[:5]:  # Limit to 5 keys for readability
+                    try:
+                        value = data[key]
+                        value_type = type(value).__name__
+                        if hasattr(value, 'shape'):
+                            print(f"     • {key}: {value_type} {getattr(value, 'shape', '')}")
+                        elif isinstance(value, (list, tuple)) and len(value) > 0:
+                            print(f"     • {key}: {value_type}[{len(value)}] (first: {type(value[0]).__name__})")
+                        else:
+                            print(f"     • {key}: {value_type}")
+                    except Exception as e:
+                        print(f"     • {key}: <analysis error>")
+            
+            # Specific analysis based on dict type
+            if dict_type == "LATENT" and 'samples' in data:
+                samples = data['samples']
+                if hasattr(samples, 'shape'):
+                    print(f"   - Latent Shape: {samples.shape}")
+                if hasattr(samples, 'device'):
+                    print(f"   - Device: {samples.device}")
+            elif dict_type == "PARAMETERS":
+                param_count = len([k for k, v in data.items() if not k.startswith('_')])
+                print(f"   - Parameter Count: {param_count}")
+                
+        except Exception as e:
+            print(f"   ❌ Enhanced dict analysis error: {e}")
+
     def _analyze_generic_object(self, obj, level: str):
         """Analyze generic objects with common attributes"""
         try:
@@ -457,53 +631,104 @@ class OutputDev:
 
     def _show_content_preview(self, data: Any):
         """Show a safe preview of the data content"""
+        print("\n📋 CONTENT PREVIEW:")
         try:
-            print("\n📋 CONTENT PREVIEW:")
-            
             if isinstance(data, str):
                 preview = data[:100] + "..." if len(data) > 100 else data
                 print(f"Text: '{preview}'")
-            elif hasattr(data, 'shape') and len(data.shape) > 0:
+            elif isinstance(data, dict):
+                # Enhanced dict preview
+                if len(data) == 0:
+                    print("Empty dictionary")
+                else:
+                    items = []
+                    for key, value in list(data.items())[:3]:
+                        value_str = str(type(value).__name__)
+                        if hasattr(value, 'shape'):
+                            value_str += f" {value.shape}"
+                        elif isinstance(value, (list, tuple)):
+                            value_str += f"[{len(value)}]"
+                        items.append(f"{key}: {value_str}")
+                    if len(data) > 3:
+                        items.append(f"... and {len(data) - 3} more keys")
+                    print("Dict contents: " + ", ".join(items))
+            elif hasattr(data, 'shape') and len(getattr(data, 'shape', [])) > 0:
                 # For tensors/arrays
-                if hasattr(data, 'flatten'):
-                    flat = data.flatten()
-                    if len(flat) > 0:
-                        preview_size = min(5, len(flat))
-                        values = []
-                        for i in range(preview_size):
-                            try:
-                                val = float(flat[i])
-                                values.append(f"{val:.4f}")
-                            except:
-                                values.append(str(flat[i]))
-                        preview_str = ", ".join(values)
-                        if len(flat) > preview_size:
-                            preview_str += f", ... ({len(flat)-preview_size} more)"
-                        print(f"Values: [{preview_str}]")
-                        
-                        # Show statistics for numeric data
-                        try:
-                            if hasattr(data, 'min') and hasattr(data, 'max'):
-                                min_val = float(data.min())
-                                max_val = float(data.max())
-                                mean_val = float(data.mean()) if hasattr(data, 'mean') else 'N/A'
-                                print(f"Range: {min_val:.4f} to {max_val:.4f}")
-                                print(f"Mean: {mean_val:.4f}" if mean_val != 'N/A' else "Mean: N/A")
-                        except:
-                            pass
+                try:
+                    shape = data.shape
+                    print(f"Tensor shape: {shape}")
+                    
+                    # Try to show some values if possible
+                    if hasattr(data, 'flatten') and hasattr(data, '__getitem__'):
+                        flat = data.flatten()
+                        if len(flat) > 0:
+                            preview_size = min(5, len(flat))
+                            values = []
+                            for i in range(preview_size):
+                                try:
+                                    val = float(flat[i])
+                                    values.append(f"{val:.4f}")
+                                except Exception as e:
+                                    values.append(f"<{type(e).__name__}>")
+                            preview_str = ", ".join(values)
+                            if len(flat) > preview_size:
+                                preview_str += f", ... ({len(flat)-preview_size} more)"
+                            print(f"Values: [{preview_str}]")
                             
-            elif hasattr(data, '__len__') and len(data) > 0:
-                # For lists/tuples
-                preview_size = min(3, len(data))
-                items = []
-                for i in range(preview_size):
-                    item_str = str(data[i])
-                    if len(item_str) > 50:
-                        item_str = item_str[:47] + "..."
-                    items.append(item_str)
-                if len(data) > preview_size:
-                    items.append(f"... ({len(data)-preview_size} more items)")
-                print(f"Items: {items}")
+                    # Show statistics for numeric data
+                    if hasattr(data, 'min') and hasattr(data, 'max'):
+                        try:
+                            min_val = float(data.min())
+                            max_val = float(data.max())
+                            mean_val = float(data.mean()) if hasattr(data, 'mean') else None
+                            print(f"Range: {min_val:.4f} to {max_val:.4f}")
+                            if mean_val is not None:
+                                print(f"Mean: {mean_val:.4f}")
+                        except Exception as stat_e:
+                            print(f"Statistics unavailable: {type(stat_e).__name__}")
+                except Exception as tensor_e:
+                    print(f"Tensor analysis failed: {type(tensor_e).__name__}: {str(tensor_e)}")
+                    
+            elif hasattr(data, '__len__'):
+                # For lists/tuples  
+                length = len(data)
+                if length == 0:
+                    print("Empty container")
+                else:
+                    preview_size = min(3, length)
+                    items = []
+                    for i in range(preview_size):
+                        try:
+                            item = data[i]
+                            item_type = type(item).__name__
+                            if hasattr(item, 'shape'):
+                                item_str = f"{item_type} {item.shape}"
+                            else:
+                                item_str = str(item)
+                                if len(item_str) > 50:
+                                    item_str = item_str[:47] + "..."
+                            items.append(item_str)
+                        except Exception as item_e:
+                            items.append(f"<{type(item_e).__name__}>")
+                    if length > preview_size:
+                        items.append(f"... and {length - preview_size} more items")
+                    print(f"Items ({length}): " + " | ".join(items))
+            else:
+                # For other objects
+                obj_str = str(data)
+                if len(obj_str) > 100:
+                    obj_str = obj_str[:97] + "..."
+                print(f"Object: {obj_str}")
+                    
+        except Exception as e:
+            print(f"Preview error: {type(e).__name__}: {str(e)}")
+            # Try to show basic info even if preview fails
+            try:
+                print(f"Fallback info - Type: {type(data).__name__}")
+                if hasattr(data, '__len__'):
+                    print(f"Length: {len(data)}")
+            except:
+                print("No additional info available")
                 
         except Exception as e:
             print(f"Content preview error: {e}")
