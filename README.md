@@ -8,7 +8,7 @@
 
 A **production-ready starter kit** for building and publishing **ComfyUI custom nodes** with professional-grade patterns, comprehensive validation, rich documentation, and complete GitHub standards.
 
-> 🚀 **NEW**: LLM-Enhanced Prompt Tools with 37 professional nodes including AI-powered character creation, intelligent style generation, contextual prompts, and comprehensive LM Studio integration.
+> 🚀 **NEW**: SDXL Model Mixer with 38 professional nodes - Advanced model blending toolkit with 5 mixing algorithms, 4 weighting strategies, comprehensive validation, and selective layer blending capabilities.
 
 > 🔧 **ENHANCED**: OutputDev now provides intelligent ComfyUI object analysis - properly detects and analyzes MODEL, CLIP, VAE, CONDITIONING, and LATENT objects with detailed information instead of generic type reporting.
 
@@ -32,6 +32,7 @@ A **production-ready starter kit** for building and publishing **ComfyUI custom 
 - **InputDev** - Test data generator for 12 core ComfyUI types
 - **VAERoundTrip** - Complete VAE encode/decode cycle testing
 - **VAEPreview** - Quick latent visualization and analysis
+- **SDXLModelMixer** - Professional SDXL model blending with 5 algorithms and advanced validation
 
 ### Complete Development Toolkit
 - 🎯 **Universal Type Testing** - InputDev generates, OutputDev analyzes all 18 ComfyUI types
@@ -39,6 +40,7 @@ A **production-ready starter kit** for building and publishing **ComfyUI custom 
 - 🔍 **Advanced Debugging** - Multi-input comparison, memory analysis, file export
 - 📊 **Professional Validation** - Type checking, error handling, processing statistics
 - ⚡ **Performance Monitoring** - Memory usage, processing time, efficiency metrics
+- 🎛️ **Model Operations** - Advanced SDXL model mixing with validation and performance analysis
 
 ### Professional Infrastructure
 - 🏗️ **GitHub Standards** - Complete CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md

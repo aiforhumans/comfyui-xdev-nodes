@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2024-12-27
+
+### Added
+- **🎛️ SDXL Model Mixer**: Professional model blending toolkit with advanced capabilities
+  - **Multi-Model Support**: Mix up to 4 SDXL models simultaneously with intelligent validation
+  - **5 Mixing Algorithms**: Linear interpolation, Spherical LERP, Additive, Weighted Average, Geometric Mean
+  - **4 Weighting Strategies**: Uniform, Manual, Priority-based, and Adaptive weighting systems
+  - **Advanced Validation**: 3-level compatibility checking (basic, detailed, comprehensive)
+  - **Selective Layer Blending**: Choose which layers to mix (all, encoder, decoder, attention, custom)
+  - **Professional Analysis**: Comprehensive mixing reports and compatibility analysis with OutputDev integration
+
+### Technical
+- Created `xdev_nodes/nodes/model_tools.py` with SDXLModelMixer class
+- Implemented model parameter blending with PyTorch state_dict manipulation
+- Added comprehensive model compatibility validation system
+- Built caching system for performance optimization
+- Integrated with existing performance monitoring and validation frameworks
+
+### Documentation
+- Added comprehensive `SDXL_Model_Mixer_Guide.md` with best practices
+- Created test workflow `sdxl_model_mixer_test_suite.json`
+- Included troubleshooting guide and creative mixing techniques
+
 ## [0.3.1] - 2024-12-27
 
 ### Enhanced

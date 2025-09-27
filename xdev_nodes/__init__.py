@@ -57,6 +57,10 @@ debug_print("Loading LLM integrations...")
 from .nodes.llm_integration import LMStudioChat, LLMPromptAssistant, LLMContextualBuilder, LLMSDXLPhotoEnhancer, LLMSDXLExpertWriter, LLMDevFramework
 debug_print("✅ LLM integrations loaded")
 
+debug_print("Loading model tools...")
+from .nodes.model_tools import SDXLModelMixer
+debug_print("✅ Model tools loaded")
+
 # If you add frontend assets, keep this path relative to this package root.
 WEB_DIRECTORY = "./web"
 
@@ -105,6 +109,8 @@ NODE_CLASS_MAPPINGS = {
     # Phase 6 LLM-Enhanced Prompt Tools
     "XDEV_LLMPersonBuilder": LLMPersonBuilder,
     "XDEV_LLMStyleBuilder": LLMStyleBuilder,
+    # Phase 7 Model Tools
+    "XDEV_SDXLModelMixer": SDXLModelMixer,
 }
 
 debug_print("Registering node mappings...")
@@ -154,6 +160,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "XDEV_LLMDevFramework": "LLM-DEV Framework (XDev)",
     "XDEV_LLMPersonBuilder": "LLM Person Builder (XDev)",
     "XDEV_LLMStyleBuilder": "LLM Style Builder (XDev)",
+    # Phase 7 Model Tools
+    "XDEV_SDXLModelMixer": "SDXL Model Mixer (XDev)",
 }
 
 debug_print(f"✅ XDev Nodes initialization complete! Registered {len(NODE_CLASS_MAPPINGS)} nodes:")
