@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Dict, Tuple, Any, Literal
 from ..utils import get_torch, get_numpy, validate_choice
+from ..categories import NodeCategories
 
 def _avg_brightness_torch(img):
     """Optimized torch brightness calculation with minimal memory allocation"""
@@ -43,6 +44,7 @@ def _avg_brightness_list(img):
     return scores
 
 class PickByBrightness:
+    DISPLAY_NAME = "Pick By Brightness (XDev)"
     """
     Enhanced image brightness selector with comprehensive validation and rich documentation.
     
@@ -95,7 +97,7 @@ class PickByBrightness:
     RETURN_TYPES = ("IMAGE", "FLOAT", "STRING")
     RETURN_NAMES = ("selected_image", "brightness_score", "processing_info")
     FUNCTION = "pick"
-    CATEGORY = "XDev/Image"
+    CATEGORY = NodeCategories.IMAGE_ANALYSIS
     DESCRIPTION = "Select brightest or darkest image from batch with comprehensive validation and multiple algorithms"
 
     def pick(self, images, mode: Literal["brightest","darkest"]="brightest", 
@@ -258,6 +260,7 @@ from ..mixins import ImageProcessingNode
 
 
 class ImageResize(ImageProcessingNode):
+    DISPLAY_NAME = "Image Resize (XDev)"
     """
     Professional image resizing with multiple algorithms and performance optimization.
     
@@ -414,6 +417,7 @@ class ImageResize(ImageProcessingNode):
 
 
 class ImageCrop(ImageProcessingNode):
+    DISPLAY_NAME = "Image Crop (XDev)"
     """
     Professional image cropping with multiple modes and smart centering.
     
@@ -579,6 +583,7 @@ class ImageCrop(ImageProcessingNode):
 
 
 class ImageRotate(ImageProcessingNode):
+    DISPLAY_NAME = "Image Rotate (XDev)"
     """
     Professional image rotation with multiple algorithms and automatic cropping.
     
@@ -758,6 +763,7 @@ class ImageRotate(ImageProcessingNode):
 
 
 class ImageBlend(ImageProcessingNode):
+    DISPLAY_NAME = "Image Blend (XDev)"
     """
     Professional image blending with multiple blend modes and opacity control.
     
@@ -995,6 +1001,7 @@ class ImageBlend(ImageProcessingNode):
 
 
 class ImageSplit(ImageProcessingNode):
+    DISPLAY_NAME = "Image Split (XDev)"
     """
     Professional image splitting into regular grid tiles with efficient tensor operations.
     
@@ -1221,6 +1228,7 @@ class ImageSplit(ImageProcessingNode):
 
 
 class ImageTile(ImageProcessingNode):
+    DISPLAY_NAME = "Image Tile (XDev)"
     """
     Professional image tiling for creating repeated patterns and texture mapping.
     

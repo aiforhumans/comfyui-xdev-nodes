@@ -1,3 +1,4 @@
+from ..categories import NodeCategories
 """
 Prompt manipulation and processing nodes for XDev toolkit.
 Provides professional prompt engineering tools for ComfyUI workflows.
@@ -11,6 +12,7 @@ from ..performance import performance_monitor, cached_operation
 from ..mixins import ValidationMixin
 
 class PromptCombiner(ValidationMixin):
+    DISPLAY_NAME = "Prompt Combiner (XDev)"
     """
     Combine multiple prompts with advanced weighting and formatting options.
     Supports prompt merging, weighting, and intelligent concatenation.
@@ -58,7 +60,7 @@ class PromptCombiner(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "INT")
     RETURN_NAMES = ("combined_prompt", "combination_info", "total_prompts")
     FUNCTION = "combine_prompts"
-    CATEGORY = "XDev/Prompt/Combination"
+    CATEGORY = NodeCategories.PROMPT_COMBINATION
     DESCRIPTION = "Combine multiple prompts with advanced weighting and formatting"
     
     @performance_monitor("prompt_combination")
@@ -143,8 +145,9 @@ class PromptWeighter(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "INT")
     RETURN_NAMES = ("weighted_prompt", "operation_info", "weights_modified")
     FUNCTION = "process_weights"
-    CATEGORY = "XDev/Prompt/Weighting"
+    CATEGORY = NodeCategories.PROMPT_WEIGHTING
     DESCRIPTION = "Add, modify, or remove attention weights from prompts"
+    DISPLAY_NAME = "Prompt Weighter (XDev)"
     
     @performance_monitor("prompt_weighting")
     def process_weights(self, prompt: str, operation: str, weight_value: float, 
@@ -286,7 +289,8 @@ class PromptCleaner(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "INT")
     RETURN_NAMES = ("cleaned_prompt", "cleanup_info", "changes_made")
     FUNCTION = "clean_prompt"
-    CATEGORY = "XDev/Prompt/Cleaning"
+    CATEGORY = NodeCategories.PROMPT_CLEANING
+    DISPLAY_NAME = "Prompt Cleaner (XDev)"
     DESCRIPTION = "Clean and format prompts with comprehensive text processing"
     
     @performance_monitor("prompt_cleaning")
@@ -432,7 +436,8 @@ class PromptAnalyzer(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "INT", "FLOAT")
     RETURN_NAMES = ("analysis_report", "statistics", "word_count", "complexity_score")
     FUNCTION = "analyze_prompt"
-    CATEGORY = "XDev/Prompt/Analysis"
+    CATEGORY = NodeCategories.PROMPT_ANALYSIS
+    DISPLAY_NAME = "Prompt Analyzer (XDev)"
     DESCRIPTION = "Analyze prompt structure, complexity, and composition"
     
     @performance_monitor("prompt_analysis")
@@ -583,7 +588,8 @@ class PromptRandomizer(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "INT")
     RETURN_NAMES = ("randomized_prompt", "randomization_info", "seed_used")
     FUNCTION = "randomize_prompt"
-    CATEGORY = "XDev/Prompt/Randomization"
+    CATEGORY = NodeCategories.PROMPT_RANDOMIZATION
+    DISPLAY_NAME = "Prompt Randomizer (XDev)"
     DESCRIPTION = "Randomize and vary prompts with multiple randomization strategies"
     
     @performance_monitor("prompt_randomization")
@@ -845,7 +851,8 @@ class PersonBuilder(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING")
     RETURN_NAMES = ("person_prompt", "template_info", "trait_summary")
     FUNCTION = "build_person"
-    CATEGORY = "XDev/Prompt/Templates"
+    CATEGORY = NodeCategories.PROMPT_TEMPLATES
+    DISPLAY_NAME = "Person Builder (XDev)"
     DESCRIPTION = "Build structured person/character prompts with comprehensive templates"
     
     @performance_monitor("person_building")
@@ -1053,7 +1060,8 @@ class StyleBuilder(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING")
     RETURN_NAMES = ("style_prompt", "style_info", "style_breakdown")
     FUNCTION = "build_style"
-    CATEGORY = "XDev/Prompt/Templates"
+    CATEGORY = NodeCategories.PROMPT_TEMPLATES
+    DISPLAY_NAME = "Style Builder (XDev)"
     DESCRIPTION = "Build structured artistic style prompts with comprehensive style control"
     
     @performance_monitor("style_building")
@@ -1203,7 +1211,8 @@ class PromptMatrix(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING")
     RETURN_NAMES = ("matrix_prompts", "combination_info", "combination_list")
     FUNCTION = "generate_matrix"
-    CATEGORY = "XDev/Prompt/Advanced"
+    CATEGORY = NodeCategories.PROMPT_ADVANCED
+    DISPLAY_NAME = "Prompt Matrix (XDev)"
     DESCRIPTION = "Generate prompt combinations using | delimiter syntax for systematic prompt exploration"
     
     @performance_monitor("prompt_matrix")
@@ -1327,7 +1336,8 @@ class PromptInterpolator(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING")
     RETURN_NAMES = ("interpolated_prompts", "interpolation_info", "step_ratios")
     FUNCTION = "interpolate_prompts"
-    CATEGORY = "XDev/Prompt/Advanced"
+    CATEGORY = NodeCategories.PROMPT_ADVANCED
+    DISPLAY_NAME = "Prompt Interpolator (XDev)"
     DESCRIPTION = "Create smooth transitions between two prompts using various interpolation methods"
     
     @performance_monitor("prompt_interpolation")
@@ -1470,7 +1480,8 @@ class PromptScheduler(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING")
     RETURN_NAMES = ("scheduled_prompt", "schedule_info", "step_breakdown")
     FUNCTION = "schedule_prompts"
-    CATEGORY = "XDev/Prompt/Advanced"
+    CATEGORY = NodeCategories.PROMPT_ADVANCED
+    DISPLAY_NAME = "Prompt Scheduler (XDev)"
     DESCRIPTION = "Create dynamic prompt schedules with step-based transitions using ComfyUI syntax"
     
     @performance_monitor("prompt_scheduling")
@@ -1614,7 +1625,8 @@ class PromptAttention(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING")
     RETURN_NAMES = ("weighted_prompt", "attention_info", "weight_analysis")
     FUNCTION = "modify_attention"
-    CATEGORY = "XDev/Prompt/Advanced"
+    CATEGORY = NodeCategories.PROMPT_ADVANCED
+    DISPLAY_NAME = "Prompt Attention (XDev)"
     DESCRIPTION = "Manipulate prompt attention weights using ComfyUI () and [] syntax with precise control"
     
     @performance_monitor("attention_modification")
@@ -1800,7 +1812,8 @@ class PromptChainOfThought(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING")
     RETURN_NAMES = ("cot_prompt", "reasoning_info", "structure_breakdown")
     FUNCTION = "generate_chain_of_thought"
-    CATEGORY = "XDev/Prompt/Advanced"  
+    CATEGORY = NodeCategories.PROMPT_ADVANCED  
+    DISPLAY_NAME = "Prompt Chain-of-Thought (XDev)"
     DESCRIPTION = "Generate Chain-of-Thought reasoning structures to enhance prompt clarity and AI understanding"
     
     @performance_monitor("chain_of_thought")
@@ -2022,7 +2035,8 @@ class PromptFewShot(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING")
     RETURN_NAMES = ("few_shot_prompt", "selection_info", "example_analysis")
     FUNCTION = "generate_few_shot"
-    CATEGORY = "XDev/Prompt/Advanced"
+    CATEGORY = NodeCategories.PROMPT_ADVANCED
+    DISPLAY_NAME = "Prompt Few-Shot (XDev)"
     DESCRIPTION = "Generate few-shot prompts with intelligent example selection and similarity matching"
     
     @performance_monitor("few_shot_generation")
@@ -2294,7 +2308,8 @@ class LLMPersonBuilder(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING")
     RETURN_NAMES = ("character_prompt", "personality_analysis", "trait_summary", "enhancement_info")
     FUNCTION = "build_llm_character"
-    CATEGORY = "XDev/LLM/Character"
+    CATEGORY = NodeCategories.LLM_CHARACTER
+    DISPLAY_NAME = "LLM Person Builder (XDev)"
     DESCRIPTION = "Build intelligent, consistent characters using AI-powered personality analysis and trait generation"
     
     @performance_monitor("llm_person_builder")
@@ -2585,7 +2600,8 @@ class LLMStyleBuilder(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING") 
     RETURN_NAMES = ("style_prompt", "style_analysis", "coherence_report", "enhancement_info")
     FUNCTION = "build_llm_style"
-    CATEGORY = "XDev/LLM/Style"
+    CATEGORY = NodeCategories.LLM_STYLE
+    DISPLAY_NAME = "LLM Style Builder (XDev)"
     DESCRIPTION = "Build intelligent, cohesive artistic styles using AI-powered analysis and style coordination"
     
     @performance_monitor("llm_style_builder")

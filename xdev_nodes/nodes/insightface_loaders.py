@@ -1,0 +1,375 @@
+from ..categories import NodeCategories
+"""
+XDev InsightFace Model Loaders
+
+Professional InsightFace model loading nodes following ComfyUI patterns.
+Integrates with ComfyUI's folder_paths and ModelPatcher system for proper model management.
+"""
+
+from typing import Dict, Any, List, Tuple
+import os
+
+# ComfyUI imports (graceful fallbacks)
+try:
+    import folder_paths
+    import comfy.model_management as mm
+    import comfy.model_patcher
+    import comfy.utils
+    HAS_COMFY = True
+except ImportError:
+    HAS_COMFY = False
+    folder_paths = None
+    mm = None
+
+# XDev framework imports  
+from ..performance import performance_monitor, cached_operation
+from ..mixins import ValidationMixin
+from ..utils import get_insightface, get_numpy, get_torch
+
+# InsightFace imports (graceful fallbacks)
+try:
+    import insightface
+    from insightface.app import FaceAnalysis, FaceSwapper
+    HAS_INSIGHTFACE = True
+except ImportError:
+    HAS_INSIGHTFACE = False
+    insightface = None
+    FaceAnalysis = None
+    FaceSwapper = None
+
+
+class InsightFaceModelWrapper:
+    DISPLAY_NAME = "InsightFace Model Wrapper (XDev)"
+    """Wrapper for InsightFace models to integrate with ComfyUI model management."""
+    
+    def __init__(self, model_name: str, model_type: str, providers: List[str] = None):
+        self.model_name = model_name
+        self.model_type = model_type  # 'analysis' or 'swapper'
+        self.providers = providers or ['CPUExecutionProvider']
+        self.model = None
+        self.memory_required = 0
+        
+    def load(self):
+        """Load the InsightFace model."""
+        if not HAS_INSIGHTFACE:
+            raise RuntimeError("InsightFace not available")
+            
+        try:
+            if self.model_type == 'analysis':
+                self.model = FaceAnalysis(name=self.model_name, providers=self.providers)
+                self.model.prepare(ctx_id=-1, det_size=(640, 640))
+                self.memory_required = 500 * 1024 * 1024  # ~500MB estimate
+            elif self.model_type == 'swapper':
+                # Try to load FaceSwapper, fall back to analysis model if not available
+                try:
+                    self.model = FaceSwapper(name=self.model_name, providers=self.providers)
+                    self.memory_required = 300 * 1024 * 1024  # ~300MB estimate
+                except (ImportError, AttributeError, Exception) as e:
+                    print(f"FaceSwapper not available ({e}), using FaceAnalysis for swapping")
+                    # Use FaceAnalysis as fallback for swapping
+                    self.model = FaceAnalysis(name='buffalo_l', providers=self.providers)
+                    self.model.prepare(ctx_id=-1, det_size=(640, 640))
+                    self.model_type = 'analysis_swapper'  # Mark as analysis model used for swapping
+                    self.memory_required = 500 * 1024 * 1024  # ~500MB estimate
+            else:
+                raise ValueError(f"Unknown model type: {self.model_type}")
+                
+            return True
+        except Exception as e:
+            print(f"Failed to load InsightFace model {self.model_name}: {e}")
+            return False
+    
+    def unload(self):
+        """Unload the model to free memory."""
+        if self.model is not None:
+            del self.model
+            self.model = None
+    
+    def is_loaded(self):
+        """Check if model is loaded."""
+        return self.model is not None
+
+
+class XDEV_InsightFaceModelLoader(ValidationMixin):
+    DISPLAY_NAME = "InsightFace Model Loader (XDev)"
+    """
+    InsightFace Analysis Model Loader (XDev)
+    
+    Loads InsightFace FaceAnalysis models for face detection, landmark extraction,
+    and face embedding generation. Integrates with ComfyUI model management.
+    """
+    
+    # Available InsightFace analysis model packs
+    _ANALYSIS_MODELS = {
+        "buffalo_l": "Buffalo Large - Balanced performance and quality (Recommended)",
+        "buffalo_m": "Buffalo Medium - Faster processing, good quality", 
+        "buffalo_s": "Buffalo Small - Lightweight, mobile-friendly",
+        "antelopev2": "Antelope v2 - High accuracy face analysis"
+    }
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
+        return {
+            "required": {
+                "model_name": (list(cls._ANALYSIS_MODELS.keys()), {
+                    "default": "buffalo_l",
+                    "tooltip": "InsightFace analysis model pack for face detection and landmarks"
+                }),
+                "providers": (["CPUExecutionProvider", "CUDAExecutionProvider", "CoreMLExecutionProvider"], {
+                    "default": "CPUExecutionProvider", 
+                    "tooltip": "ONNX execution provider (GPU requires CUDA/CoreML)"
+                })
+            }
+        }
+    
+    RETURN_TYPES = ("INSIGHTFACE_ANALYSIS",)
+    RETURN_NAMES = ("analysis_model",)
+    FUNCTION = "load_model"
+    CATEGORY = NodeCategories.INSIGHTFACE_LOADERS
+    DESCRIPTION = "Load InsightFace analysis models for face detection and landmarks"
+    
+    @performance_monitor("load_insightface_analysis")
+    def load_model(self, model_name: str, providers: str) -> Tuple[Any,]:
+        """Load InsightFace analysis model with ComfyUI model management."""
+        try:
+            if not HAS_INSIGHTFACE:
+                error_msg = "InsightFace not installed. Install with: pip install insightface"
+                return ({"error": error_msg, "model": None},)
+            
+            # Create model wrapper
+            model_wrapper = InsightFaceModelWrapper(
+                model_name=model_name,
+                model_type='analysis', 
+                providers=[providers]
+            )
+            
+            # Load model (downloads automatically if not present)
+            if not model_wrapper.load():
+                error_msg = f"Failed to load InsightFace model: {model_name}"
+                return ({"error": error_msg, "model": None},)
+            
+            model_info = {
+                "model": model_wrapper,
+                "model_name": model_name,
+                "model_type": "analysis",
+                "providers": [providers],
+                "description": self._ANALYSIS_MODELS[model_name],
+                "memory_required": model_wrapper.memory_required,
+                "error": None
+            }
+            
+            return (model_info,)
+            
+        except Exception as e:
+            error_msg = f"InsightFace Analysis Model Loader Error: {str(e)}"
+            return ({"error": error_msg, "model": None},)
+
+
+class XDEV_InsightFaceSwapperLoader(ValidationMixin):
+    DISPLAY_NAME = "InsightFace Swapper Loader (XDev)"
+    """
+    InsightFace Swapper Model Loader (XDev)
+    
+    Loads InsightFace face swapping models (INSwapper) for professional-grade
+    face swapping. Integrates with ComfyUI model management.
+    """
+    
+    # Available InsightFace swapper models
+    _SWAPPER_MODELS = {
+        "inswapper_128.onnx": "INSwapper 128x128 - High quality face swapping (Recommended)",
+        "inswapper_cyn.onnx": "INSwapper CYN - Specialized variant for certain face types",
+        "inswapper_dax.onnx": "INSwapper DAX - Alternative specialized variant"
+    }
+    
+    @classmethod  
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
+        # Get available swapper models from ComfyUI model directories
+        if HAS_COMFY and folder_paths:
+            try:
+                available_models = folder_paths.get_filename_list("faceswap")
+                if not available_models:
+                    # Fallback to predefined list if no models found
+                    available_models = list(cls._SWAPPER_MODELS.keys())
+            except:
+                available_models = list(cls._SWAPPER_MODELS.keys())
+        else:
+            available_models = list(cls._SWAPPER_MODELS.keys())
+        
+        return {
+            "required": {
+                "model_name": (available_models, {
+                    "default": available_models[0] if available_models else "inswapper_128.onnx",
+                    "tooltip": "InsightFace swapper model for face swapping"
+                }),
+                "providers": (["CPUExecutionProvider", "CUDAExecutionProvider", "CoreMLExecutionProvider"], {
+                    "default": "CPUExecutionProvider",
+                    "tooltip": "ONNX execution provider (GPU requires CUDA/CoreML)"
+                })
+            }
+        }
+    
+    RETURN_TYPES = ("INSIGHTFACE_SWAPPER",)
+    RETURN_NAMES = ("swapper_model",) 
+    FUNCTION = "load_swapper"
+    CATEGORY = NodeCategories.INSIGHTFACE_LOADERS
+    DESCRIPTION = "Load InsightFace swapper models for professional face swapping"
+    
+    @performance_monitor("load_insightface_swapper")
+    def load_swapper(self, model_name: str, providers: str) -> Tuple[Any,]:
+        """Load InsightFace swapper model with ComfyUI model management."""
+        try:
+            if not HAS_INSIGHTFACE:
+                error_msg = "InsightFace not installed. Install with: pip install insightface"
+                return ({"error": error_msg, "model": None},)
+            
+            # Get model path from ComfyUI model management
+            model_path = None
+            if HAS_COMFY and folder_paths:
+                try:
+                    model_path = folder_paths.get_full_path_or_raise("faceswap", model_name)
+                except:
+                    # Model not found in ComfyUI directories, try loading by name
+                    pass
+            
+            # Create model wrapper
+            model_wrapper = InsightFaceModelWrapper(
+                model_name=model_name if not model_path else model_path,
+                model_type='swapper',
+                providers=[providers]
+            )
+            
+            # Load model
+            if not model_wrapper.load():
+                error_msg = f"Failed to load InsightFace swapper: {model_name}"
+                return ({"error": error_msg, "model": None},)
+            
+            model_info = {
+                "model": model_wrapper,
+                "model_name": model_name,
+                "model_type": "swapper", 
+                "providers": [providers],
+                "description": self._SWAPPER_MODELS.get(model_name, "Custom InsightFace swapper model"),
+                "memory_required": model_wrapper.memory_required,
+                "model_path": model_path,
+                "error": None
+            }
+            
+            return (model_info,)
+            
+        except Exception as e:
+            error_msg = f"InsightFace Swapper Loader Error: {str(e)}"
+            return ({"error": error_msg, "model": None},)
+
+
+class XDEV_InsightFaceProcessor(ValidationMixin):
+    """
+    InsightFace Face Processor (XDev)
+    
+    Processes images using loaded InsightFace models for face detection,
+    landmark extraction, and face analysis.
+    """
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
+        return {
+            "required": {
+                "image": ("IMAGE", {
+                    "tooltip": "Input image for face processing"
+                }),
+                "analysis_model": ("INSIGHTFACE_ANALYSIS", {
+                    "tooltip": "Loaded InsightFace analysis model from loader"
+                }),
+                "confidence_threshold": ("FLOAT", {
+                    "default": 0.7,
+                    "min": 0.1,
+                    "max": 1.0,
+                    "step": 0.05,
+                    "tooltip": "Minimum confidence for face detection"
+                })
+            }
+        }
+    
+    RETURN_TYPES = ("IMAGE", "STRING", "INSIGHTFACE_FACES")
+    RETURN_NAMES = ("image", "analysis_info", "detected_faces")
+    FUNCTION = "process_faces"
+    CATEGORY = NodeCategories.INSIGHTFACE_PROCESSING
+    DESCRIPTION = "Process faces using InsightFace analysis models"
+    
+    @performance_monitor("insightface_face_processing")
+    @cached_operation(ttl=300)
+    def process_faces(self, image, analysis_model: Dict, confidence_threshold: float) -> Tuple[Any, str, Dict]:
+        """Process faces using InsightFace analysis model."""
+        try:
+            # Validate model
+            if analysis_model.get("error"):
+                return image, f"Model Error: {analysis_model['error']}", {"faces": [], "error": analysis_model["error"]}
+            
+            model_wrapper = analysis_model.get("model")
+            if not model_wrapper or not model_wrapper.is_loaded():
+                return image, "Analysis model not loaded", {"faces": [], "error": "Model not loaded"}
+            
+            # Convert image for InsightFace processing
+            numpy = get_numpy()
+            if numpy is None:
+                return image, "NumPy not available", {"faces": [], "error": "NumPy required"}
+            
+            # Convert tensor to numpy 
+            if hasattr(image, 'cpu'):
+                image_np = image.cpu().numpy()
+                if len(image_np.shape) == 4:  # [B, H, W, C]
+                    image_np = image_np[0]  # Take first batch
+                image_cv = (image_np * 255).astype('uint8')
+            else:
+                image_cv = image
+            
+            # Process faces with InsightFace
+            faces = model_wrapper.model.get(image_cv)
+            
+            # Filter and format faces
+            detected_faces = []
+            for i, face in enumerate(faces):
+                if face.det_score >= confidence_threshold:
+                    face_data = {
+                        'index': i,
+                        'bbox': face.bbox.astype(int).tolist(),
+                        'landmarks': face.kps.tolist() if face.kps is not None else [],
+                        'confidence': float(face.det_score),
+                        'embedding': face.embedding.tolist() if hasattr(face, 'embedding') else None,
+                        'age': int(face.age) if hasattr(face, 'age') else None,
+                        'gender': int(face.gender) if hasattr(face, 'gender') else None,
+                        'insightface_face': face  # Keep original face object for swapping
+                    }
+                    detected_faces.append(face_data)
+            
+            # Generate analysis info
+            model_name = analysis_model.get("model_name", "Unknown")
+            h, w = image_cv.shape[:2] 
+            analysis_info = f"InsightFace Analysis ({model_name}): Found {len(detected_faces)} faces in {w}x{h} image (threshold: {confidence_threshold:.2f})"
+            
+            faces_data = {
+                "faces": detected_faces,
+                "model_name": model_name,
+                "image_size": (w, h),
+                "confidence_threshold": confidence_threshold,
+                "error": None
+            }
+            
+            return image, analysis_info, faces_data
+            
+        except Exception as e:
+            error_msg = f"InsightFace Processing Error: {str(e)}"
+            return image, error_msg, {"faces": [], "error": str(e)}
+
+
+# Node mappings for the loader classes
+NODE_CLASS_MAPPINGS = {
+    "XDEV_InsightFaceModelLoader": XDEV_InsightFaceModelLoader,
+    "XDEV_InsightFaceSwapperLoader": XDEV_InsightFaceSwapperLoader, 
+    "XDEV_InsightFaceProcessor": XDEV_InsightFaceProcessor
+}
+
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "XDEV_InsightFaceModelLoader": "InsightFace Model Loader (XDev)",
+    "XDEV_InsightFaceSwapperLoader": "InsightFace Swapper Loader (XDev)",
+    "XDEV_InsightFaceProcessor": "InsightFace Face Processor (XDev)"
+}

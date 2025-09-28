@@ -1,7 +1,8 @@
 from __future__ import annotations
 from typing import Dict, Tuple, Any, Union
 import json
-from ..utils import efficient_data_analysis, get_torch
+from ..utils import efficient_data_analysis, get_torch, get_numpy
+from ..categories import NodeCategories
 
 class VAERoundTrip:
     """
@@ -50,8 +51,9 @@ class VAERoundTrip:
     RETURN_TYPES = ("IMAGE", "LATENT", "STRING")
     RETURN_NAMES = ("decoded_image", "reencoded_latent", "process_info")
     FUNCTION = "vae_round_trip"
-    CATEGORY = "XDev/VAE Tools"
+    CATEGORY = NodeCategories.VAE_TOOLS
     DESCRIPTION = "Complete VAE round-trip: LATENT → DECODE → IMAGE → ENCODE → LATENT with visual feedback"
+    DISPLAY_NAME = "VAE Round-Trip (XDev)"
 
     def vae_round_trip(self, latent, vae, show_stats: bool = True, 
                       quality_check: bool = False, decode_only: bool = False):
@@ -272,22 +274,56 @@ class VAERoundTrip:
             return self._create_mock_image_object([1, 512, 512, 3])
 
     def _create_mock_image_object(self, shape: list):
-        """Create a mock image object when torch is unavailable"""
-        class MockImage:
+        """Create a structured mock image object when torch is unavailable"""
+        class StructuredMockImage:
+            DISPLAY_NAME = "Structured Mock Image (XDev)"
             def __init__(self, shape):
                 self.shape = tuple(shape)
                 self.dtype = "float32"
+                self.ndim = len(shape)
+                self.size = 1
+                for dim in shape:
+                    self.size *= dim
+                    
+                # Create informative properties
+                self._is_batch = len(shape) == 4 and shape[0] >= 1
+                self._height = shape[-3] if len(shape) >= 3 else 1
+                self._width = shape[-2] if len(shape) >= 2 else 1
+                self._channels = shape[-1] if len(shape) >= 1 else 1
                 
             def min(self):
                 return 0.0
                 
             def max(self):
-                return 0.0
+                return 1.0  # Proper ComfyUI IMAGE range
+                
+            def mean(self):
+                return 0.5
+                
+            def std(self):
+                return 0.3
+                
+            def get_image_info(self):
+                """Provide structured information about the mock image"""
+                return {
+                    "type": "structured_mock_image",
+                    "shape": self.shape,
+                    "dimensions": f"{self._width}x{self._height}",
+                    "channels": self._channels,
+                    "batch_size": self.shape[0] if self._is_batch else 1,
+                    "pixel_count": self._width * self._height * self._channels,
+                    "data_type": self.dtype,
+                    "value_range": "0.0-1.0 (ComfyUI IMAGE standard)",
+                    "note": "Install torch for tensor-based image processing"
+                }
                 
             def __str__(self):
-                return f"MockImage(shape={self.shape})"
+                return f"StructuredMockImage(shape={self.shape}, {self._width}x{self._height}, {self._channels}ch)"
                 
-        return MockImage(shape)
+            def __repr__(self):
+                return f"StructuredMockImage(shape={self.shape})"
+                
+        return StructuredMockImage(shape)
 
     def _generate_process_info(self, steps: list, decode_success: bool, 
                              encode_success: bool) -> str:
@@ -375,8 +411,9 @@ class VAEPreview:
     RETURN_TYPES = ("IMAGE", "STRING")
     RETURN_NAMES = ("preview_image", "latent_info")
     FUNCTION = "preview_latent"
-    CATEGORY = "XDev/VAE Tools"
+    CATEGORY = NodeCategories.VAE_TOOLS
     DESCRIPTION = "Quick latent preview: LATENT → DECODE → IMAGE with optional analysis"
+    DISPLAY_NAME = "VAE Preview (XDev)"
 
     def preview_latent(self, latent, vae, add_info_text: bool = True, 
                       preview_mode: str = "full"):
@@ -467,30 +504,108 @@ class VAEPreview:
             return f"❌ Image analysis error: {str(e)}"
 
     def _create_error_image(self, latent: Dict):
-        """Create an error placeholder image"""
+        """Create a structured error visualization image based on latent data"""
         try:
             torch = get_torch()
             if torch is None:
                 raise ImportError("PyTorch not available")
             
-            # Create red error image
-            error_image = torch.ones(1, 256, 256, 3, dtype=torch.float32)
-            error_image[:, :, :, 0] = 1.0  # Red channel
-            error_image[:, :, :, 1] = 0.0  # Green channel  
-            error_image[:, :, :, 2] = 0.0  # Blue channel
+            # Extract dimensions from latent if available
+            width = height = 256
+            if isinstance(latent, dict) and "samples" in latent:
+                samples = latent["samples"]
+                if hasattr(samples, 'shape') and len(samples.shape) >= 3:
+                    # Convert latent dimensions to image dimensions (8x upscale)
+                    height = samples.shape[-2] * 8
+                    width = samples.shape[-1] * 8
+            
+            # Create structured error visualization
+            error_image = torch.zeros(1, height, width, 3, dtype=torch.float32)
+            
+            # Create diagnostic pattern based on latent properties
+            checker_size = max(16, min(width, height) // 16)
+            for h in range(height):
+                for w in range(width):
+                    # Checkerboard pattern with latent-based variation
+                    if (h // checker_size + w // checker_size) % 2 == 0:
+                        error_image[0, h, w, 0] = 0.8  # Red base
+                        error_image[0, h, w, 1] = 0.2  # Green accent
+                        error_image[0, h, w, 2] = 0.2  # Blue accent
+                    else:
+                        error_image[0, h, w, 0] = 0.5  # Darker red
+                        error_image[0, h, w, 1] = 0.1  # Minimal green
+                        error_image[0, h, w, 2] = 0.1  # Minimal blue
+            
+            # Add informational border indicating this is an error visualization
+            border_size = max(4, min(width, height) // 64)
+            error_image[:, :border_size, :, 0] = 1.0  # Top border - bright red
+            error_image[:, -border_size:, :, 0] = 1.0  # Bottom border 
+            error_image[:, :, :border_size, 0] = 1.0  # Left border
+            error_image[:, :, -border_size:, 0] = 1.0  # Right border
             
             return error_image
             
         except ImportError:
-            # Fallback mock
-            class ErrorImage:
-                def __init__(self):
-                    self.shape = (1, 256, 256, 3)
+            # Enhanced fallback with numpy
+            try:
+                np = get_numpy()
+                if np is not None:
+                    # Create numpy-based structured error image
+                    width = height = 256
+                    if isinstance(latent, dict) and "samples" in latent:
+                        try:
+                            samples = latent["samples"]
+                            if hasattr(samples, 'shape') and len(samples.shape) >= 3:
+                                height = samples.shape[-2] * 8  
+                                width = samples.shape[-1] * 8
+                        except:
+                            pass
+                    
+                    error_image = np.zeros((1, height, width, 3), dtype=np.float32)
+                    
+                    # Create diagnostic pattern
+                    checker_size = max(16, min(width, height) // 16)
+                    for h in range(height):
+                        for w in range(width):
+                            if (h // checker_size + w // checker_size) % 2 == 0:
+                                error_image[0, h, w] = [0.8, 0.2, 0.2]
+                            else:
+                                error_image[0, h, w] = [0.5, 0.1, 0.1]
+                    
+                    return error_image
+            except:
+                pass
+            
+            # Ultimate fallback with structured data
+            class StructuredErrorImage:
+                def __init__(self, latent_data):
+                    # Extract size info from latent 
+                    self.width = self.height = 256
+                    if isinstance(latent_data, dict) and "samples" in latent_data:
+                        try:
+                            samples = latent_data["samples"]
+                            if hasattr(samples, 'shape') and len(samples.shape) >= 3:
+                                self.height = samples.shape[-2] * 8
+                                self.width = samples.shape[-1] * 8
+                        except:
+                            pass
+                    
+                    self.shape = (1, self.height, self.width, 3)
+                    self.dtype = "float32"
                     
                 def __str__(self):
-                    return "ErrorImage(red placeholder)"
+                    return f"StructuredErrorImage(checkerboard {self.width}x{self.height}, diagnostic pattern)"
+                
+                def get_info(self):
+                    return {
+                        "type": "error_visualization",
+                        "pattern": "diagnostic_checkerboard", 
+                        "dimensions": f"{self.width}x{self.height}",
+                        "shape": self.shape,
+                        "note": "Install torch/numpy for visual error patterns"
+                    }
             
-            return ErrorImage()
+            return StructuredErrorImage(latent)
 
     @classmethod
     def IS_CHANGED(cls, latent, vae, add_info_text=True, preview_mode="full"):

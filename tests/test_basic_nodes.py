@@ -57,14 +57,25 @@ def test_dev_nodes():
 def test_dev_nodes_advanced():
     from xdev_nodes.nodes.dev_nodes import InputDev, OutputDev
     
-    # Test InputDev with mock tensor
+    # Test InputDev with authentic IMAGE tensor
     input_node = InputDev()
-    result_tensor, metadata_tensor = input_node.generate_data("MOCK_TENSOR", "realistic", size_parameter=64)
+    result_image, metadata_image = input_node.generate_data("IMAGE", "realistic", size_parameter=64)
     
-    # Mock tensor should have tensor-like attributes
-    assert hasattr(result_tensor, 'shape')
-    assert hasattr(result_tensor, 'dtype')
-    assert hasattr(result_tensor, 'device')
+    # Check if torch is available - if so, should be tensor, otherwise dict
+    if hasattr(result_image, 'shape'):
+        # Real tensor case (torch available)
+        assert len(result_image.shape) == 4
+        assert result_image.shape[0] >= 1  # Batch
+        assert result_image.shape[3] == 3  # RGB channels
+    elif isinstance(result_image, dict):
+        # Fallback dict case (torch unavailable) 
+        assert 'tensor_type' in result_image
+        assert result_image['tensor_type'] == 'IMAGE'
+        assert 'shape' in result_image
+        assert len(result_image['shape']) == 4
+        assert result_image['shape'][3] == 3  # RGB channels
+    else:
+        assert False, f"Expected tensor or dict, got {type(result_image)}"
     
     # Test reproducible generation with seeds
     result1, _ = input_node.generate_data("INT", "realistic", seed=123)

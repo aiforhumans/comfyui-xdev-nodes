@@ -1,0 +1,538 @@
+{
+  "last_node_id": 15,
+  "last_link_id": 20,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "XDEV_InputDev",
+      "pos": [50, 50],
+      "size": {
+        "0": 315,
+        "1": 82
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "*",
+          "type": "*",
+          "links": [1],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_InputDev"
+      },
+      "widgets_values": [
+        "IMAGE"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 2,
+      "type": "XDEV_InputDev", 
+      "pos": [50, 180],
+      "size": {
+        "0": 315,
+        "1": 82
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "*",
+          "type": "*",
+          "links": [2],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_InputDev"
+      },
+      "widgets_values": [
+        "IMAGE"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 3,
+      "type": "XDEV_AdvancedFaceSwap",
+      "pos": [450, 50],
+      "size": {
+        "0": 400,
+        "1": 600
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source_image",
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "name": "target_image", 
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "swapped_image",
+          "type": "IMAGE",
+          "links": [3, 10],
+          "slot_index": 0
+        },
+        {
+          "name": "process_info",
+          "type": "STRING", 
+          "links": [4],
+          "slot_index": 1
+        },
+        {
+          "name": "face_regions",
+          "type": "IMAGE",
+          "links": [5],
+          "slot_index": 2
+        },
+        {
+          "name": "alignment_debug",
+          "type": "IMAGE",
+          "links": [6],
+          "slot_index": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_AdvancedFaceSwap"
+      },
+      "widgets_values": [
+        "hybrid_multi",
+        "landmark_based",
+        "multi_band", 
+        "professional",
+        0,
+        0,
+        0.85,
+        0.7,
+        0.6,
+        true,
+        "face_restoration",
+        0.8,
+        0.3,
+        0.7,
+        true
+      ],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 4,
+      "type": "XDEV_OutputDev",
+      "pos": [950, 50],
+      "size": {
+        "0": 315,
+        "1": 62
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "data",
+          "type": "*",
+          "link": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_OutputDev"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 5,
+      "type": "XDEV_OutputDev",
+      "pos": [950, 150],
+      "size": {
+        "0": 315,
+        "1": 62
+      },
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "data",
+          "type": "*",
+          "link": 4
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_OutputDev"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 6,
+      "type": "XDEV_OutputDev",
+      "pos": [950, 250],
+      "size": {
+        "0": 315,
+        "1": 62
+      },
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "data",
+          "type": "*",
+          "link": 5
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_OutputDev"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 7,
+      "type": "XDEV_OutputDev",
+      "pos": [950, 350],
+      "size": {
+        "0": 315,
+        "1": 62
+      },
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "data",
+          "type": "*",
+          "link": 6
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_OutputDev"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 8,
+      "type": "XDEV_FaceQualityAnalyzer",
+      "pos": [450, 700],
+      "size": {
+        "0": 350,
+        "1": 200
+      },
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source_image",
+          "type": "IMAGE",
+          "link": 7
+        },
+        {
+          "name": "target_image",
+          "type": "IMAGE", 
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "quality_report",
+          "type": "STRING",
+          "links": [9],
+          "slot_index": 0
+        },
+        {
+          "name": "quality_score",
+          "type": "FLOAT",
+          "links": [],
+          "slot_index": 1
+        },
+        {
+          "name": "analysis_image",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_FaceQualityAnalyzer"
+      },
+      "widgets_values": [
+        "comprehensive"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 9,
+      "type": "XDEV_OutputDev",
+      "pos": [950, 700],
+      "size": {
+        "0": 315,
+        "1": 62
+      },
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "data",
+          "type": "*",
+          "link": 9
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_OutputDev"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 10,
+      "type": "XDEV_InputDev",
+      "pos": [50, 950],
+      "size": {
+        "0": 315,
+        "1": 82
+      },
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "*",
+          "type": "*",
+          "links": [11, 12, 13],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_InputDev"
+      },
+      "widgets_values": [
+        "IMAGE"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 11,
+      "type": "XDEV_FaceSwapBatch",
+      "pos": [450, 950],
+      "size": {
+        "0": 400,
+        "1": 300
+      },
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source_image",
+          "type": "IMAGE",
+          "link": 11
+        },
+        {
+          "name": "target_images",
+          "type": "IMAGE",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "batch_results",
+          "type": "IMAGE",
+          "links": [14],
+          "slot_index": 0
+        },
+        {
+          "name": "batch_info",
+          "type": "STRING",
+          "links": [15],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_FaceSwapBatch"
+      },
+      "widgets_values": [
+        "hybrid_multi",
+        "professional",
+        "adaptive",
+        4,
+        0.85,
+        true
+      ],
+      "color": "#223",
+      "bgcolor": "#334"
+    },
+    {
+      "id": 12,
+      "type": "XDEV_OutputDev",
+      "pos": [950, 950],
+      "size": {
+        "0": 315,
+        "1": 62
+      },
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "data",
+          "type": "*",
+          "link": 14
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_OutputDev"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 13,
+      "type": "XDEV_OutputDev",
+      "pos": [950, 1050],
+      "size": {
+        "0": 315,
+        "1": 62
+      },
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "data",
+          "type": "*",
+          "link": 15
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_OutputDev"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 14,
+      "type": "XDEV_InputDev",
+      "pos": [50, 720],
+      "size": {
+        "0": 150,
+        "1": 82
+      },
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "*",
+          "type": "*", 
+          "links": [7],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_InputDev"
+      },
+      "widgets_values": [
+        "IMAGE"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 15,
+      "type": "XDEV_InputDev",
+      "pos": [220, 720],
+      "size": {
+        "0": 150,
+        "1": 82
+      },
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "*",
+          "type": "*",
+          "links": [8],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_InputDev"
+      },
+      "widgets_values": [
+        "IMAGE"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 3, 0, "IMAGE"],
+    [2, 2, 0, 3, 1, "IMAGE"],
+    [3, 3, 0, 4, 0, "*"],
+    [4, 3, 1, 5, 0, "*"],
+    [5, 3, 2, 6, 0, "*"],
+    [6, 3, 3, 7, 0, "*"],
+    [7, 14, 0, 8, 0, "IMAGE"],
+    [8, 15, 0, 8, 1, "IMAGE"],
+    [9, 8, 0, 9, 0, "*"],
+    [10, 3, 0, 0, 0, "*"],
+    [11, 10, 0, 11, 0, "IMAGE"],
+    [12, 10, 0, 11, 1, "IMAGE"],
+    [13, 10, 0, 0, 0, "*"],
+    [14, 11, 0, 12, 0, "*"],
+    [15, 11, 1, 13, 0, "*"]
+  ],
+  "groups": [
+    {
+      "title": "Advanced Face Swap - Single Processing",
+      "bounding": [25, -25, 1275, 475],
+      "color": "#3f789e",
+      "font_size": 24
+    },
+    {
+      "title": "Face Quality Analysis",
+      "bounding": [25, 625, 1275, 300],
+      "color": "#8A8",
+      "font_size": 24
+    },
+    {
+      "title": "Batch Face Swap Processing",
+      "bounding": [25, 875, 1275, 425],
+      "color": "#A88",
+      "font_size": 24
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6830134553650707,
+      "offset": [
+        -8.388608068732143,
+        154.89233073488602
+      ]
+    },
+    "groupNodes": {}
+  },
+  "version": 0.4
+}

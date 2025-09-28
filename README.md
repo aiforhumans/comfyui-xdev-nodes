@@ -1,16 +1,16 @@
-# ComfyUI XDev Nodes — Professional Starter Kit
+# ComfyUI XDev Nodes — Professional Modular Architecture
 
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/aiforhumans/comfyui-xdev-nodes)](https://github.com/aiforhumans/comfyui-xdev-nodes/releases)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/aiforhumans/comfyui-xdev-nodes/ci.yml)](https://github.com/aiforhumans/comfyui-xdev-nodes/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-1.0%2B-green)](https://github.com/comfyanonymous/ComfyUI)
 
-A **production-ready starter kit** for building and publishing **ComfyUI custom nodes** with professional-grade patterns, comprehensive validation, rich documentation, and complete GitHub standards.
+A **production-ready modular framework** for building and publishing **ComfyUI custom nodes** with professional architecture patterns, enhanced performance, and comprehensive development tools.
 
-> 🚀 **NEW**: SDXL Model Mixer with 38 professional nodes - Advanced model blending toolkit with 5 mixing algorithms, 4 weighting strategies, comprehensive validation, and selective layer blending capabilities.
+> 🎉 **v0.6.0 RELEASE**: **Major Architecture Update** - Complete modular restructure with auto-registration system, enhanced registry with recursive discovery, and improved performance framework. Successfully transformed from monolithic to focused modular design while maintaining 100% functionality.
 
-> 🔧 **ENHANCED**: OutputDev now provides intelligent ComfyUI object analysis - properly detects and analyzes MODEL, CLIP, VAE, CONDITIONING, and LATENT objects with detailed information instead of generic type reporting.
+> ⚡ **26+ Active Nodes**: Enhanced registry system with robust error handling, graceful fallbacks, and comprehensive validation. Professional development patterns with performance monitoring and intelligent caching.
 
 ---
 
@@ -48,6 +48,46 @@ A **production-ready starter kit** for building and publishing **ComfyUI custom 
 - 📊 **Comprehensive Testing** - Unit tests with validation scenarios
 - 🚀 **CI/CD Pipeline** - Automated testing, linting, and quality gates
 - 📖 **Rich Documentation** - Web-based help system with markdown docs
+
+---
+
+## 🏗️ Modular Architecture (v0.6.0)
+
+**Phase 1 & 2 Complete**: Transformed from monolithic to professional modular design
+
+### New Directory Structure
+```
+xdev_nodes/
+├── nodes/
+│   ├── prompt/           # Prompt engineering tools
+│   │   ├── prompt_core.py      # PromptCombiner, PromptWeighter
+│   │   └── __init__.py         # Auto-import system
+│   ├── image/            # Image processing operations  
+│   │   ├── image_analysis.py   # PickByBrightness
+│   │   ├── image_manipulation.py # ImageResize, etc.
+│   │   └── __init__.py
+│   ├── llm/              # LLM integration (future)
+│   ├── face_processing/  # Face swap operations (future)  
+│   ├── development/      # Development utilities (future)
+│   └── [original files]  # Backward compatibility maintained
+├── registry.py          # Enhanced auto-registration with recursive scanning
+├── categories.py         # Centralized category constants (28+ categories)
+├── performance.py        # Performance monitoring framework
+└── mixins.py            # Validation and base classes
+```
+
+### Enhanced Registry System
+- ✅ **Recursive Discovery**: Automatically finds nodes in subdirectories
+- ✅ **Backward Compatible**: Original files continue working
+- ✅ **Load Validation**: Real-time success/failure reporting  
+- ✅ **Error Resilience**: Graceful fallbacks for problematic modules
+- ✅ **Performance Tracking**: Enhanced monitoring and caching
+
+### Current Status
+- **26+ Working Nodes**: Enhanced discovery and validation
+- **Modular Foundation**: Ready for continued splitting and organization
+- **Performance Optimized**: XDev patterns preserved and enhanced
+- **Development Ready**: Clear structure for future enhancements
 
 ---
 
@@ -363,6 +403,72 @@ Building on Phase 5's LM Studio integration, Phase 6 adds **4 new AI-powered pro
 - **Enhanced Original Nodes**: PersonBuilder and StyleBuilder now have LLM variants
 - **Performance Optimized**: All nodes use `@performance_monitor` and caching
 - **Graceful Fallbacks**: Works with or without LLM connectivity
+
+## ⚡ Phase 8: Advanced KSampler with Learning Optimization (NEWEST!)
+
+Revolutionary sampling system that generates **3 different rendering variants** simultaneously using **real ComfyUI sampling** and learns from your selections to optimize future generations.
+
+### XDEV_AdvancedKSampler (XDev)
+**Category**: `XDev/Sampling/Advanced` | **Multi-variant learning sampler**
+
+- **Purpose**: Generate 3 different sampling strategies simultaneously with learning optimization
+- **Inputs**:
+  - Standard sampling inputs: `model`, `positive`, `negative`, `latent_image`, `seed`, `steps`, `cfg`, `sampler_name`, `scheduler`, `denoise`
+  - Learning controls: `enable_learning`, `variant_selection`, `quality_priority`, `speed_priority`, `creative_priority`, `learning_strength`
+- **Outputs**:
+  - `quality_variant` (LATENT) - High-quality precision sampling
+  - `speed_variant` (LATENT) - Speed-optimized sampling  
+  - `creative_variant` (LATENT) - Creative exploration sampling
+  - `variant_info` (STRING) - Detailed parameter breakdown for each variant
+  - `optimization_info` (STRING) - Learning progress and adaptation history
+  - `selection_guide` (STRING) - Usage instructions and optimization tips
+
+### XDEV_VariantSelector (XDev) 
+**Category**: `XDev/Sampling/Advanced` | **Learning feedback system**
+
+- **Purpose**: Select best variant and provide feedback for learning optimization
+- **Inputs**:
+  - `quality_variant`, `speed_variant`, `creative_variant` (LATENT) - The 3 generated variants
+  - `selected_variant` (COMBO) - Choose which variant performed best
+  - `quality_rating`, `speed_rating`, `creative_rating` (INT, 1-10) - Rate each variant's performance
+  - `selection_notes` (STRING) - Optional notes about selection criteria
+- **Outputs**:
+  - `selected_latent` (LATENT) - Your chosen best variant
+  - `selection_feedback` (STRING) - Formatted feedback for learning system
+  - `ratings_summary` (STRING) - Analysis of ratings and selection patterns
+
+### 🎯 Key Features
+
+#### Multi-Variant Generation System
+- **Quality Strategy**: Higher step counts, refined CFG for maximum detail
+- **Speed Strategy**: Optimized parameters for rapid iteration (0.6x base steps)
+- **Creative Strategy**: Experimental variations for artistic exploration
+
+#### Learning Optimization Engine
+- **Selection Tracking**: Records which variants you choose over time
+- **Parameter Evolution**: Gradually adapts base parameters toward your preferences
+- **Intelligent Boundaries**: Keeps parameters within safe, effective ranges
+- **Feedback Integration**: Uses ratings and notes to improve future generations
+
+#### Professional Integration
+- **OutputDev Compatible**: Connect each variant to OutputDev for detailed analysis
+- **Performance Monitored**: All operations use `@performance_monitor` decorators
+- **XDev Framework**: Built on ValidationMixin with graceful fallbacks
+- **Workflow Ready**: Complete demo workflow in `workflows/advanced_ksampler_demo.json`
+
+### 📖 Documentation
+
+Complete usage guide available at **[docs/Advanced_KSampler_Guide.md](docs/Advanced_KSampler_Guide.md)** including:
+- Step-by-step workflow setup and usage patterns
+- Learning system optimization strategies  
+- Detailed parameter reference and troubleshooting
+- Integration examples with existing XDev ecosystem
+
+**Phase 8 Architecture**:
+- **Advanced Sampling Engine**: 3-variant generation with intelligent parameter adjustment
+- **Learning Feedback Loop**: User selection drives continuous optimization
+- **Professional Validation**: Comprehensive input checking and error handling
+- **Complete Integration**: Works seamlessly with existing XDev framework and OutputDev analysis
 
 ---
 

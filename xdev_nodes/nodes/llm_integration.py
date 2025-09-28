@@ -1,3 +1,4 @@
+from ..categories import NodeCategories
 """
 LLM Integration Nodes - Local LLM server support for ComfyUI
 
@@ -40,6 +41,7 @@ from urllib.parse import urljoin, urlparse
 
 
 class LMStudioChat(ValidationMixin):
+    DISPLAY_NAME = "LM Studio Chat (XDev)"
     """
     Advanced LM Studio integration node with OpenAI-compatible API support.
     
@@ -149,7 +151,7 @@ class LMStudioChat(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING")
     RETURN_NAMES = ("response", "full_conversation", "server_info", "generation_stats")
     FUNCTION = "generate_response"
-    CATEGORY = "XDev/LLM/Integration"
+    CATEGORY = NodeCategories.LLM_INTEGRATION
     DESCRIPTION = "Connect to LM Studio local API for chat completions with advanced configuration and error handling"
     
     def __init__(self):
@@ -526,6 +528,7 @@ class LMStudioChat(ValidationMixin):
 
 
 class LLMPromptFramework:
+    DISPLAY_NAME = "LLM Prompt Framework (XDev)"
     """
     Unified LLM framework for prompt tool enhancement.
     
@@ -816,7 +819,8 @@ class LLMPromptAssistant(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING")
     RETURN_NAMES = ("enhanced_prompt", "original_prompt", "enhancement_info")
     FUNCTION = "enhance_prompt_with_llm"
-    CATEGORY = "XDev/LLM/PromptTools"
+    CATEGORY = NodeCategories.LLM_PROMPT_TOOLS
+    DISPLAY_NAME = "LLM Prompt Assistant (XDev)"
     DESCRIPTION = "Enhance prompts using LLM intelligence with context awareness and multiple enhancement modes"
     
     @performance_monitor("llm_prompt_assistant")
@@ -929,7 +933,8 @@ class LLMContextualBuilder(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING")
     RETURN_NAMES = ("contextual_prompt", "prompt_breakdown", "generation_info")
     FUNCTION = "build_contextual_prompt"
-    CATEGORY = "XDev/LLM/PromptTools"
+    CATEGORY = NodeCategories.LLM_PROMPT_TOOLS
+    DISPLAY_NAME = "LLM Contextual Builder (XDev)"
     DESCRIPTION = "Build intelligent, contextually coherent prompts using LLM understanding and thematic coordination"
     
     @performance_monitor("llm_contextual_builder")
@@ -1088,7 +1093,8 @@ class LLMDevFramework(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING")
     RETURN_NAMES = ("response", "request_made")
     FUNCTION = "dev_llm_call"
-    CATEGORY = "XDev/LLM/Development"
+    CATEGORY = NodeCategories.LLM_DEVELOPMENT
+    DISPLAY_NAME = "LLM-DEV Framework (XDev)"
     DESCRIPTION = "LLM-DEV Framework - Simple system instruction + prompt interface for development and testing"
     
     @performance_monitor("llm_dev_framework")
@@ -1297,7 +1303,8 @@ class LLMSDXLExpertWriter(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING")
     RETURN_NAMES = ("sdxl_prompt", "generation_info")
     FUNCTION = "write_sdxl_prompt"
-    CATEGORY = "XDev/LLM/SDXL"
+    CATEGORY = NodeCategories.LLM_SDXL
+    DISPLAY_NAME = "LLM SDXL Expert Writer (XDev)"
     DESCRIPTION = "Expert SDXL prompt writer - analyzes USER_PROMPT + STYLE_SETTINGS + RULES to produce optimized SDXL prompts"
     
     def __init__(self):
@@ -1534,7 +1541,8 @@ class LLMSDXLPhotoEnhancer(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING")
     RETURN_NAMES = ("sdxl_prompt", "negative_prompt", "settings_json", "enhancement_notes")
     FUNCTION = "enhance_sdxl_photo_prompt"
-    CATEGORY = "XDev/LLM/SDXL"
+    CATEGORY = NodeCategories.LLM_SDXL
+    DISPLAY_NAME = "LLM SDXL Photo Enhancer (XDev)"
     DESCRIPTION = "Professional SDXL prompt enhancer for photorealistic images with structured prompts and technical settings"
     
     @performance_monitor("llm_sdxl_photo_enhancement")

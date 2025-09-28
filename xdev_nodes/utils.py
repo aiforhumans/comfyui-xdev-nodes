@@ -86,6 +86,8 @@ def validate_choice(value: str, pattern_name: str) -> bool:
 # Lazy import utilities
 _torch_cache = None
 _numpy_cache = None
+_opencv_cache = None
+_insightface_cache = None
 
 def get_torch():
     """Lazy import torch with caching"""
@@ -108,3 +110,26 @@ def get_numpy():
         except ImportError:
             _numpy_cache = False
     return _numpy_cache if _numpy_cache is not False else None
+
+def get_opencv():
+    """Lazy import opencv with caching"""
+    global _opencv_cache
+    if _opencv_cache is None:
+        try:
+            import cv2
+            _opencv_cache = cv2
+        except ImportError:
+            _opencv_cache = False
+    return _opencv_cache if _opencv_cache is not False else None
+
+def get_insightface():
+    """Lazy import insightface with caching"""
+    global _insightface_cache
+    if _insightface_cache is None:
+        try:
+            import insightface
+            from insightface.app import FaceAnalysis
+            _insightface_cache = {'insightface': insightface, 'FaceAnalysis': FaceAnalysis}
+        except ImportError:
+            _insightface_cache = False
+    return _insightface_cache if _insightface_cache is not False else None

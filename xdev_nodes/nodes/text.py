@@ -4,8 +4,10 @@ from functools import lru_cache
 from ..utils import fast_string_validation, efficient_data_analysis
 from ..performance import performance_monitor, cached_operation, intern_string, PrecompiledPatterns
 from ..mixins import TextProcessingNode, ValidationMixin
+from ..categories import NodeCategories
 
 class AppendSuffix:
+    DISPLAY_NAME = "Append Suffix (XDev)"
     """
     Advanced text suffix appender with comprehensive validation and rich documentation.
     
@@ -56,7 +58,7 @@ class AppendSuffix:
     RETURN_TYPES = ("STRING", "INT")
     RETURN_NAMES = ("processed_text", "total_length")
     FUNCTION = "run"
-    CATEGORY = "XDev/Text"
+    CATEGORY = NodeCategories.TEXT
     DESCRIPTION = "Append suffix to text with comprehensive validation and rich documentation"
     
     # Example of experimental features - advanced text processing
@@ -151,6 +153,7 @@ class AppendSuffix:
 
 
 class TextCase(TextProcessingNode):
+    DISPLAY_NAME = "Text Case (XDev)"
     """
     Optimized Phase 1 Foundation Node: High-performance text case conversion.
     

@@ -1,0 +1,196 @@
+{
+  "last_node_id": 15,
+  "last_link_id": 20,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "XDEV_InputDev",
+      "pos": [100, 100],
+      "size": {"0": 315, "1": 126},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "output", "type": "*", "links": [1], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "XDEV_InputDev"},
+      "widgets_values": ["IMAGE", "source", "IMAGE", true]
+    },
+    {
+      "id": 2,
+      "type": "XDEV_InputDev",
+      "pos": [100, 300],
+      "size": {"0": 315, "1": 126},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {"name": "output", "type": "*", "links": [2], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "XDEV_InputDev"},
+      "widgets_values": ["IMAGE", "target", "IMAGE", true]
+    },
+    {
+      "id": 10,
+      "type": "XDEV_AdvancedFaceSwap",
+      "pos": [500, 200],
+      "size": {"0": 400, "1": 600},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "source_image", "type": "IMAGE", "link": 1},
+        {"name": "target_image", "type": "IMAGE", "link": 2}
+      ],
+      "outputs": [
+        {"name": "swapped_image", "type": "IMAGE", "links": [10], "slot_index": 0},
+        {"name": "process_info", "type": "STRING", "links": [11], "slot_index": 1},
+        {"name": "face_analysis", "type": "STRING", "links": [12], "slot_index": 2},
+        {"name": "debug_overlay", "type": "IMAGE", "links": [13], "slot_index": 3}
+      ],
+      "properties": {"Node name for S&R": "XDEV_AdvancedFaceSwap"},
+      "widgets_values": [
+        "opencv_haar", 
+        "landmark_based", 
+        "poisson_seamless", 
+        0.8, 
+        0.7, 
+        "professional", 
+        "skin_tone_adaptive", 
+        true
+      ]
+    },
+    {
+      "id": 11,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 100],
+      "size": {"0": 315, "1": 126},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "input", "type": "*", "link": 10}
+      ],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": ["swapped_result", "detailed"]
+    },
+    {
+      "id": 12,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 300],
+      "size": {"0": 315, "1": 126},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "input", "type": "*", "link": 11}
+      ],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": ["process_info", "detailed"]
+    },
+    {
+      "id": 13,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 500],
+      "size": {"0": 315, "1": 126},
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "input", "type": "*", "link": 12}
+      ],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": ["face_analysis", "detailed"]
+    },
+    {
+      "id": 14,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 700],
+      "size": {"0": 315, "1": 126},
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "input", "type": "*", "link": 13}
+      ],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": ["debug_overlay", "detailed"]
+    },
+    {
+      "id": 15,
+      "type": "XDEV_FaceQualityAnalyzer",
+      "pos": [500, 900],
+      "size": {"0": 400, "1": 300},
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 1}
+      ],
+      "outputs": [
+        {"name": "quality_score", "type": "FLOAT", "links": [20], "slot_index": 0},
+        {"name": "detailed_analysis", "type": "STRING", "links": [21], "slot_index": 1},
+        {"name": "recommendations", "type": "STRING", "links": [22], "slot_index": 2}
+      ],
+      "properties": {"Node name for S&R": "XDEV_FaceQualityAnalyzer"},
+      "widgets_values": ["comprehensive", true, "professional"]
+    },
+    {
+      "id": 16,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 900],
+      "size": {"0": 315, "1": 126},
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {"name": "input", "type": "*", "link": 20}
+      ],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": ["quality_score", "detailed"]
+    },
+    {
+      "id": 17,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 1100],
+      "size": {"0": 315, "1": 126},
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {"name": "input", "type": "*", "link": 21}
+      ],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": ["quality_analysis", "detailed"]
+    },
+    {
+      "id": 18,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 1300],
+      "size": {"0": 315, "1": 126},
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {"name": "input", "type": "*", "link": 22}
+      ],
+      "properties": {"Node name for S&R": "XDEV_OutputDev"},
+      "widgets_values": ["recommendations", "detailed"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 10, 0, "IMAGE"],
+    [2, 2, 0, 10, 1, "IMAGE"],
+    [10, 10, 0, 11, 0, "IMAGE"],
+    [11, 10, 1, 12, 0, "STRING"],
+    [12, 10, 2, 13, 0, "STRING"],
+    [13, 10, 3, 14, 0, "IMAGE"],
+    [20, 15, 0, 16, 0, "FLOAT"],
+    [21, 15, 1, 17, 0, "STRING"],
+    [22, 15, 2, 18, 0, "STRING"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

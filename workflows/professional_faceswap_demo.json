@@ -1,0 +1,459 @@
+{
+  "last_node_id": 12,
+  "last_link_id": 15,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [100, 100],
+      "size": {"0": 315, "1": 314},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [1],
+          "slot_index": 0,
+          "shape": 3
+        },
+        {
+          "name": "MASK", 
+          "type": "MASK",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "reference_face.jpg",
+        "image"
+      ],
+      "title": "Reference Face (Source Identity)"
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [100, 500],
+      "size": {"0": 315, "1": 314},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE", 
+          "links": [8],
+          "slot_index": 0,
+          "shape": 3
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "target_image.jpg", 
+        "image"
+      ],
+      "title": "Target Image (Face to Replace)"
+    },
+    {
+      "id": 3,
+      "type": "XDEV_FaceExtractEmbed",
+      "pos": [500, 100],
+      "size": {"0": 400, "1": 280},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "ref_image",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "identity",
+          "type": "FACE_EMBED",
+          "links": [3],
+          "slot_index": 0,
+          "shape": 3
+        },
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": [4],
+          "slot_index": 1,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_FaceExtractEmbed"
+      },
+      "widgets_values": [
+        0,
+        "scrfd_10g_bnkps",
+        "w600k_r50", 
+        0.5,
+        true
+      ],
+      "title": "Extract Face Identity (InsightFace + ArcFace)"
+    },
+    {
+      "id": 4,
+      "type": "XDEV_FaceSwapApply",
+      "pos": [1000, 300],
+      "size": {"0": 450, "1": 380},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 8
+        },
+        {
+          "name": "identity",
+          "type": "FACE_EMBED",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "swapped_image",
+          "type": "IMAGE",
+          "links": [9, 10, 11],
+          "slot_index": 0,
+          "shape": 3
+        },
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": [12],
+          "slot_index": 1,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_FaceSwapApply"
+      },
+      "widgets_values": [
+        1.0,
+        "auto",
+        0.35,
+        false,
+        0,
+        "inswapper_128",
+        "scrfd_10g_bnkps",
+        "gaussian",
+        0,
+        true
+      ],
+      "title": "Professional Face Swap (InSwapper)"
+    },
+    {
+      "id": 5,
+      "type": "PreviewImage",
+      "pos": [1500, 100],
+      "size": {"0": 400, "1": 300},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 9
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "title": "Face Swap Result"
+    },
+    {
+      "id": 6,
+      "type": "ShowText|pysssss", 
+      "pos": [500, 400],
+      "size": {"0": 400, "1": 100},
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 4,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "title": "Face Extraction Info"
+    },
+    {
+      "id": 7,
+      "type": "ShowText|pysssss",
+      "pos": [1000, 700],
+      "size": {"0": 450, "1": 100},
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 12,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "title": "Face Swap Info"
+    },
+    {
+      "id": 8,
+      "type": "XDEV_FaceSwapApply",
+      "pos": [1000, 850],
+      "size": {"0": 450, "1": 380},
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 10
+        },
+        {
+          "name": "identity",
+          "type": "FACE_EMBED",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "swapped_image",
+          "type": "IMAGE",
+          "links": [13],
+          "slot_index": 0,
+          "shape": 3
+        },
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 1,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_FaceSwapApply"
+      },
+      "widgets_values": [
+        0.8,
+        "expand", 
+        0.5,
+        true,
+        0,
+        "inswapper_128",
+        "scrfd_10g_bnkps",
+        "poisson",
+        10,
+        true
+      ],
+      "title": "Enhanced Face Swap (Poisson + Upscale)"
+    },
+    {
+      "id": 9,
+      "type": "PreviewImage",
+      "pos": [1500, 850],
+      "size": {"0": 400, "1": 300},
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "title": "Enhanced Result"
+    },
+    {
+      "id": 10,
+      "type": "XDEV_FaceSwapApply",
+      "pos": [1000, 1300],
+      "size": {"0": 450, "1": 380},
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 11
+        },
+        {
+          "name": "identity",
+          "type": "FACE_EMBED",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "swapped_image",
+          "type": "IMAGE",
+          "links": [14],
+          "slot_index": 0,
+          "shape": 3
+        },
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 1,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "XDEV_FaceSwapApply"
+      },
+      "widgets_values": [
+        0.9,
+        "face_parser",
+        0.25,
+        false,
+        0,
+        "inswapper_128",
+        "scrfd_10g_bnkps",
+        "gaussian",
+        5,
+        true
+      ],
+      "title": "Face Parser Masking (BiSeNet)"
+    },
+    {
+      "id": 11,
+      "type": "PreviewImage",
+      "pos": [1500, 1300],
+      "size": {"0": 400, "1": 300},
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 14
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "title": "Face Parser Result"
+    },
+    {
+      "id": 12,
+      "type": "SaveImage",
+      "pos": [1500, 450],
+      "size": {"0": 400, "1": 300},
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 15
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "xdev_faceswap_result"
+      ],
+      "title": "Save Final Result"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 3, 0, "IMAGE"],
+    [3, 3, 0, 4, 1, "FACE_EMBED"],
+    [4, 3, 1, 6, 0, "STRING"],
+    [8, 2, 0, 4, 0, "IMAGE"],
+    [9, 4, 0, 5, 0, "IMAGE"],
+    [10, 4, 0, 8, 0, "IMAGE"],
+    [11, 4, 0, 10, 0, "IMAGE"],
+    [12, 4, 1, 7, 0, "STRING"],
+    [13, 8, 0, 9, 0, "IMAGE"],
+    [14, 10, 0, 11, 0, "IMAGE"],
+    [15, 8, 0, 12, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "Identity Extraction",
+      "bounding": [80, 50, 850, 480],
+      "color": "#3f789e",
+      "font_size": 24,
+      "locked": false
+    },
+    {
+      "title": "Face Swapping Pipeline",
+      "bounding": [980, 250, 950, 1480],
+      "color": "#8A8",
+      "font_size": 24,
+      "locked": false
+    },
+    {
+      "title": "Results Comparison",
+      "bounding": [1480, 50, 450, 1680],
+      "color": "#A88",
+      "font_size": 24,
+      "locked": false
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [-100, 0]
+    },
+    "info": {
+      "name": "XDev Professional Face Swap Demo",
+      "author": "XDev Nodes",
+      "description": "Comprehensive demo of professional face swapping using InsightFace + InSwapper architecture with multiple masking and blending options.",
+      "version": "1.0",
+      "created": "2025-09-28",
+      "workflow_type": "face_swap_professional"
+    }
+  },
+  "version": 0.4
+}

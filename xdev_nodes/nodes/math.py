@@ -5,8 +5,10 @@ from functools import lru_cache
 from ..utils import efficient_data_analysis
 from ..performance import performance_monitor, cached_operation, intern_string, PrecompiledPatterns
 from ..mixins import MathProcessingNode, ValidationMixin
+from ..categories import NodeCategories
 
 class MathBasic(MathProcessingNode):
+    DISPLAY_NAME = "Math Basic (XDev)"
     """
     Optimized Phase 1 Foundation Node: High-performance mathematical operations.
     
@@ -84,7 +86,7 @@ class MathBasic(MathProcessingNode):
     RETURN_TYPES = ("FLOAT", "INT", "STRING")
     RETURN_NAMES = ("result", "result_int", "calculation_info")
     FUNCTION = "calculate"
-    CATEGORY = "XDev/Math"
+    CATEGORY = NodeCategories.MATH
     DESCRIPTION = "Perform basic mathematical operations with precision control"
 
     def _validate_inputs(self, a: float, b: float, operation: str) -> Dict[str, Any]:

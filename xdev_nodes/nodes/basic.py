@@ -2,8 +2,10 @@ from __future__ import annotations
 from typing import Dict, Tuple, Any
 from datetime import datetime
 from ..utils import efficient_data_analysis, get_object_size, validate_choice
+from ..categories import NodeCategories
 
 class HelloString:
+    DISPLAY_NAME = "Hello String (XDev)"
     """
     Enhanced greeting node demonstrating XDev best practices.
     
@@ -39,7 +41,7 @@ class HelloString:
     RETURN_TYPES = ("STRING", "STRING")
     RETURN_NAMES = ("greeting", "metadata")
     FUNCTION = "hello"
-    CATEGORY = "XDev/Basic"
+    CATEGORY = NodeCategories.BASIC
     DESCRIPTION = "Enhanced greeting generator with customizable formatting and optional timestamp"
 
     # Precompute static greetings for better performance
@@ -87,6 +89,7 @@ class HelloString:
 
 
 class AnyPassthrough:
+    DISPLAY_NAME = "Any Passthrough (XDev)"
     """
     Robust passthrough node for any ComfyUI data type with advanced debugging capabilities.
     
@@ -126,7 +129,7 @@ class AnyPassthrough:
     RETURN_TYPES = ("*", "STRING", "STRING")
     RETURN_NAMES = ("output", "data_report", "performance_info")
     FUNCTION = "process"
-    CATEGORY = "XDev/Basic"
+    CATEGORY = NodeCategories.BASIC
     DESCRIPTION = "Universal passthrough with comprehensive data analysis and debugging capabilities"
 
     def process(self, value, analysis_level: str = "basic", show_content_preview: bool = False, track_performance: bool = False):

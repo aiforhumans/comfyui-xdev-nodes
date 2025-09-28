@@ -1,0 +1,291 @@
+{
+  "last_node_id": 15,
+  "last_link_id": 20,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "XDEV_InputDev",
+      "pos": [100, 100],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "generated_data", "type": "*", "links": [1], "slot_index": 0}
+      ],
+      "properties": {},
+      "widgets_values": ["MODEL", 1, 42, 1.0, "test"]
+    },
+    {
+      "id": 2,
+      "type": "XDEV_InputDev", 
+      "pos": [100, 350],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {"name": "generated_data", "type": "*", "links": [2], "slot_index": 0}
+      ],
+      "properties": {},
+      "widgets_values": ["CONDITIONING", 1, 123, 1.0, "positive prompt"]
+    },
+    {
+      "id": 3,
+      "type": "XDEV_InputDev",
+      "pos": [100, 600],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 2, 
+      "mode": 0,
+      "outputs": [
+        {"name": "generated_data", "type": "*", "links": [3], "slot_index": 0}
+      ],
+      "properties": {},
+      "widgets_values": ["CONDITIONING", 1, 456, 1.0, "negative prompt"]
+    },
+    {
+      "id": 4,
+      "type": "XDEV_InputDev",
+      "pos": [100, 850],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "outputs": [
+        {"name": "generated_data", "type": "*", "links": [4], "slot_index": 0}
+      ],
+      "properties": {},
+      "widgets_values": ["LATENT", 1, 789, 1.0, "base latent"]
+    },
+    {
+      "id": 5,
+      "type": "XDEV_AdvancedKSampler",
+      "pos": [500, 200],
+      "size": {"0": 400, "1": 600},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 1},
+        {"name": "positive", "type": "CONDITIONING", "link": 2},
+        {"name": "negative", "type": "CONDITIONING", "link": 3},
+        {"name": "latent_image", "type": "LATENT", "link": 4}
+      ],
+      "outputs": [
+        {"name": "quality_variant", "type": "LATENT", "links": [5], "slot_index": 0},
+        {"name": "speed_variant", "type": "LATENT", "links": [6], "slot_index": 1},
+        {"name": "creative_variant", "type": "LATENT", "links": [7], "slot_index": 2},
+        {"name": "variant_info", "type": "STRING", "links": [8], "slot_index": 3},
+        {"name": "optimization_info", "type": "STRING", "links": [9], "slot_index": 4},
+        {"name": "selection_guide", "type": "STRING", "links": [10], "slot_index": 5}
+      ],
+      "properties": {},
+      "widgets_values": [-1, 25, 7.0, "dpmpp_2m", "karras", 1.0, true, "none", 0.33, 0.33, 0.34, 0.1, true]
+    },
+    {
+      "id": 6,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 100],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 5}
+      ],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": ["detailed", true, true]
+    },
+    {
+      "id": 7,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 350],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 6}
+      ],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": ["detailed", true, true]
+    },
+    {
+      "id": 8,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 600],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 7}
+      ],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": ["detailed", true, true]
+    },
+    {
+      "id": 9,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 850],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 8}
+      ],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": ["basic", true, false]
+    },
+    {
+      "id": 10,
+      "type": "XDEV_OutputDev",
+      "pos": [1350, 100],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 9}
+      ],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": ["basic", true, false]
+    },
+    {
+      "id": 11,
+      "type": "XDEV_OutputDev",
+      "pos": [1350, 350],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 10}
+      ],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": ["basic", true, false]
+    },
+    {
+      "id": 12,
+      "type": "XDEV_VariantSelector",
+      "pos": [500, 900],
+      "size": {"0": 400, "1": 300},
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {"name": "quality_variant", "type": "LATENT", "link": 11},
+        {"name": "speed_variant", "type": "LATENT", "link": 12},
+        {"name": "creative_variant", "type": "LATENT", "link": 13}
+      ],
+      "outputs": [
+        {"name": "selected_latent", "type": "LATENT", "links": [14], "slot_index": 0},
+        {"name": "selection_feedback", "type": "STRING", "links": [15], "slot_index": 1},
+        {"name": "ratings_summary", "type": "STRING", "links": [16], "slot_index": 2}
+      ],
+      "properties": {},
+      "widgets_values": ["quality", 8, 6, 7, "Quality variant had best detail and sharpness"]
+    },
+    {
+      "id": 13,
+      "type": "XDEV_OutputDev",
+      "pos": [1000, 1100],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 14}
+      ],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": ["detailed", true, true]
+    },
+    {
+      "id": 14,
+      "type": "XDEV_OutputDev",
+      "pos": [1350, 600],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 15}
+      ],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": ["basic", true, false]
+    },
+    {
+      "id": 15,
+      "type": "XDEV_OutputDev",
+      "pos": [1350, 850],
+      "size": {"0": 300, "1": 200},
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_1", "type": "*", "link": 16}
+      ],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": ["basic", true, false]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 5, 0, "MODEL"],
+    [2, 2, 0, 5, 1, "CONDITIONING"],
+    [3, 3, 0, 5, 2, "CONDITIONING"],
+    [4, 4, 0, 5, 3, "LATENT"],
+    [5, 5, 0, 6, 0, "LATENT"],
+    [6, 5, 1, 7, 0, "LATENT"],
+    [7, 5, 2, 8, 0, "LATENT"],
+    [8, 5, 3, 9, 0, "STRING"],
+    [9, 5, 4, 10, 0, "STRING"],
+    [10, 5, 5, 11, 0, "STRING"],
+    [11, 5, 0, 12, 0, "LATENT"],
+    [12, 5, 1, 12, 1, "LATENT"],
+    [13, 5, 2, 12, 2, "LATENT"],
+    [14, 12, 0, 13, 0, "LATENT"],
+    [15, 12, 1, 14, 0, "STRING"],
+    [16, 12, 2, 15, 0, "STRING"]
+  ],
+  "groups": [
+    {
+      "title": "Input Generation",
+      "bounding": [80, 50, 350, 1000],
+      "color": "#3f789e"
+    },
+    {
+      "title": "Advanced KSampler",
+      "bounding": [480, 50, 440, 800],
+      "color": "#b58b2a"
+    },
+    {
+      "title": "Variant Analysis",
+      "bounding": [980, 50, 350, 1000],
+      "color": "#a1309b"
+    },
+    {
+      "title": "Selection & Feedback",
+      "bounding": [480, 850, 440, 400],
+      "color": "#88a82a"
+    },
+    {
+      "title": "Results Analysis",
+      "bounding": [1330, 50, 350, 1000],
+      "color": "#8aa629"
+    }
+  ],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

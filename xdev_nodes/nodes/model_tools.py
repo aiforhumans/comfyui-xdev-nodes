@@ -1,3 +1,4 @@
+from ..categories import NodeCategories
 """
 SDXL Model Mixer Node - Advanced Model Blending for ComfyUI
 
@@ -121,7 +122,8 @@ class SDXLModelMixer(ValidationMixin):
     RETURN_TYPES = ("MODEL", "STRING", "STRING")
     RETURN_NAMES = ("mixed_model", "mixing_info", "compatibility_report")
     FUNCTION = "mix_models"
-    CATEGORY = "XDev/Model/Advanced"
+    CATEGORY = NodeCategories.MODEL_ADVANCED
+    DISPLAY_NAME = "SDXL Model Mixer (XDev)"
     DESCRIPTION = "Advanced SDXL model mixing with multiple algorithms and weighting strategies"
     
     def __init__(self):
