@@ -70,7 +70,8 @@ class NodeRegistry:
                 
             # Check if it's a ComfyUI node (has required attributes)
             if self._is_comfyui_node(obj):
-                node_id = f"XDEV_{name}"
+                # Avoid double XDEV_ prefix
+                node_id = name if name.startswith("XDEV_") else f"XDEV_{name}"
                 display_name = getattr(obj, 'DISPLAY_NAME', f"{name} (XDev)")
                 
                 self.node_classes[node_id] = obj

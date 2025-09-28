@@ -2,10 +2,10 @@
 import pytest
 
 def test_prompt_combiner():
-    """Test the PromptCombiner node"""
-    from xdev_nodes.nodes.prompt import PromptCombiner
+    """Test the XDEV_PromptCombiner node"""
+    from xdev_nodes.nodes.prompt import XDEV_PromptCombiner
     
-    node = PromptCombiner()
+    node = XDEV_PromptCombiner()
     
     # Test basic concatenation
     result, info, count = node.combine_prompts(
@@ -36,10 +36,10 @@ def test_prompt_combiner():
 
 
 def test_prompt_weighter():
-    """Test the PromptWeighter node"""
-    from xdev_nodes.nodes.prompt import PromptWeighter
+    """Test the XDEV_PromptWeighter node"""
+    from xdev_nodes.nodes.prompt import XDEV_PromptWeighter
     
-    node = PromptWeighter()
+    node = XDEV_PromptWeighter()
     
     # Test adding emphasis
     result, info, count = node.process_weights(

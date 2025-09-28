@@ -11,7 +11,7 @@ from collections import Counter
 from ..performance import performance_monitor, cached_operation
 from ..mixins import ValidationMixin
 
-class PromptCombiner(ValidationMixin):
+class XDEV_PromptCombiner(ValidationMixin):
     DISPLAY_NAME = "Prompt Combiner (XDev)"
     """
     Combine multiple prompts with advanced weighting and formatting options.
@@ -107,7 +107,7 @@ class PromptCombiner(ValidationMixin):
             return (prompt_1, f"Combination failed: {str(e)}", 1)
 
 
-class PromptWeighter(ValidationMixin):
+class XDEV_PromptWeighter(ValidationMixin):
     """
     Add, modify, or remove attention weights from prompts.
     Supports ComfyUI weight syntax: (text:weight) and [text:weight]
@@ -252,7 +252,7 @@ class PromptWeighter(ValidationMixin):
             return (original_prompt, f"Weight processing failed: {str(e)}", 0)
 
 
-class PromptCleaner(ValidationMixin):
+class XDEV_PromptCleaner(ValidationMixin):
     """
     Clean and format prompts by removing duplicates, fixing spacing, and standardizing format.
     Provides comprehensive text cleanup for better prompt quality.
@@ -410,7 +410,7 @@ class PromptCleaner(ValidationMixin):
             return (original_prompt, f"Cleaning failed: {str(e)}", 0)
 
 
-class PromptAnalyzer(ValidationMixin):
+class XDEV_PromptAnalyzer(ValidationMixin):
     """
     Analyze prompt structure, complexity, and composition.
     Provides detailed statistics and insights about prompt content.
@@ -546,7 +546,7 @@ class PromptAnalyzer(ValidationMixin):
             return (f"Analysis failed: {str(e)}", "error", 0, 0.0)
 
 
-class PromptRandomizer(ValidationMixin):
+class XDEV_PromptRandomizer(ValidationMixin):
     """
     Randomize and vary prompts by shuffling elements, adding variations, or generating alternatives.
     Useful for creating prompt variations and exploring creative possibilities.
@@ -737,7 +737,7 @@ class PromptRandomizer(ValidationMixin):
             return (original_prompt, f"Randomization failed: {str(e)}", seed)
 
 
-class PersonBuilder(ValidationMixin):
+class XDEV_PersonBuilder(ValidationMixin):
     """
     Structured person/character prompt builder with comprehensive template system.
     Generates professional portrait and character prompts with detailed customization.
@@ -939,7 +939,7 @@ class PersonBuilder(ValidationMixin):
             return (f"Error building person: {str(e)}", "build_failed", "")
 
 
-class StyleBuilder(ValidationMixin):
+class XDEV_StyleBuilder(ValidationMixin):
     """
     Structured artistic style prompt builder with comprehensive style templates.
     Generates professional artistic style prompts with detailed aesthetic control.
@@ -1185,7 +1185,7 @@ class StyleBuilder(ValidationMixin):
             return (f"Error building style: {str(e)}", "build_failed", "")
 
 
-class PromptMatrix(ValidationMixin):
+class XDEV_PromptMatrix(ValidationMixin):
     """
     Generate all combinations from prompt components using | delimiter syntax.
     Inspired by Stable Diffusion WebUI's Prompt Matrix functionality.
@@ -1302,7 +1302,7 @@ class PromptMatrix(ValidationMixin):
             return (f"Error generating matrix: {str(e)}", "generation_failed", "")
 
 
-class PromptInterpolator(ValidationMixin):
+class XDEV_PromptInterpolator(ValidationMixin):
     """
     Smooth interpolation between two prompts with ratio control.
     Creates seamless transitions between different prompt concepts.
@@ -1455,7 +1455,7 @@ class PromptInterpolator(ValidationMixin):
             return (f"Error interpolating: {str(e)}", "interpolation_failed", "")
 
 
-class PromptScheduler(ValidationMixin):
+class XDEV_PromptScheduler(ValidationMixin):
     """
     Dynamic prompt changes with step-based scheduling using [prompt_a:prompt_b:step] syntax.
     Enables prompt evolution during generation process.
@@ -1589,7 +1589,7 @@ class PromptScheduler(ValidationMixin):
             return (f"Error scheduling: {str(e)}", "scheduling_failed", "")
 
 
-class PromptAttention(ValidationMixin):
+class XDEV_PromptAttention(ValidationMixin):
     """
     ComfyUI-style attention weight manipulation using () for emphasis and [] for de-emphasis.
     Supports custom multipliers like (word:1.2) for precise attention control.
@@ -1777,7 +1777,7 @@ class PromptAttention(ValidationMixin):
             return (f"Error modifying attention: {str(e)}", "modification_failed", "")
 
 
-class PromptChainOfThought(ValidationMixin):
+class XDEV_PromptChainOfThought(ValidationMixin):
     """
     Advanced reasoning structure generation using Chain-of-Thought prompting techniques.
     Breaks complex prompts into step-by-step reasoning structures for better AI understanding.
@@ -1984,7 +1984,7 @@ Aesthetic goals: {components['conclusion']}"""
         return examples.get(style, "Example: Break down the prompt into logical components, analyze requirements, and synthesize the final approach.")
 
 
-class PromptFewShot(ValidationMixin):
+class XDEV_PromptFewShot(ValidationMixin):
     """
     Intelligent example selection and management for few-shot prompting.
     Dynamically selects relevant examples based on similarity and manages example databases.
@@ -2228,7 +2228,7 @@ class PromptFewShot(ValidationMixin):
         return "\n".join(parts)
 
 
-class LLMPersonBuilder(ValidationMixin):
+class XDEV_LLMPersonBuilder(ValidationMixin):
     """
     LLM-enhanced person/character builder with AI-powered personality analysis
     and intelligent trait generation for consistent, detailed character creation.
@@ -2521,7 +2521,7 @@ class LLMPersonBuilder(ValidationMixin):
         return " | ".join(summary)
 
 
-class LLMStyleBuilder(ValidationMixin):
+class XDEV_LLMStyleBuilder(ValidationMixin):
     """
     LLM-enhanced artistic style builder with AI-powered style analysis
     and intelligent style combination for cohesive artistic descriptions.
