@@ -1,0 +1,428 @@
+#!/usr/bin/env python3
+"""
+Test suite for XDev Advanced Face Swap nodes.
+Tests comprehensive face swap functionality and quality analysis.
+"""
+
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from xdev_nodes.nodes.face_swap import XDEV_AdvancedFaceSwap, XDEV_FaceSwapBatch, XDEV_FaceQualityAnalyzer
+
+
+class TestAdvancedFaceSwap:
+    """Test Advanced Face Swap functionality"""
+    
+    def test_face_swap_import(self):
+        """Test that Advanced Face Swap can be imported"""
+        assert XDEV_AdvancedFaceSwap is not None
+        assert hasattr(XDEV_AdvancedFaceSwap, 'INPUT_TYPES')
+        assert hasattr(XDEV_AdvancedFaceSwap, 'advanced_face_swap')
+    
+    def test_input_types_validation(self):
+        """Test input types structure"""
+        input_types = XDEV_AdvancedFaceSwap.INPUT_TYPES()
+        
+        # Check required inputs
+        assert "source_image" in input_types["required"]
+        assert "target_image" in input_types["required"]
+        assert "detection_model" in input_types["required"]
+        assert "alignment_method" in input_types["required"]
+        assert "blending_mode" in input_types["required"]
+        assert "quality_level" in input_types["required"]
+        
+        # Check optional inputs
+        assert "face_index_source" in input_types["optional"]
+        assert "blend_strength" in input_types["optional"]
+        assert "enhance_result" in input_types["optional"]
+    
+    def test_detection_models(self):
+        """Test face detection model options"""
+        face_swap = XDEV_AdvancedFaceSwap()
+        
+        # Check detection models are defined
+        assert hasattr(face_swap, '_DETECTION_MODELS')
+        assert len(face_swap._DETECTION_MODELS) > 0
+        
+        # Check for key detection methods
+        models = face_swap._DETECTION_MODELS
+        assert "hybrid_multi" in models
+        assert "confidence_weighted" in models
+    
+    def test_alignment_methods(self):
+        """Test face alignment method options"""
+        face_swap = XDEV_AdvancedFaceSwap()
+        
+        # Check alignment methods are defined
+        assert hasattr(face_swap, '_ALIGNMENT_METHODS')
+        assert len(face_swap._ALIGNMENT_METHODS) > 0
+        
+        # Check for key alignment methods
+        methods = face_swap._ALIGNMENT_METHODS
+        assert "landmark_based" in methods
+        assert "pose_estimation" in methods
+    
+    def test_blending_modes(self):
+        """Test blending mode options"""
+        face_swap = XDEV_AdvancedFaceSwap()
+        
+        # Check blending modes are defined
+        assert hasattr(face_swap, '_BLENDING_MODES')
+        assert len(face_swap._BLENDING_MODES) > 0
+        
+        # Check for key blending modes
+        modes = face_swap._BLENDING_MODES
+        assert "multi_band" in modes
+        assert "poisson_seamless" in modes
+        assert "edge_preserving" in modes
+    
+    def test_enhancement_modes(self):
+        """Test enhancement mode options"""
+        face_swap = XDEV_AdvancedFaceSwap()
+        
+        # Check enhancement modes are defined
+        assert hasattr(face_swap, '_ENHANCEMENT_MODES')
+        assert len(face_swap._ENHANCEMENT_MODES) > 0
+        
+        # Check for key enhancement modes
+        modes = face_swap._ENHANCEMENT_MODES
+        assert "face_restoration" in modes
+        assert "detail_preservation" in modes
+        assert "artifact_reduction" in modes
+    
+    def test_basic_face_swap_processing(self):
+        """Test basic face swap processing"""
+        face_swap = XDEV_AdvancedFaceSwap()
+        
+        # Create mock images
+        try:
+            import torch
+            source_image = torch.ones(1, 512, 512, 3, dtype=torch.float32)
+            target_image = torch.ones(1, 512, 512, 3, dtype=torch.float32)
+            HAS_TORCH = True
+        except ImportError:
+            # Fallback mock images
+            class MockImage:
+                def __init__(self, shape):
+                    self.shape = shape
+                def __str__(self):
+                    return f"MockImage{self.shape}"
+            
+            source_image = MockImage((1, 512, 512, 3))
+            target_image = MockImage((1, 512, 512, 3))
+            HAS_TORCH = False
+        
+        # Test face swap with default parameters
+        result = face_swap.advanced_face_swap(
+            source_image=source_image,
+            target_image=target_image,
+            detection_model="hybrid_multi",
+            alignment_method="landmark_based",
+            blending_mode="multi_band",
+            quality_level="professional"
+        )
+        
+        # Verify result structure
+        assert len(result) == 4  # swapped_image, process_info, face_analysis, debug_overlay
+        swapped_image, process_info, face_analysis, debug_overlay = result
+        
+        # Check outputs
+        assert swapped_image is not None
+        assert isinstance(process_info, str)
+        assert isinstance(face_analysis, str)
+        assert debug_overlay is not None
+        
+        # Check process info contains key information
+        assert "ADVANCED FACE SWAP" in process_info
+        assert "professional" in process_info.lower()
+    
+    def test_face_swap_with_enhancements(self):
+        """Test face swap with enhancement options"""
+        face_swap = XDEV_AdvancedFaceSwap()
+        
+        # Create mock images
+        try:
+            import torch
+            source_image = torch.ones(1, 512, 512, 3, dtype=torch.float32)
+            target_image = torch.ones(1, 512, 512, 3, dtype=torch.float32)
+        except ImportError:
+            class MockImage:
+                def __init__(self, shape):
+                    self.shape = shape
+            source_image = MockImage((1, 512, 512, 3))
+            target_image = MockImage((1, 512, 512, 3))
+        
+        # Test with various enhancement settings
+        result = face_swap.advanced_face_swap(
+            source_image=source_image,
+            target_image=target_image,
+            detection_model="confidence_weighted",
+            alignment_method="pose_estimation",
+            blending_mode="feature_guided",
+            quality_level="ultra",
+            enhance_result=True,
+            enhancement_mode="face_restoration",
+            blend_strength=0.9,
+            preserve_identity=0.85
+        )
+        
+        swapped_image, process_info, face_analysis, debug_overlay = result
+        
+        # Check enhancement was processed
+        assert "Enhancement" in process_info or "enhancement" in process_info.lower()
+        assert "face_restoration" in process_info.lower() or "restoration" in process_info.lower()
+    
+    def test_error_handling(self):
+        """Test error handling with invalid inputs"""
+        face_swap = XDEV_AdvancedFaceSwap()
+        
+        # Test with None inputs
+        result = face_swap.advanced_face_swap(
+            source_image=None,
+            target_image=None,
+            detection_model="hybrid_multi",
+            alignment_method="landmark_based",
+            blending_mode="multi_band",
+            quality_level="professional",
+            validate_input=True
+        )
+        
+        swapped_image, process_info, face_analysis, debug_overlay = result
+        
+        # Should handle errors gracefully
+        assert "ERROR" in process_info or "error" in process_info or "Error" in process_info
+
+
+class TestFaceSwapBatch:
+    """Test Face Swap Batch functionality"""
+    
+    def test_batch_import(self):
+        """Test that Face Swap Batch can be imported"""
+        assert XDEV_FaceSwapBatch is not None
+        assert hasattr(XDEV_FaceSwapBatch, 'INPUT_TYPES')
+        assert hasattr(XDEV_FaceSwapBatch, 'process_batch')
+    
+    def test_batch_input_types(self):
+        """Test batch input types structure"""
+        input_types = XDEV_FaceSwapBatch.INPUT_TYPES()
+        
+        # Check required inputs
+        assert "source_images" in input_types["required"]
+        assert "target_images" in input_types["required"]
+        assert "batch_processing_mode" in input_types["required"]
+        assert "consistency_mode" in input_types["required"]
+        
+        # Check optional inputs
+        assert "quality_level" in input_types["optional"]
+        assert "progress_updates" in input_types["optional"]
+    
+    def test_batch_processing_modes(self):
+        """Test batch processing mode options"""
+        input_types = XDEV_FaceSwapBatch.INPUT_TYPES()
+        
+        modes = input_types["required"]["batch_processing_mode"][0]
+        assert "sequential" in modes
+        assert "parallel" in modes
+        assert "adaptive" in modes
+    
+    def test_basic_batch_processing(self):
+        """Test basic batch processing"""
+        batch_processor = XDEV_FaceSwapBatch()
+        
+        # Create mock batch images
+        try:
+            import torch
+            source_images = torch.ones(2, 512, 512, 3, dtype=torch.float32)
+            target_images = torch.ones(2, 512, 512, 3, dtype=torch.float32)
+        except ImportError:
+            class MockBatch:
+                def __init__(self, count):
+                    self.count = count
+                def __len__(self):
+                    return self.count
+                    
+            source_images = MockBatch(2)
+            target_images = MockBatch(2)
+        
+        # Test batch processing
+        result = batch_processor.process_batch(
+            source_images=source_images,
+            target_images=target_images,
+            batch_processing_mode="adaptive",
+            consistency_mode="adaptive"
+        )
+        
+        # Verify result structure
+        assert len(result) == 3  # batch_results, batch_info, batch_analysis
+        batch_results, batch_info, batch_analysis = result
+        
+        assert batch_results is not None
+        assert isinstance(batch_info, str)
+        assert isinstance(batch_analysis, str)
+        assert "batch" in batch_info.lower()
+
+
+class TestFaceQualityAnalyzer:
+    """Test Face Quality Analyzer functionality"""
+    
+    def test_analyzer_import(self):
+        """Test that Face Quality Analyzer can be imported"""
+        assert XDEV_FaceQualityAnalyzer is not None
+        assert hasattr(XDEV_FaceQualityAnalyzer, 'INPUT_TYPES')
+        assert hasattr(XDEV_FaceQualityAnalyzer, 'analyze_face_quality')
+    
+    def test_analyzer_input_types(self):
+        """Test analyzer input types structure"""
+        input_types = XDEV_FaceQualityAnalyzer.INPUT_TYPES()
+        
+        # Check required inputs
+        assert "image" in input_types["required"]
+        assert "analysis_depth" in input_types["required"]
+        
+        # Check optional inputs
+        assert "include_recommendations" in input_types["optional"]
+    
+    def test_analysis_depth_options(self):
+        """Test analysis depth options"""
+        input_types = XDEV_FaceQualityAnalyzer.INPUT_TYPES()
+        
+        depths = input_types["required"]["analysis_depth"][0]
+        assert "basic" in depths
+        assert "comprehensive" in depths
+        assert "professional" in depths
+    
+    def test_basic_quality_analysis(self):
+        """Test basic quality analysis"""
+        analyzer = XDEV_FaceQualityAnalyzer()
+        
+        # Create mock image
+        try:
+            import torch
+            image = torch.ones(1, 512, 512, 3, dtype=torch.float32)
+        except ImportError:
+            class MockImage:
+                def __init__(self, shape):
+                    self.shape = shape
+            image = MockImage((1, 512, 512, 3))
+        
+        # Test quality analysis
+        result = analyzer.analyze_face_quality(
+            image=image,
+            analysis_depth="comprehensive"
+        )
+        
+        # Verify result structure
+        assert len(result) == 3  # quality_report, recommendations, overall_score
+        quality_report, recommendations, overall_score = result
+        
+        assert isinstance(quality_report, str)
+        assert isinstance(recommendations, str)
+        assert isinstance(overall_score, float)
+        
+        # Check content
+        assert "QUALITY" in quality_report
+        assert overall_score >= 0.0 and overall_score <= 1.0
+    
+    def test_professional_analysis(self):
+        """Test professional depth analysis"""
+        analyzer = XDEV_FaceQualityAnalyzer()
+        
+        try:
+            import torch
+            image = torch.ones(1, 512, 512, 3, dtype=torch.float32)
+        except ImportError:
+            class MockImage:
+                def __init__(self, shape):
+                    self.shape = shape
+            image = MockImage((1, 512, 512, 3))
+        
+        # Test professional analysis
+        result = analyzer.analyze_face_quality(
+            image=image,
+            analysis_depth="professional",
+            include_recommendations=True
+        )
+        
+        quality_report, recommendations, overall_score = result
+        
+        # Professional analysis should have more detailed metrics
+        assert "ADVANCED METRICS" in quality_report or "advanced" in quality_report.lower()
+        assert len(recommendations) > 0
+        assert "RECOMMENDATION" in recommendations or "recommendation" in recommendations.lower()
+
+
+def run_all_tests():
+    """Run all face swap tests"""
+    
+    # Advanced Face Swap tests
+    face_swap_tests = TestAdvancedFaceSwap()
+    print("🎭 Testing Advanced Face Swap...")
+    
+    face_swap_tests.test_face_swap_import()
+    print("  ✅ Import test passed")
+    
+    face_swap_tests.test_input_types_validation()
+    print("  ✅ Input types validation passed")
+    
+    face_swap_tests.test_detection_models()
+    print("  ✅ Detection models test passed")
+    
+    face_swap_tests.test_alignment_methods()
+    print("  ✅ Alignment methods test passed")
+    
+    face_swap_tests.test_blending_modes()
+    print("  ✅ Blending modes test passed")
+    
+    face_swap_tests.test_enhancement_modes()
+    print("  ✅ Enhancement modes test passed")
+    
+    face_swap_tests.test_basic_face_swap_processing()
+    print("  ✅ Basic processing test passed")
+    
+    face_swap_tests.test_face_swap_with_enhancements()
+    print("  ✅ Enhanced processing test passed")
+    
+    face_swap_tests.test_error_handling()
+    print("  ✅ Error handling test passed")
+    
+    # Face Swap Batch tests
+    batch_tests = TestFaceSwapBatch()
+    print("\n📦 Testing Face Swap Batch...")
+    
+    batch_tests.test_batch_import()
+    print("  ✅ Import test passed")
+    
+    batch_tests.test_batch_input_types()
+    print("  ✅ Input types test passed")
+    
+    batch_tests.test_batch_processing_modes()
+    print("  ✅ Processing modes test passed")
+    
+    batch_tests.test_basic_batch_processing()
+    print("  ✅ Basic batch processing test passed")
+    
+    # Face Quality Analyzer tests
+    analyzer_tests = TestFaceQualityAnalyzer()
+    print("\n🔍 Testing Face Quality Analyzer...")
+    
+    analyzer_tests.test_analyzer_import()
+    print("  ✅ Import test passed")
+    
+    analyzer_tests.test_analyzer_input_types()
+    print("  ✅ Input types test passed")
+    
+    analyzer_tests.test_analysis_depth_options()
+    print("  ✅ Analysis depth options test passed")
+    
+    analyzer_tests.test_basic_quality_analysis()
+    print("  ✅ Basic analysis test passed")
+    
+    analyzer_tests.test_professional_analysis()
+    print("  ✅ Professional analysis test passed")
+    
+    print(f"\n🎉 All advanced face swap tests passed! Tested 3 nodes with 17 test functions.")
+
+
+if __name__ == "__main__":
+    run_all_tests()

@@ -1,12 +1,28 @@
 [project]
 name = "comfyui-xdev-nodes"
-version = "0.2.0"
-description = "Complete ComfyUI development toolkit with 8 professional nodes including VAE tools, universal type testing, and comprehensive debugging infrastructure."
+version = "0.6.0"
+description = "Complete professional ComfyUI toolkit with 44+ specialized nodes covering advanced prompt engineering, face swapping, LLM integration, SDXL model mixing, and cutting-edge sampling techniques."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 classifiers = [
   "Operating System :: OS Independent"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "ruff>=0.1.0",
+    "numpy>=1.21.0",
+]
+
+face_processing = [
+    "opencv-python>=4.5.0",
+    "mediapipe>=0.8.0",
+    "insightface>=0.7.3",
+    "pillow>=8.0.0",
+    "scipy>=1.7.0",
 ]
 
 [project.urls]

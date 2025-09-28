@@ -1,5 +1,3 @@
-from __future__ import annotations
-from ..categories import NodeCategories
 """
 XDev Advanced Face Swap Nodes
 
@@ -15,6 +13,8 @@ Professional-grade face swapping system with advanced features:
 This system goes far beyond basic face swapping to provide
 production-quality results suitable for professional workflows.
 """
+
+from __future__ import annotations
 from typing import Dict, Tuple, Any, Union, List, Optional
 import json
 import random
@@ -66,7 +66,6 @@ except ImportError:
 
 
 class XDEV_AdvancedFaceSwap(ImageProcessingNode):
-    DISPLAY_NAME = "Advanced Face Swap (XDev)"
     """
     Professional Advanced Face Swap System
     
@@ -212,7 +211,7 @@ class XDEV_AdvancedFaceSwap(ImageProcessingNode):
     RETURN_TYPES = ("IMAGE", "STRING", "STRING", "IMAGE")
     RETURN_NAMES = ("swapped_image", "process_info", "face_analysis", "debug_overlay")
     FUNCTION = "advanced_face_swap"
-    CATEGORY = NodeCategories.FACE_PROCESSING_ADVANCED
+    CATEGORY = "XDev/Face Processing/Advanced"
     DESCRIPTION = "Professional-grade face swapping with advanced detection, alignment, and blending"
 
     @performance_monitor("advanced_face_swap")
@@ -1820,7 +1819,6 @@ class XDEV_AdvancedFaceSwap(ImageProcessingNode):
         else:
             # Fallback error image
             class ErrorImage:
-                DISPLAY_NAME = "Error Image (XDev)"
                 def __init__(self):
                     self.shape = (1, 512, 512, 3)
                 def __str__(self):
@@ -1841,7 +1839,6 @@ class XDEV_AdvancedFaceSwap(ImageProcessingNode):
 
 
 class XDEV_FaceSwapBatch(ImageProcessingNode):
-    DISPLAY_NAME = "Face Swap Batch (XDev)"
     """
     Advanced Face Swap Batch Processor
     
@@ -1886,7 +1883,7 @@ class XDEV_FaceSwapBatch(ImageProcessingNode):
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     RETURN_NAMES = ("batch_results", "batch_info", "batch_analysis")
     FUNCTION = "process_batch"
-    CATEGORY = NodeCategories.FACE_PROCESSING_BATCH
+    CATEGORY = "XDev/Face Processing/Batch"
     DESCRIPTION = "Advanced batch face swapping with consistency and quality optimization"
 
     @performance_monitor("face_swap_batch")
@@ -1951,7 +1948,6 @@ Results generated: {len(results) if hasattr(results, '__len__') else 'Single'}
 
 
 class XDEV_FaceQualityAnalyzer(ValidationMixin):
-    DISPLAY_NAME = "Face Quality Analyzer (XDev)"
     """
     Face Quality Analyzer
     
@@ -1985,7 +1981,7 @@ class XDEV_FaceQualityAnalyzer(ValidationMixin):
     RETURN_TYPES = ("STRING", "STRING", "FLOAT")
     RETURN_NAMES = ("quality_report", "recommendations", "overall_score")
     FUNCTION = "analyze_face_quality"
-    CATEGORY = NodeCategories.FACE_PROCESSING_ANALYSIS
+    CATEGORY = "XDev/Face Processing/Analysis"
     DESCRIPTION = "Comprehensive face quality analysis and optimization recommendations"
 
     @performance_monitor("face_quality_analysis")
