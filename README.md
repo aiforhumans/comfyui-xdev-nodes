@@ -786,29 +786,35 @@ docs/                           # 📚 Comprehensive Documentation
 
 ## 📚 Comprehensive Documentation
 
-The `docs/` folder contains extensive guides for all aspects of ComfyUI development:
+### 🎯 Quick Start Documentation
+- **[📖 Documentation Index](docs/DOCUMENTATION_INDEX.md)** - Complete navigation guide to all documentation
+- **[📊 Project Status Report](PROJECT_STATUS_REPORT.md)** - Complete project achievements and architecture overview
+- **[⚡ Performance Framework](PERFORMANCE_FRAMEWORK.md)** - Comprehensive performance optimization guide
+- **[🛠️ Development Guide](docs/DEVELOPMENT_GUIDE.md)** - Complete development journey and architecture patterns
 
-### Getting Started
-- **[📋 Overview](docs/00_Overview.md)** - Project architecture and development philosophy
-- **[🧬 Node Anatomy](docs/01_Node_Anatomy.md)** - Complete node structure and patterns
-- **[🔢 Datatypes](docs/02_Datatypes.md)** - ComfyUI type system with examples
+### 🎓 ComfyUI Learning Resources (Foundation)
+- **[📋 Overview](docs/00_Overview.md)** - ComfyUI extension development overview
+- **[🧬 Node Anatomy](docs/01_Node_Anatomy.md)** - Understanding ComfyUI node structure  
+- **[🔢 Datatypes](docs/02_Datatypes.md)** - ComfyUI data type system
+- **[🖼️ Images, Latents & Masks](docs/03_Images_Latents_Masks.md)** - Image processing concepts
+- **[⚙️ Advanced Inputs](docs/04_Inputs_Advanced.md)** - Advanced input configuration
 
-### Advanced Development  
-- **[🖼️ Images, Latents & Masks](docs/03_Images_Latents_Masks.md)** - Advanced image processing techniques
-- **[⚙️ Advanced Inputs](docs/04_Inputs_Advanced.md)** - Complex input patterns and validation
-- **[🌐 JS Extensions](docs/05_JS_Extensions.md)** - Frontend development and custom widgets
-
-### Production & Distribution
-- **[📦 Packaging & Registry](docs/06_Packaging_and_Registry.md)** - Publishing to ComfyUI registry
-- **[🧪 Testing & CI](docs/07_Testing_CI.md)** - Testing strategies and continuous integration
-- **[🔧 Configuration & Testing](docs/09_Configuration_Testing.md)** - Infrastructure setup and validation
-
-### Troubleshooting  
+### 🚀 Advanced Topics & Production
+- **[🌐 JS Extensions](docs/05_JS_Extensions.md)** - JavaScript extension development
+- **[📦 Packaging & Registry](docs/06_Packaging_and_Registry.md)** - Extension packaging and distribution
+- **[🧪 Testing & CI](docs/07_Testing_CI.md)** - Testing strategies and CI/CD
 - **[🚨 Troubleshooting](docs/08_Troubleshooting.md)** - Common issues and solutions
-- **[📊 Type Selection Guide](docs/how_to_pick_types.png)** - Visual flowchart for choosing types
+- **[🔧 Configuration & Testing](docs/09_Configuration_Testing.md)** - Configuration best practices
 
-### Quick References
-Each document includes practical examples, code snippets, and real-world patterns used in production ComfyUI extensions.
+### 🎭 Feature-Specific Guides
+- **[Advanced KSampler Guide](docs/Advanced_KSampler_Guide.md)** - Multi-variant sampling strategies
+- **[Face Swap Guide](docs/Advanced_Face_Swap_Guide.md)** - Professional face swapping workflows  
+- **[SDXL Model Mixer](docs/SDXL_Model_Mixer_Guide.md)** - Advanced model blending techniques
+- **[LLM Integration](docs/LLM_DEV_Framework_Guide.md)** - Local LLM server integration
+- **[Face Swap Models](docs/FACESWAP_MODELS.md)** - Face swap model setup and configuration
+
+### 📝 Individual Node Documentation  
+Detailed documentation for all 42 nodes is available in `xdev_nodes/web/docs/` with comprehensive usage examples, technical specifications, and workflow integration patterns.
 
 ---
 

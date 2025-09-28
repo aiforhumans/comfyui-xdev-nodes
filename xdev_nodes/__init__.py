@@ -28,12 +28,31 @@ try:
 except Exception as e:
     debug_print(f"⚠️ Model path setup failed: {e}")
 
+# Ensure this package is available for imports
+current_dir = Path(__file__).parent
+package_name = "xdev_nodes"
+
+# Register this package in sys.modules if it's not already there
+if package_name not in sys.modules:
+    import types
+    xdev_module = types.ModuleType(package_name)
+    xdev_module.__file__ = str(current_dir / "__init__.py")
+    xdev_module.__path__ = [str(current_dir)]
+    sys.modules[package_name] = xdev_module
+    
+    # Also register the nodes subpackage
+    nodes_package = f"{package_name}.nodes"
+    if nodes_package not in sys.modules:
+        nodes_module = types.ModuleType(nodes_package)
+        nodes_module.__file__ = str(current_dir / "nodes" / "__init__.py")
+        nodes_module.__path__ = [str(current_dir / "nodes")]
+        sys.modules[nodes_package] = nodes_module
+
 # Auto-registration system
 from .registry import registry
 from .categories import NodeCategories
 
 # Discover and register all nodes
-current_dir = Path(__file__).parent
 nodes_dir = current_dir / "nodes"
 registry.discover_nodes(nodes_dir)
 

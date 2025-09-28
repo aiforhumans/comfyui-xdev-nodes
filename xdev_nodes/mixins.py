@@ -6,6 +6,7 @@ Provides standardized validation patterns and reduces code duplication.
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple, Union, Type
 from .performance import PrecompiledPatterns, fast_type_check, intern_string, CompactDict, performance_monitor
+from .categories import NodeCategories
 
 class ValidationMixin:
     """Base validation mixin providing common validation methods"""
@@ -145,7 +146,7 @@ class BaseXDevNode(ValidationMixin, CachingMixin, ErrorHandlingMixin, ABC):
     RETURN_TYPES = ("STRING",)  # Default, should be overridden
     RETURN_NAMES = ("output",)  # Default, should be overridden  
     FUNCTION = "execute"        # Default, should be overridden
-    CATEGORY = "XDev/Base"      # Default category
+    CATEGORY = NodeCategories.BASIC      # Default category
     DESCRIPTION = "XDev base node"  # Default description
     
     def validate_all_inputs(self, **kwargs) -> Dict[str, Any]:
@@ -164,7 +165,7 @@ class BaseXDevNode(ValidationMixin, CachingMixin, ErrorHandlingMixin, ABC):
 class TextProcessingNode(BaseXDevNode):
     """Base class for text processing nodes"""
     
-    CATEGORY = "XDev/Text"
+    CATEGORY = NodeCategories.TEXT
     
     def validate_text_inputs(self, text: str, **kwargs) -> Dict[str, Any]:
         """Common text validation"""
@@ -176,7 +177,7 @@ class TextProcessingNode(BaseXDevNode):
 class MathProcessingNode(BaseXDevNode):
     """Base class for mathematical operation nodes"""
     
-    CATEGORY = "XDev/Math"
+    CATEGORY = NodeCategories.MATH
     
     def validate_numeric_inputs(self, **kwargs) -> Dict[str, Any]:
         """Common numeric validation"""
@@ -190,7 +191,7 @@ class MathProcessingNode(BaseXDevNode):
 class ImageProcessingNode(BaseXDevNode):
     """Base class for image processing nodes"""
     
-    CATEGORY = "XDev/Image"
+    CATEGORY = NodeCategories.IMAGE_BASIC
     
     def validate_image_inputs(self, image: Any, **kwargs) -> Dict[str, Any]:
         """Common image validation"""

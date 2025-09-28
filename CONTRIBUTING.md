@@ -2,13 +2,21 @@
 
 🎉 Thank you for your interest in contributing to the XDev ComfyUI Nodes project! This guide will help you get started with contributing to our educational ComfyUI custom node framework.
 
+## 📚 Documentation Quick Reference
+
+Before contributing, familiarize yourself with our comprehensive documentation:
+- **[Documentation Index](docs/DOCUMENTATION_INDEX.md)** - Complete navigation guide
+- **[Development Guide](docs/DEVELOPMENT_GUIDE.md)** - Architecture patterns and best practices
+- **[Project Status Report](PROJECT_STATUS_REPORT.md)** - Current status and technical achievements
+- **[Performance Framework](PERFORMANCE_FRAMEWORK.md)** - Performance optimization guidelines
+
 ## 🎯 Project Mission
 
 XDev serves as a **starter kit and educational framework** for ComfyUI custom node development, demonstrating:
-- Professional node development patterns
-- Comprehensive input validation and error handling  
-- Rich documentation and tooltip systems
-- Production-ready testing and CI workflows
+- Professional node development patterns with 42 production-ready nodes
+- Comprehensive input validation and error handling framework
+- Rich documentation and tooltip systems for educational value
+- Production-ready testing and CI workflows with GitHub Actions
 
 ## 🚀 Quick Start for Contributors
 
