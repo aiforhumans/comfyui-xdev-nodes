@@ -1,5 +1,5 @@
 from __future__ import annotations
-from ..categories import NodeCategories
+from ...categories import NodeCategories
 """
 XDev Advanced Face Swap Nodes
 
@@ -19,9 +19,9 @@ from typing import Dict, Tuple, Any, Union, List, Optional
 import json
 import random
 import math
-from ..utils import get_torch, get_numpy, get_opencv, get_insightface, efficient_data_analysis
-from ..performance import performance_monitor, cached_operation
-from ..mixins import ValidationMixin, ImageProcessingNode
+from ...utils import get_torch, get_numpy, get_opencv, get_insightface, efficient_data_analysis
+from ...performance import performance_monitor, cached_operation
+from ...mixins import ValidationMixin, ImageProcessingNode
 
 # Advanced face swap dependencies (graceful fallbacks)
 try:

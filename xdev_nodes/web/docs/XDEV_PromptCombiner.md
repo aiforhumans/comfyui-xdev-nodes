@@ -2,13 +2,15 @@
 
 ## Overview
 
-The **Prompt Combiner** node provides advanced prompt combination capabilities with multiple merging strategies and intelligent formatting options. It supports combining up to 4 prompts with various separators and weighting systems.
+The **Prompt Combiner** node provides advanced prompt combination capabilities with multiple merging strategies, intelligent formatting options, and **chat message formatting**. It supports combining up to 4 regular prompts plus dedicated system, user, and assistant message blocks for conversational AI workflows.
 
 ## Features
 
-- **Multiple Combination Modes**: Concatenation, weighted merging, alternating, and priority-based merging
+- **Multiple Combination Modes**: Concatenation, weighted merging, alternating, priority-based merging, **chat format**, and **instruct format**
+- **Chat Message Support**: Dedicated blocks for system, user, and assistant messages
 - **Flexible Separators**: Comma, space, newline, pipe, semicolon, or custom separators  
 - **Weighted Merging**: Apply individual weights to each prompt in weighted_merge mode
+- **Conversational Formatting**: Professional chat and instruction templates
 - **Performance Optimized**: Uses advanced caching and performance monitoring
 - **Comprehensive Validation**: Input validation with detailed error reporting
 
@@ -22,6 +24,8 @@ The **Prompt Combiner** node provides advanced prompt combination capabilities w
   - `weighted_merge`: Combine with weight syntax (prompt:weight)
   - `alternating`: Alternate between prompts
   - `priority_merge`: Sort by length, longest first
+  - `chat_format`: Format as conversational messages (Role: Content)
+  - `instruct_format`: Format as instruction blocks (### Role\\nContent)
 - **separator** (DROPDOWN): Separator between prompts
   - `comma`: ", " (default)
   - `space`: " "
@@ -33,40 +37,33 @@ The **Prompt Combiner** node provides advanced prompt combination capabilities w
 ### Optional Parameters
 - **prompt_3** (STRING): Optional third prompt
 - **prompt_4** (STRING): Optional fourth prompt
+- **system_message** (STRING): System message for chat/instruct formats
+- **user_message** (STRING): User message for chat/instruct formats  
+- **assistant_message** (STRING): Assistant message for chat/instruct formats
 - **weight_1-4** (FLOAT): Individual weights for weighted_merge mode (0.1-5.0)
 - **custom_separator** (STRING): Custom separator when separator="custom"
 - **validate_input** (BOOLEAN): Enable input validation
 
 ## Output Types
 
-1. **combined_prompt** (STRING): The resulting combined prompt
-2. **combination_info** (STRING): Information about the combination process
-3. **total_prompts** (INT): Number of non-empty prompts processed
+1. **combined_prompt** (STRING): The resulting combined prompt or formatted conversation
+2. **combination_info** (STRING): Information about the combination process and message types
+3. **total_items** (INT): Number of non-empty prompts/messages processed
 
 ## Usage Examples
 
-### Basic Concatenation
+### Chat Message Formatting
 ```
 Inputs:
-- prompt_1: "beautiful landscape"
-- prompt_2: "dramatic lighting"
-- mode: "concatenate"
-- separator: "comma"
+- mode: "chat_format"
+- system_message: "You are a creative AI assistant specialized in image generation."
+- user_message: "Create a beautiful mountain landscape at sunset."
+- assistant_message: "I'll create a stunning mountain landscape with warm sunset colors."
 
-Output: "beautiful landscape, dramatic lighting"
-```
+Output:
+System: You are a creative AI assistant specialized in image generation.
 
-### Weighted Merging
-```
-Inputs:
-- prompt_1: "portrait"
-- prompt_2: "detailed"
-- mode: "weighted_merge"
-- weight_1: 1.3
-- weight_2: 0.8
-
-Output: "(portrait:1.3), (detailed:0.8)"
-```
+User: Create a beautiful mountain landscape at sunset.
 
 ### Priority Merging
 ```

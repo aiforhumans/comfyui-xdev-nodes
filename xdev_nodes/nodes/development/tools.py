@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Dict, Tuple, Any, Union, List
 import json
 import sys
-from ..categories import NodeCategories
+from ...categories import NodeCategories
 
 class OutputDev:
     """

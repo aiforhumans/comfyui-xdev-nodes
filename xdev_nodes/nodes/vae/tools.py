@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Dict, Tuple, Any, Union
-from ..utils import efficient_data_analysis, get_torch, get_numpy
-from ..categories import NodeCategories
+from ...utils import efficient_data_analysis, get_torch, get_numpy
+from ...categories import NodeCategories
 
 class VAERoundTrip:
     """

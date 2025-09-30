@@ -1,10 +1,10 @@
 from __future__ import annotations
 from typing import Dict, Tuple, Any
 from functools import lru_cache
-from ..utils import fast_string_validation, efficient_data_analysis
-from ..performance import performance_monitor, cached_operation, intern_string, PrecompiledPatterns
-from ..mixins import TextProcessingNode, ValidationMixin
-from ..categories import NodeCategories
+from ...utils import fast_string_validation, efficient_data_analysis
+from ...performance import performance_monitor, cached_operation, intern_string, PrecompiledPatterns
+from ...mixins import TextProcessingNode, ValidationMixin
+from ...categories import NodeCategories
 
 class AppendSuffix:
     DISPLAY_NAME = "Append Suffix (XDev)"

@@ -33,6 +33,56 @@ def test_prompt_combiner():
     assert "(portrait:1.2)" in result
     assert "(detailed:0.8)" in result
     print(f"✅ PromptCombiner weighted: {result}")
+    
+    # Test chat format with system, user, assistant messages
+    result, info, count = node.combine_prompts(
+        "", "",  # Empty regular prompts
+        "chat_format",
+        "comma",
+        system_message="You are a creative AI assistant",
+        user_message="Create a beautiful landscape", 
+        assistant_message="I will create a stunning landscape"
+    )
+    
+    assert "System: You are a creative AI assistant" in result
+    assert "User: Create a beautiful landscape" in result 
+    assert "Assistant: I will create a stunning landscape" in result
+    assert count == 3
+    assert "chat_format" in info
+    print(f"✅ PromptCombiner chat format: {result}")
+    
+    # Test instruct format
+    result, info, count = node.combine_prompts(
+        "", "",
+        "instruct_format", 
+        "comma",
+        system_message="You are a photographer",
+        user_message="Take a photo of mountains"
+    )
+    
+    assert "### System" in result
+    assert "You are a photographer" in result
+    assert "### User" in result
+    assert "Take a photo of mountains" in result
+    assert count == 2
+    print(f"✅ PromptCombiner instruct format: {result}")
+    
+    # Test mixed mode (regular prompts + chat messages)
+    result, info, count = node.combine_prompts(
+        "high quality",
+        "detailed",
+        "concatenate",
+        "comma", 
+        system_message="professional work",
+        user_message="8K resolution"
+    )
+    
+    assert "professional work" in result  # System message included first
+    assert "high quality" in result
+    assert "detailed" in result  
+    assert "8K resolution" in result  # User message included last
+    assert count == 4
+    print(f"✅ PromptCombiner mixed mode: {result}")
 
 
 def test_prompt_weighter():

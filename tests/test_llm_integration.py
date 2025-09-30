@@ -72,6 +72,72 @@ class TestLMStudioChatImport(unittest.TestCase):
         self.assertIn('temperature', optional)
         self.assertIn('max_tokens', optional)
         self.assertIn('stream', optional)
+        
+        # Check new easy-to-edit history inputs
+        expected_history_inputs = [
+            'history_user_1', 'history_assistant_1',
+            'history_user_2', 'history_assistant_2',
+            'history_user_3', 'history_assistant_3'
+        ]
+        for history_input in expected_history_inputs:
+            self.assertIn(history_input, optional, f"Missing history input: {history_input}")
+
+
+class TestLMStudioChatMessageHistory(unittest.TestCase):
+    """Test LM Studio Chat message history functionality."""
+    
+    def setUp(self):
+        """Set up test fixtures."""
+        if not IMPORT_SUCCESS:
+            self.skipTest("Import failed")
+        self.node = LMStudioChat()
+    
+    def test_easy_edit_history_building(self):
+        """Test building messages with easy-to-edit history inputs."""
+        messages = self.node._build_message_list(
+            prompt="What's the weather?",
+            system_prompt="You are a weather assistant.",
+            message_history="",  # No legacy history
+            history_user_1="Hello!",
+            history_assistant_1="Hi there!",
+            history_user_2="How are you?",
+            history_assistant_2="I'm doing great!",
+            history_user_3="",  # Empty, should be ignored
+            history_assistant_3=""
+        )
+        
+        # Should have: system, user1, assistant1, user2, assistant2, current_prompt
+        self.assertEqual(len(messages), 6)
+        self.assertEqual(messages[0]["role"], "system")
+        self.assertEqual(messages[1]["role"], "user")
+        self.assertEqual(messages[1]["content"], "Hello!")
+        self.assertEqual(messages[2]["role"], "assistant")
+        self.assertEqual(messages[2]["content"], "Hi there!")
+        self.assertEqual(messages[-1]["role"], "user")
+        self.assertEqual(messages[-1]["content"], "What's the weather?")
+    
+    def test_legacy_json_compatibility(self):
+        """Test that legacy JSON message history still works."""
+        legacy_history = '[{"role": "user", "content": "Legacy user"}, {"role": "assistant", "content": "Legacy assistant"}]'
+        
+        messages = self.node._build_message_list(
+            prompt="Current question",
+            system_prompt="",
+            message_history=legacy_history,
+            history_user_1="New user",
+            history_assistant_1="New assistant"
+        )
+        
+        # Should combine legacy JSON + new format + current prompt
+        self.assertGreater(len(messages), 3)
+        
+        # Check that both legacy and new messages are present
+        contents = [msg["content"] for msg in messages]
+        self.assertIn("Legacy user", contents)
+        self.assertIn("Legacy assistant", contents)
+        self.assertIn("New user", contents)
+        self.assertIn("New assistant", contents)
+        self.assertIn("Current question", contents)
 
 
 class TestLMStudioChatConfiguration(unittest.TestCase):

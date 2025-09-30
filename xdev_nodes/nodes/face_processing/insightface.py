@@ -1,4 +1,4 @@
-from ..categories import NodeCategories
+from ...categories import NodeCategories
 """
 XDev ComfyUI-Compatible Face Swap Node
 
@@ -10,9 +10,9 @@ from typing import Dict, Any, List, Tuple
 import os
 
 # XDev framework imports
-from ..performance import performance_monitor, cached_operation
-from ..mixins import ImageProcessingNode
-from ..utils import get_numpy, get_torch
+from ...performance import performance_monitor, cached_operation
+from ...mixins import ImageProcessingNode
+from ...utils import get_numpy, get_torch
 
 class XDEV_InsightFaceFaceSwap(ImageProcessingNode):
     """

@@ -1,4 +1,4 @@
-from ..categories import NodeCategories
+from ...categories import NodeCategories
 """
 LLM Integration Nodes - Local LLM server support for ComfyUI
 
@@ -17,8 +17,8 @@ Features:
 import json
 import time
 from typing import Dict, List, Tuple, Any, Optional, Union
-from ..mixins import ValidationMixin
-from ..performance import performance_monitor, cached_operation
+from ...mixins import ValidationMixin
+from ...performance import performance_monitor, cached_operation
 
 # HTTP client with graceful fallbacks
 try:
@@ -48,7 +48,8 @@ class LMStudioChat(ValidationMixin):
     Features:
     - OpenAI-compatible chat completions API
     - Automatic server discovery and health checks
-    - Message history management with system prompts
+    - Easy-to-edit message history with individual input blocks
+    - Legacy JSON history support for backward compatibility
     - Streaming and non-streaming responses
     - Advanced configuration (temperature, max_tokens, etc.)
     - Robust error handling with connection fallbacks
@@ -105,7 +106,37 @@ class LMStudioChat(ValidationMixin):
                 "message_history": ("STRING", {
                     "multiline": True,
                     "default": "",
-                    "tooltip": "Previous conversation history in JSON format"
+                    "tooltip": "Previous conversation history in JSON format (legacy format)"
+                }),
+                "history_user_1": ("STRING", {
+                    "multiline": True,
+                    "default": "",
+                    "tooltip": "Previous user message 1 (easy editing)"
+                }),
+                "history_assistant_1": ("STRING", {
+                    "multiline": True,
+                    "default": "",
+                    "tooltip": "Previous assistant response 1 (easy editing)"
+                }),
+                "history_user_2": ("STRING", {
+                    "multiline": True,
+                    "default": "",
+                    "tooltip": "Previous user message 2 (easy editing)"
+                }),
+                "history_assistant_2": ("STRING", {
+                    "multiline": True,
+                    "default": "",
+                    "tooltip": "Previous assistant response 2 (easy editing)"
+                }),
+                "history_user_3": ("STRING", {
+                    "multiline": True,
+                    "default": "",
+                    "tooltip": "Previous user message 3 (easy editing)"
+                }),
+                "history_assistant_3": ("STRING", {
+                    "multiline": True,
+                    "default": "",
+                    "tooltip": "Previous assistant response 3 (easy editing)"
                 }),
                 "temperature": ("FLOAT", {
                     "default": 0.7,
@@ -168,6 +199,12 @@ class LMStudioChat(ValidationMixin):
         preset: str,
         system_prompt: str = "",
         message_history: str = "",
+        history_user_1: str = "",
+        history_assistant_1: str = "",
+        history_user_2: str = "",
+        history_assistant_2: str = "",
+        history_user_3: str = "",
+        history_assistant_3: str = "",
         temperature: float = 0.7,
         max_tokens: int = 1024,
         top_p: float = 0.8,
@@ -206,7 +243,12 @@ class LMStudioChat(ValidationMixin):
             config = self._get_preset_config(preset, temperature, max_tokens, top_p)
             
             # Build message list
-            messages = self._build_message_list(prompt, system_prompt, message_history)
+            messages = self._build_message_list(
+                prompt, system_prompt, message_history,
+                history_user_1, history_assistant_1,
+                history_user_2, history_assistant_2, 
+                history_user_3, history_assistant_3
+            )
             
             # Generate response
             start_time = time.time()
@@ -416,9 +458,15 @@ class LMStudioChat(ValidationMixin):
         self, 
         prompt: str, 
         system_prompt: str, 
-        message_history: str
+        message_history: str,
+        history_user_1: str = "",
+        history_assistant_1: str = "",
+        history_user_2: str = "",
+        history_assistant_2: str = "",
+        history_user_3: str = "",
+        history_assistant_3: str = ""
     ) -> List[Dict[str, str]]:
-        """Build OpenAI-compatible message list."""
+        """Build OpenAI-compatible message list with easy-to-edit history blocks."""
         
         messages = []
         
@@ -426,7 +474,7 @@ class LMStudioChat(ValidationMixin):
         if system_prompt.strip():
             messages.append({"role": "system", "content": system_prompt.strip()})
         
-        # Parse message history if provided
+        # Parse legacy JSON message history if provided
         if message_history.strip():
             try:
                 history = json.loads(message_history)
@@ -438,7 +486,20 @@ class LMStudioChat(ValidationMixin):
                 # Ignore invalid JSON history
                 pass
         
-        # Add user prompt
+        # Add easy-to-edit individual history messages (in chronological order)
+        history_pairs = [
+            (history_user_1, history_assistant_1),
+            (history_user_2, history_assistant_2),
+            (history_user_3, history_assistant_3)
+        ]
+        
+        for user_msg, assistant_msg in history_pairs:
+            if user_msg.strip():
+                messages.append({"role": "user", "content": user_msg.strip()})
+            if assistant_msg.strip():
+                messages.append({"role": "assistant", "content": assistant_msg.strip()})
+        
+        # Add current user prompt
         messages.append({"role": "user", "content": prompt})
         
         return messages

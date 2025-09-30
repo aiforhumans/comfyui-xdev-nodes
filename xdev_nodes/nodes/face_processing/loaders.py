@@ -1,4 +1,4 @@
-from ..categories import NodeCategories
+from ...categories import NodeCategories
 """
 XDev InsightFace Model Loaders
 
@@ -22,9 +22,9 @@ except ImportError:
     mm = None
 
 # XDev framework imports  
-from ..performance import performance_monitor, cached_operation
-from ..mixins import ValidationMixin
-from ..utils import get_insightface, get_numpy, get_torch
+from ...performance import performance_monitor, cached_operation
+from ...mixins import ValidationMixin
+from ...utils import get_insightface, get_numpy, get_torch
 
 # InsightFace imports (graceful fallbacks)
 try:

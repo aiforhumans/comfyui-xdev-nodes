@@ -1,8 +1,8 @@
 from __future__ import annotations
 from typing import Dict, Tuple, Any
 from datetime import datetime
-from ..utils import efficient_data_analysis, get_object_size, validate_choice
-from ..categories import NodeCategories
+from ...utils import efficient_data_analysis, get_object_size, validate_choice
+from ...categories import NodeCategories
 
 class HelloString:
     DISPLAY_NAME = "Hello String (XDev)"

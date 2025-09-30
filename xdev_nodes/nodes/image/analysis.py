@@ -52,58 +52,46 @@ def _avg_brightness_list(img):
 
 
 class PickByBrightness:
-    DISPLAY_NAME = "Pick By Brightness (XDev)"
     """
-    Enhanced image brightness selector with comprehensive validation and rich documentation.
+    Advanced image selection based on brightness analysis with multiple algorithms.
     
-    This node demonstrates:
-    - Robust fallback implementations (torch → numpy → pure Python)
-    - Comprehensive input validation with detailed error messages
-    - Rich tooltip documentation for all parameters
-    - Advanced brightness calculation with multiple algorithms
+    Intelligently selects the brightest or darkest image from a batch using various
+    brightness calculation methods. Features graceful fallbacks from PyTorch to NumPy
+    to pure Python for maximum compatibility.
     """
-
+    
+    DISPLAY_NAME = "Pick By Brightness (XDev)"
+    
     @classmethod
     def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]:
         return {
             "required": {
                 "images": ("IMAGE", {
-                    "tooltip": "Batch of input images to analyze. Supports ComfyUI IMAGE tensors in [B,H,W,C] format. Minimum batch size: 2 images."
+                    "tooltip": "Batch of images to analyze. Must contain at least 2 images for comparison."
                 }),
                 "mode": (["brightest", "darkest"], {
                     "default": "brightest",
-                    "tooltip": "Selection criteria: 'brightest' picks the image with highest average brightness, 'darkest' picks the image with lowest average brightness."
-                }),
+                    "tooltip": "Selection criteria: 'brightest' selects highest brightness, 'darkest' selects lowest brightness."
+                })
             },
             "optional": {
                 "algorithm": (["average", "weighted", "luminance"], {
                     "default": "average",
-                    "tooltip": "Brightness calculation method: 'average' uses simple RGB mean, 'weighted' applies perceptual weights, 'luminance' uses standard luminance formula.",
-                    "lazy": True
+                    "tooltip": "Brightness calculation method: 'average' (simple mean), 'weighted' (perceptual), 'luminance' (standard formula)."
                 }),
                 "validate_input": ("BOOLEAN", {
                     "default": True,
-                    "tooltip": "Enable comprehensive input validation with detailed error messages. Recommended for production workflows."
-                }),
-                "quality_threshold": ("FLOAT", {
-                    "default": 0.5,
-                    "min": 0.0,
-                    "max": 1.0,
-                    "step": 0.01,
-                    "round": 0.001,
-                    "display": "slider",
-                    "tooltip": "Minimum brightness quality threshold for image selection (0.0-1.0)",
-                    "lazy": True
+                    "tooltip": "Enable comprehensive input validation with detailed error messages."
                 }),
                 "return_metadata": ("BOOLEAN", {
                     "default": False,
-                    "tooltip": "Return additional metadata including brightness scores and processing method used."
-                }),
+                    "tooltip": "Include detailed processing information in the output string."
+                })
             }
         }
 
     RETURN_TYPES = ("IMAGE", "FLOAT", "STRING")
-    RETURN_NAMES = ("selected_image", "brightness_score", "processing_info")
+    RETURN_NAMES = ("selected_image", "brightness_score", "selection_info")
     FUNCTION = "pick"
     CATEGORY = NodeCategories.IMAGE_ANALYSIS
     DESCRIPTION = "Select brightest or darkest image from batch with comprehensive validation and multiple algorithms"
@@ -187,7 +175,7 @@ class PickByBrightness:
         except Exception as e:
             error_msg = f"Error processing images: {str(e)}"
             return (images if hasattr(images, '__len__') and len(images) > 0 else None, 0.0, error_msg)
-    
+
     def _validate_inputs(self, images, mode: str, algorithm: str) -> Dict[str, Any]:
         """
         Optimized input validation with early returns for performance.
@@ -252,4 +240,4 @@ class PickByBrightness:
                 cache_key += f"_{images.shape}"
             return cache_key
         except:
-            return f"{mode}_{algorithm}_{validate_input}_{return_metadata}"
+            return float("nan")

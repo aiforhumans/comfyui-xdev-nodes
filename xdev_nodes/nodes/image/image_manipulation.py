@@ -3,7 +3,8 @@ Core image manipulation operations
 Part of the XDev Nodes modular architecture.
 """
 
-from typing import Dict, Any
+from __future__ import annotations
+from typing import Dict, Tuple, Any
 from ...performance import performance_monitor, cached_operation, intern_string
 from ...mixins import ImageProcessingNode
 from ...categories import NodeCategories

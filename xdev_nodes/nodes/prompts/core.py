@@ -1,4 +1,4 @@
-from ..categories import NodeCategories
+from ...categories import NodeCategories
 """
 Prompt manipulation and processing nodes for XDev toolkit.
 Provides professional prompt engineering tools for ComfyUI workflows.
@@ -8,14 +8,14 @@ import re
 import random
 from typing import Dict, List, Tuple, Any, Optional, Union
 from collections import Counter
-from ..performance import performance_monitor, cached_operation
-from ..mixins import ValidationMixin
+from ...performance import performance_monitor, cached_operation
+from ...mixins import ValidationMixin
 
 class XDEV_PromptCombiner(ValidationMixin):
     DISPLAY_NAME = "Prompt Combiner (XDev)"
     """
     Combine multiple prompts with advanced weighting and formatting options.
-    Supports prompt merging, weighting, and intelligent concatenation.
+    Supports prompt merging, weighting, intelligent concatenation, and chat message formatting.
     """
     
     # Precomputed combination strategies
@@ -24,6 +24,8 @@ class XDEV_PromptCombiner(ValidationMixin):
         "weighted_merge": lambda prompts, weights: ", ".join(f"({p.strip()}:{w})" for p, w in zip(prompts, weights) if p.strip()),
         "alternating": lambda prompts, sep: sep.join(prompts[i].strip() for i in range(len(prompts)) if prompts[i].strip()),
         "priority_merge": lambda prompts, sep: sep.join(sorted([p.strip() for p in prompts if p.strip()], key=len, reverse=True)),
+        "chat_format": lambda messages, sep: sep.join(f"{role}: {content}" for role, content in messages if content.strip()),
+        "instruct_format": lambda messages, sep: "\n".join([f"### {role.title()}\n{content}" for role, content in messages if content.strip()]),
     }
     
     # Common separators with descriptions
@@ -48,6 +50,9 @@ class XDEV_PromptCombiner(ValidationMixin):
             "optional": {
                 "prompt_3": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional third prompt"}),
                 "prompt_4": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional fourth prompt"}),
+                "system_message": ("STRING", {"default": "", "multiline": True, "tooltip": "System message for chat/instruct formats"}),
+                "user_message": ("STRING", {"default": "", "multiline": True, "tooltip": "User message for chat/instruct formats"}),
+                "assistant_message": ("STRING", {"default": "", "multiline": True, "tooltip": "Assistant message for chat/instruct formats"}),
                 "weight_1": ("FLOAT", {"default": 1.0, "min": 0.1, "max": 5.0, "step": 0.1, "tooltip": "Weight for prompt 1 (weighted_merge mode)"}),
                 "weight_2": ("FLOAT", {"default": 1.0, "min": 0.1, "max": 5.0, "step": 0.1, "tooltip": "Weight for prompt 2 (weighted_merge mode)"}),
                 "weight_3": ("FLOAT", {"default": 1.0, "min": 0.1, "max": 5.0, "step": 0.1, "tooltip": "Weight for prompt 3 (weighted_merge mode)"}),
@@ -58,29 +63,74 @@ class XDEV_PromptCombiner(ValidationMixin):
         }
     
     RETURN_TYPES = ("STRING", "STRING", "INT")
-    RETURN_NAMES = ("combined_prompt", "combination_info", "total_prompts")
+    RETURN_NAMES = ("combined_prompt", "combination_info", "total_items")
     FUNCTION = "combine_prompts"
     CATEGORY = NodeCategories.PROMPT_COMBINATION
-    DESCRIPTION = "Combine multiple prompts with advanced weighting and formatting"
+    DESCRIPTION = "Combine multiple prompts with advanced weighting, formatting, and chat message support"
     
     @performance_monitor("prompt_combination")
     @cached_operation(ttl=600)
     def combine_prompts(self, prompt_1: str, prompt_2: str, mode: str, separator: str,
                        prompt_3: str = "", prompt_4: str = "", 
+                       system_message: str = "", user_message: str = "", assistant_message: str = "",
                        weight_1: float = 1.0, weight_2: float = 1.0, 
                        weight_3: float = 1.0, weight_4: float = 1.0,
                        custom_separator: str = ", ", validate_input: bool = True):
         
         if validate_input:
             # Validate all string inputs
-            for i, prompt in enumerate([prompt_1, prompt_2, prompt_3, prompt_4], 1):
-                validation = self.validate_string_input(prompt, f"prompt_{i}", allow_empty=True)
+            all_inputs = [prompt_1, prompt_2, prompt_3, prompt_4, system_message, user_message, assistant_message]
+            input_names = ["prompt_1", "prompt_2", "prompt_3", "prompt_4", "system_message", "user_message", "assistant_message"]
+            
+            for name, prompt in zip(input_names, all_inputs):
+                validation = self.validate_string_input(prompt, name, allow_empty=True)
                 if not validation["valid"]:
                     return (f"Error: {validation['error']}", "validation_failed", 0)
         
-        # Collect non-empty prompts
+        # Handle chat/instruct formats
+        if mode in ["chat_format", "instruct_format"]:
+            messages = []
+            if system_message.strip():
+                messages.append(("System", system_message.strip()))
+            if user_message.strip():
+                messages.append(("User", user_message.strip()))
+            if assistant_message.strip():
+                messages.append(("Assistant", assistant_message.strip()))
+            
+            # Also include regular prompts if provided
+            for i, prompt in enumerate([prompt_1, prompt_2, prompt_3, prompt_4], 1):
+                if prompt.strip():
+                    messages.append((f"Prompt_{i}", prompt.strip()))
+            
+            if not messages:
+                return ("", "No valid messages or prompts provided", 0)
+            
+            try:
+                sep = "\n\n" if mode == "chat_format" else "\n"
+                combined = self._COMBINATION_MODES[mode](messages, sep)
+                
+                message_types = [msg[0] for msg in messages]
+                info = f"Combined {len(messages)} messages using '{mode}' format: {', '.join(message_types)}"
+                return (combined, info, len(messages))
+                
+            except Exception as e:
+                return (system_message or user_message or assistant_message or prompt_1, 
+                       f"Chat combination failed: {str(e)}", 1)
+        
+        # Handle regular prompt combination modes
         prompts = [p for p in [prompt_1, prompt_2, prompt_3, prompt_4] if p.strip()]
         weights = [weight_1, weight_2, weight_3, weight_4][:len(prompts)]
+        
+        # Include chat messages in regular modes if provided
+        if system_message.strip():
+            prompts.insert(0, system_message.strip())
+            weights.insert(0, 1.0)
+        if user_message.strip():
+            prompts.append(user_message.strip())
+            weights.append(1.0)
+        if assistant_message.strip():
+            prompts.append(assistant_message.strip())
+            weights.append(1.0)
         
         if not prompts:
             return ("", "No valid prompts provided", 0)

@@ -1,4 +1,4 @@
-from ..categories import NodeCategories
+from ...categories import NodeCategories
 """
 Advanced KSampler Nodes - Native ComfyUI Integration with Multi-Variant Learning
 
@@ -27,8 +27,8 @@ import time
 import random
 import logging
 from typing import Dict, List, Tuple, Any, Optional, Union
-from ..mixins import ValidationMixin
-from ..performance import performance_monitor, cached_operation
+from ...mixins import ValidationMixin
+from ...performance import performance_monitor, cached_operation
 
 # ComfyUI native imports with comprehensive fallbacks
 try:

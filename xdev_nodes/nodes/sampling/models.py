@@ -1,4 +1,4 @@
-from ..categories import NodeCategories
+from ...categories import NodeCategories
 """
 SDXL Model Mixer Node - Advanced Model Blending for ComfyUI
 
@@ -18,8 +18,8 @@ except ImportError:
     torch = None
     HAS_TORCH = False
 
-from ..performance import performance_monitor, cached_operation
-from ..mixins import ValidationMixin
+from ...performance import performance_monitor, cached_operation
+from ...mixins import ValidationMixin
 
 
 class SDXLModelMixer(ValidationMixin):

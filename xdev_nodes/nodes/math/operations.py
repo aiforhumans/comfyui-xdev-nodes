@@ -2,10 +2,10 @@ from __future__ import annotations
 from typing import Dict, Tuple, Any, Union, Optional
 import operator
 from functools import lru_cache
-from ..utils import efficient_data_analysis
-from ..performance import performance_monitor, cached_operation, intern_string, PrecompiledPatterns
-from ..mixins import MathProcessingNode, ValidationMixin
-from ..categories import NodeCategories
+from ...utils import efficient_data_analysis
+from ...performance import performance_monitor, cached_operation, intern_string, PrecompiledPatterns
+from ...mixins import MathProcessingNode, ValidationMixin
+from ...categories import NodeCategories
 
 class MathBasic(MathProcessingNode):
     DISPLAY_NAME = "Math Basic (XDev)"

@@ -1,4 +1,4 @@
-from ..categories import NodeCategories
+from ...categories import NodeCategories
 """
 Professional Face Swapping with InsightFace + InSwapper
 Following modern face swap architecture: detect → align → embed → swap → blend
@@ -22,8 +22,8 @@ import folder_paths
 import comfy.model_management
 
 # Performance and validation imports
-from ..performance import performance_monitor, cached_operation
-from ..mixins import ImageProcessingNode, ValidationMixin
+from ...performance import performance_monitor, cached_operation
+from ...mixins import ImageProcessingNode, ValidationMixin
 
 # Graceful dependency imports
 try:
