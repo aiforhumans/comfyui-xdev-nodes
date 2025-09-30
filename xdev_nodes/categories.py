@@ -21,6 +21,7 @@ class NodeCategories:
     VAE_TOOLS = "XDev/VAE Tools"
     
     # Prompt engineering
+    PROMPTS = "XDev/Prompts"  # General prompts category
     PROMPT_COMBINATION = "XDev/Prompt/Combination"
     PROMPT_WEIGHTING = "XDev/Prompt/Weighting"
     PROMPT_CLEANING = "XDev/Prompt/Cleaning"
@@ -28,6 +29,10 @@ class NodeCategories:
     PROMPT_RANDOMIZATION = "XDev/Prompt/Randomization"
     PROMPT_TEMPLATES = "XDev/Prompt/Templates"
     PROMPT_ADVANCED = "XDev/Prompt/Advanced"
+    PROMPT_OPTIMIZATION = "XDev/Prompt/Optimization"
+    PROMPT_MANAGEMENT = "XDev/Prompt/Management"
+    PROMPT_STYLES = "XDev/Prompt/Styles"
+    PROMPT_BUILDER = "XDev/Prompt/Builder"
     
     # LLM integration
     LLM_INTEGRATION = "XDev/LLM/Integration"

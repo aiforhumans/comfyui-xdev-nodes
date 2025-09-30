@@ -1,16 +1,18 @@
 """
-LLM Module - Auto-import all LLM integration nodes
-Contains core LLM functionality, prompt tools, and SDXL integrations.
+LLM Module - Core LLM functionality for ComfyUI
+Contains LM Studio integration and core LLM nodes.
 """
 
-try:
-    from .llm_core import *
-    from .llm_prompt_tools import *
-    from .llm_sdxl_tools import *
-except ImportError:
-    # During transition, some modules may not exist yet
-    pass
+# Import core LLM functionality only
+from .core import *
 
 __all__ = [
-    # Will be populated as modules are split
+    # Core LM Studio nodes
+    "XDEV_LMStudioChatAdvanced", 
+    "XDEV_LMStudioEmbeddings",
+    "XDEV_LMStudioCompletions", 
+    "XDEV_ImageCaptioningLLM",
+    
+    # LLM chat functionality
+    "LMStudioChat",
 ]
