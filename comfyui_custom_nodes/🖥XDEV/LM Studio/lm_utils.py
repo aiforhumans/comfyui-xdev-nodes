@@ -5,6 +5,7 @@ Centralized utilities for all LM Studio nodes to eliminate code duplication.
 
 import json
 import re
+import subprocess
 import urllib.error
 import urllib.request
 from collections.abc import Callable
@@ -77,15 +78,15 @@ class LMStudioAPIClient:
                 result = json.loads(response.read().decode('utf-8'))
                 return result
                 
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode('utf-8') if hasattr(e, 'read') else str(e)
+            raise LMStudioAPIError(f"HTTP {e.code}: {error_body}") from e
+
         except (urllib.error.URLError, ConnectionRefusedError, OSError) as e:
             raise LMStudioConnectionError(f"Cannot connect to {server_url}") from e
             
         except json.JSONDecodeError as e:
             raise LMStudioAPIError("Invalid JSON response from server") from e
-            
-        except urllib.error.HTTPError as e:
-            error_body = e.read().decode('utf-8') if hasattr(e, 'read') else str(e)
-            raise LMStudioAPIError(f"HTTP {e.code}: {error_body}") from e
     
     @staticmethod
     def get_loaded_models(server_url: str) -> list[dict[str, Any]]:
@@ -529,6 +530,40 @@ def extract_response_text(result: dict[str, Any]) -> str:
     return content.strip()
 
 
+def run_lms_cli(arguments: list[str], timeout: int = 10) -> tuple[bool, str]:
+    """Run the LM Studio CLI and return success flag + output.
+
+    Args:
+        arguments: Command arguments to pass after ``lms``.
+        timeout: Seconds to wait before aborting the process.
+
+    Returns:
+        Tuple of (success, combined_output).
+
+    Raises:
+        LMStudioModelError: If the CLI is missing or times out.
+    """
+    command = ["lms", *arguments]
+
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+    except FileNotFoundError as err:
+        raise LMStudioModelError(
+            "lms CLI not found in PATH. Run 'lms bootstrap' from %USERPROFILE%/.lmstudio/bin to install."
+        ) from err
+    except subprocess.TimeoutExpired as err:
+        raise LMStudioModelError("lms CLI command timed out") from err
+
+    output = (result.stdout or "") + ("\n" + result.stderr if result.stderr else "")
+    return result.returncode == 0, output.strip()
+
+
 # Lazy import helpers for heavy dependencies
 _PIL_Image = None
 _numpy = None
@@ -574,6 +609,7 @@ __all__ = [
     "build_messages",
     "build_payload",
     "extract_response_text",
+    "run_lms_cli",
     "get_pil_image",
     "get_numpy",
 ]

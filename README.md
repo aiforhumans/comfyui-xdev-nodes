@@ -10,10 +10,30 @@ High-performance LM Studio + prompt engineering toolkit for ComfyUI. This reposi
 - ✅ Ready-to-ship `pyproject.toml`, tests, and deployment scripts for GitHub CI/CD.
 
 ## Requirements
-- Python 3.10–3.11
+- Python 3.10–3.13 verified locally
 - ComfyUI (portable Windows build or standard install)
 - LM Studio (for LM nodes)
 - Optional: VS Code + Copilot, `pytest`
+
+## Quick Start
+1. **Clone + set up environment**
+	```powershell
+	git clone https://github.com/aiforhumans/comfyui-xdev-nodes
+	cd comfyui-xdev-nodes
+	python -m venv .venv
+	.venv\Scripts\activate
+	pip install -r requirements.txt
+	pip install -r requirements-dev.txt  # linting + Ruff + pytest
+	```
+2. **Run the test suite**
+	```powershell
+	python -m pytest
+	```
+3. **Lint (optional but recommended)**
+	```powershell
+	python -m ruff check
+	```
+4. **Copy into ComfyUI** using the deployment command in the section below.
 
 ## Installation
 

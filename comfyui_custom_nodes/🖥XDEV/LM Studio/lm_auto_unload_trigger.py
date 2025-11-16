@@ -11,9 +11,11 @@ from typing import Any
 try:
     from .lm_base_node import LMStudioUtilityBaseNode
     from .lm_model_manager import check_model_loaded
+    from .lm_utils import LMStudioModelError, run_lms_cli
 except ImportError:
     from lm_base_node import LMStudioUtilityBaseNode
     from lm_model_manager import check_model_loaded
+    from lm_utils import LMStudioModelError, run_lms_cli
 
 
 class LMStudioAutoUnloadTrigger(LMStudioUtilityBaseNode):
@@ -25,11 +27,30 @@ class LMStudioAutoUnloadTrigger(LMStudioUtilityBaseNode):
         return {
             "required": {
                 "trigger": ("BOOLEAN", {"default": True}),
-                "unload_method": (["warning_only", "lms_cli", "force_error"], {"default": "lms_cli"}),
+                "unload_method": (
+                    ["warning_only", "lms_cli", "force_error"],
+                    {
+                        "default": "lms_cli",
+                        "tooltip": "Choose whether to warn, run lms CLI, or stop the workflow.",
+                    },
+                ),
             },
             "optional": {
-                "server_url": ("STRING", {"default": "http://localhost:1234"}),
-                "passthrough": ("STRING", {"default": "", "forceInput": True}),
+                "server_url": (
+                    "STRING",
+                    {
+                        "default": "http://localhost:1234",
+                        "tooltip": "LM Studio server to query for loaded models.",
+                    },
+                ),
+                "passthrough": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "forceInput": True,
+                        "tooltip": "Data forwarded unchanged so you can place this node inline.",
+                    },
+                ),
             }
         }
 
@@ -74,48 +95,30 @@ class LMStudioAutoUnloadTrigger(LMStudioUtilityBaseNode):
             return (status, False, passthrough)
         
         elif unload_method == "lms_cli":
-            # Attempt to unload via LM Studio CLI (lms)
             try:
-                import subprocess
-                
-                # Try to run lms unload --all
-                try:
-                    result = subprocess.run(
-                        ["lms", "unload", "--all"],
-                        capture_output=True,
-                        text=True,
-                        timeout=10
-                    )
-                    
-                    if result.returncode == 0:
-                        status = f"✓ Successfully unloaded model '{model_name}' via lms CLI"
-                        print(status)
-                        return (status, True, passthrough)
-                    else:
-                        # lms command failed
-                        error_output = result.stderr or result.stdout
-                        raise Exception(f"lms command failed: {error_output}")
-                        
-                except FileNotFoundError as err:
-                    # lms not found in PATH
-                    raise Exception("lms CLI not found in PATH. Please run: lms bootstrap") from err
-                except subprocess.TimeoutExpired as err:
-                    raise Exception("lms command timed out") from err
-                
-            except Exception as e:
-                status = (
-                    f"⚠️ LM Studio model '{model_name}' is loaded\n"
-                    f"CLI unload failed: {str(e)}\n\n"
-                    f"FALLBACK OPTIONS:\n"
-                    f"1. Install lms CLI: Run 'lms bootstrap' in PowerShell\n"
-                    f"   Location: %USERPROFILE%/.lmstudio/bin/lms.exe bootstrap\n"
-                    f"2. Manual unload: Open LM Studio → Local Server tab → Click 'Unload Model'\n"
-                    f"3. Use command: lms unload --all"
-                )
-                print(f"\n{'='*60}")
+                success, output = run_lms_cli(["unload", "--all"])
+            except LMStudioModelError as err:
+                success = False
+                output = str(err)
+
+            if success:
+                status = f"✓ Successfully unloaded model '{model_name}' via lms CLI"
                 print(status)
-                print(f"{'='*60}\n")
-                return (status, False, passthrough)
+                return (status, True, passthrough)
+
+            status = (
+                f"⚠️ LM Studio model '{model_name}' is loaded\n"
+                f"CLI unload failed: {output}\n\n"
+                f"FALLBACK OPTIONS:\n"
+                f"1. Install lms CLI: Run 'lms bootstrap' in PowerShell\n"
+                f"   Location: %USERPROFILE%/.lmstudio/bin/lms.exe bootstrap\n"
+                f"2. Manual unload: Open LM Studio → Local Server tab → Click 'Unload Model'\n"
+                f"3. Use command: lms unload --all"
+            )
+            print(f"\n{'='*60}")
+            print(status)
+            print(f"{'='*60}\n")
+            return (status, False, passthrough)
         
         elif unload_method == "force_error":
             # Force workflow to stop with error message

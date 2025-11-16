@@ -118,14 +118,10 @@ def test_lm_studio_connection():
             print(f"\n✓ LM Studio is running")
             if "data" in data and len(data["data"]) > 0:
                 print(f"  Loaded models: {[m.get('id', 'unknown') for m in data['data']]}")
-            return True
     except (urllib.error.URLError, ConnectionRefusedError, TimeoutError):
-        print("\n⚠ LM Studio is not running at http://localhost:1234")
-        print("  Start LM Studio to run integration tests")
-        return False
-    except Exception as e:
-        print(f"\n⚠ Error checking LM Studio: {e}")
-        return False
+        pytest.skip("LM Studio server not running on localhost:1234")
+    except Exception as e:  # pragma: no cover - informational only
+        pytest.skip(f"Skipped LM Studio connection test due to unexpected error: {e}")
 
 
 # Smoke tests for manual execution

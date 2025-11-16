@@ -44,7 +44,6 @@ def test_imports():
     from lm_chat_history import LMStudioChatHistory, LMStudioChatHistoryLoader
     
     print("✅ All imports successful!")
-    return True
 
 
 def test_base_class_inheritance():
@@ -73,7 +72,6 @@ def test_base_class_inheritance():
     assert LMStudioTextGen.CATEGORY == "🖥XDEV/LM Studio", "CATEGORY should be set"
     
     print("✅ Base class inheritance correct!")
-    return True
 
 
 def test_input_types_structure():
@@ -101,7 +99,6 @@ def test_input_types_structure():
     assert "text" in inputs["required"], "Should have text param"
     
     print("✅ INPUT_TYPES structure correct!")
-    return True
 
 
 def test_helper_methods():
@@ -131,7 +128,6 @@ def test_helper_methods():
     assert "\n" in info_str, "Should have newlines"
     
     print("✅ Helper methods working!")
-    return True
 
 
 def test_backward_compatibility():
@@ -164,7 +160,6 @@ def test_backward_compatibility():
     assert 'detail_level' in params, "Should have detail_level param"
     
     print("✅ Backward compatibility maintained!")
-    return True
 
 
 def test_utilities():
@@ -191,12 +186,11 @@ def test_utilities():
     assert len(header) == 3, "Should have 3 parts"
     
     # Test ErrorFormatter
-    error = ErrorFormatter.format_connection_error(Exception("test"), "http://localhost:1234")
+    error = ErrorFormatter.format_connection_error("http://localhost:1234", "test")
     assert isinstance(error, str), "Should return string"
     assert "Connection" in error or "test" in error, "Should contain error info"
     
     print("✅ Utilities working!")
-    return True
 
 
 def main():
@@ -219,10 +213,13 @@ def main():
     
     for test in tests:
         try:
-            if test():
-                passed += 1
-        except Exception as e:
+            test()
+            passed += 1
+        except AssertionError as e:
             print(f"❌ {test.__name__} failed: {e}")
+            failed += 1
+        except Exception as e:
+            print(f"❌ {test.__name__} errored: {e}")
             failed += 1
     
     print("\n" + "=" * 60)

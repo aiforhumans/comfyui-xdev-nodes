@@ -7,7 +7,7 @@ import modules without dealing with emoji paths.
 
 from __future__ import annotations
 
-import importlib
+import importlib.util
 import sys
 from collections.abc import Iterable
 from pathlib import Path
@@ -23,88 +23,35 @@ NODE_DISPLAY_NAME_MAPPINGS: dict[str, str] = {}
 _EXPORTS: dict[str, type] = {}
 
 
-def _ensure_path(path: Path) -> bool:
-    if not path.exists():
-        return False
-    resolved = str(path)
-    if resolved not in sys.path:
-        sys.path.insert(0, resolved)
-    return True
-
-
-def _import_class(module_name: str, class_name: str) -> type:
-    module = importlib.import_module(module_name)
-    return getattr(module, class_name)
-
-
-def _load_prompt_tools() -> tuple[dict[str, type], dict[str, str]]:
-    if not _ensure_path(PROMPT_TOOLS_PATH):
+def _load_category(alias: str, path: Path) -> tuple[dict[str, type], dict[str, str]]:
+    """Load NODE_*_MAPPINGS from a category package."""
+    init_file = path / "__init__.py"
+    if not init_file.exists():
         return {}, {}
 
-    definitions = [
-        ("text_concatenate", "TextConcatenate", "XDEVTextConcatenate", "Text Concatenate"),
-        ("multiline_prompt", "MultilinePromptBuilder", "XDEVMultilinePrompt", "Multi-line Prompt Builder"),
-        ("style_injector", "StyleTagsInjector", "XDEVStyleInjector", "Style Tags Injector"),
-        ("random_prompt", "RandomPromptSelector", "XDEVRandomPrompt", "Random Prompt Selector"),
-        ("prompt_template", "PromptTemplateSystem", "XDEVPromptTemplate", "Prompt Template System"),
-    ]
+    spec = importlib.util.spec_from_file_location(
+        f"comfyui_custom_nodes.xdev.{alias}",
+        init_file,
+        submodule_search_locations=[str(path)],
+    )
+    if spec is None or spec.loader is None:
+        return {}, {}
 
-    class_map: dict[str, type] = {}
-    display_map: dict[str, str] = {}
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
 
-    for module_name, class_name, mapping_key, display_name in definitions:
-        cls = _import_class(module_name, class_name)
-        _EXPORTS[class_name] = cls
-        class_map[mapping_key] = cls
-        display_map[mapping_key] = display_name
+    class_map = getattr(module, "NODE_CLASS_MAPPINGS", {})
+    display_map = getattr(module, "NODE_DISPLAY_NAME_MAPPINGS", {})
+
+    for cls in class_map.values():
+        _EXPORTS[cls.__name__] = cls
 
     return class_map, display_map
 
 
-def _load_lm_studio_nodes() -> tuple[dict[str, type], dict[str, str]]:
-    if not _ensure_path(LM_STUDIO_PATH):
-        return {}, {}
-
-    definitions = [
-        ("lm_text_gen", "LMStudioTextGen", "XDEVLMStudioText", "LM Studio Text Generator"),
-        ("lm_vision", "LMStudioVision", "XDEVLMStudioVision", "LM Studio Vision (Image Analysis)"),
-        ("lm_prompt_enhancer", "LMStudioPromptEnhancer", "XDEVLMStudioEnhancer", "LM Studio Prompt Enhancer"),
-        ("lm_streaming_text_gen", "LMStudioStreamingTextGen", "XDEVLMStudioStreaming", "LM Studio Streaming Text Generator"),
-        ("lm_batch_processor", "LMStudioBatchProcessor", "XDEVLMStudioBatch", "LM Studio Batch Processor"),
-        ("lm_model_selector", "LMStudioModelSelector", "XDEVLMStudioModelSelector", "LM Studio Model Selector"),
-        ("lm_multi_model_selector", "LMStudioMultiModelSelector", "XDEVLMStudioMultiModel", "LM Studio Multi-Model Selector"),
-        ("lm_model_unload_helper", "LMStudioModelUnloadHelper", "XDEVLMStudioUnloadHelper", "LM Studio Model Unload Helper"),
-        ("lm_auto_unload_trigger", "LMStudioAutoUnloadTrigger", "XDEVLMStudioAutoUnload", "LM Studio Auto Unload Trigger"),
-        ("lm_chat_history", "LMStudioChatHistory", "XDEVLMStudioChatHistory", "LM Studio Chat History Manager"),
-        ("lm_chat_history", "LMStudioChatHistoryLoader", "XDEVLMStudioChatLoader", "LM Studio Chat History Loader"),
-        ("lm_token_counter", "LMStudioTokenCounter", "XDEVLMStudioTokenCounter", "LM Studio Token Counter"),
-        ("lm_context_optimizer", "LMStudioContextOptimizer", "XDEVLMStudioContextOpt", "LM Studio Context Optimizer"),
-        ("lm_response_validator", "LMStudioResponseValidator", "XDEVLMStudioValidator", "LM Studio Response Validator"),
-        ("lm_parameter_presets", "LMStudioParameterPresets", "XDEVLMStudioPresets", "LM Studio Parameter Presets"),
-        ("lm_sdxl_prompt_builder", "LMStudioSDXLPromptBuilder", "XDEVLMStudioSDXLBuilder", "LM Studio SDXL Prompt Builder"),
-        ("lm_persona_creator", "LMStudioPersonaCreator", "XDEVLMStudioPersona", "LM Studio Persona Creator"),
-        ("lm_prompt_mixer", "LMStudioPromptMixer", "XDEVLMStudioPromptMixer", "LM Studio Prompt Mixer"),
-        ("lm_scene_composer", "LMStudioSceneComposer", "XDEVLMStudioSceneComposer", "LM Studio Scene Composer"),
-        ("lm_aspect_ratio_optimizer", "LMStudioAspectRatioOptimizer", "XDEVLMStudioAspectRatioOptimizer", "LM Studio SDXL Aspect Ratio Optimizer"),
-        ("lm_refiner_prompt_generator", "LMStudioRefinerPromptGenerator", "XDEVLMStudioRefinerPromptGenerator", "LM Studio SDXL Refiner Prompt Generator"),
-        ("lm_controlnet_prompter", "LMStudioControlNetPrompter", "XDEVLMStudioControlNetPrompter", "LM Studio ControlNet Prompter"),
-        ("lm_regional_prompter", "LMStudioRegionalPrompterHelper", "XDEVLMStudioRegionalPrompterHelper", "LM Studio Regional Prompter Helper"),
-    ]
-
-    class_map: dict[str, type] = {}
-    display_map: dict[str, str] = {}
-
-    for module_name, class_name, mapping_key, display_name in definitions:
-        cls = _import_class(module_name, class_name)
-        _EXPORTS[class_name] = cls
-        class_map[mapping_key] = cls
-        display_map[mapping_key] = display_name
-
-    return class_map, display_map
-
-
-prompt_class_map, prompt_display_map = _load_prompt_tools()
-lm_class_map, lm_display_map = _load_lm_studio_nodes()
+prompt_class_map, prompt_display_map = _load_category("prompt_tools", PROMPT_TOOLS_PATH)
+lm_class_map, lm_display_map = _load_category("lm_studio", LM_STUDIO_PATH)
 
 NODE_CLASS_MAPPINGS.update(prompt_class_map)
 NODE_CLASS_MAPPINGS.update(lm_class_map)
