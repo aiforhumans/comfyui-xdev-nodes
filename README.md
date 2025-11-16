@@ -108,6 +108,13 @@ Always restart ComfyUI; the loader caches Python modules.
 	- `docs/docs/comfyui_prompt_mastering_guide.md`
 	- `docs/docs/comfyui_troubleshooting_guide.md`
 	- `docs/REFACTORING_SUMMARY.md` (history of the 24-node rewrite)
+- Focused guides now live under `docs/guides/`:
+	- `gpu_memory.md` – LM Studio unload workflow + warnings
+	- `sdxl_prompting.md` – Research notes powering prompt enhancer
+	- `ux_improvements.md` – Info panel + Copilot UX guidelines
+
+## Changelog
+See [CHANGELOG.md](CHANGELOG.md) for a dated list of repository updates, refactors, and fixes.
 
 ## Contributing & License
 - See [CONTRIBUTING.md](CONTRIBUTING.md) for branch conventions, testing requirements, and release steps.

@@ -13,6 +13,11 @@ try:
         ErrorFormatter,
         JSONParser,
     )
+    from .prompt_templates import (
+        SDXL_SYSTEM_PROMPT,
+        build_sdxl_instruction,
+        get_detail_instruction,
+    )
 except ImportError:
     from lm_base_node import LMStudioPromptBaseNode
     from lm_utils import (
@@ -20,6 +25,11 @@ except ImportError:
         LMStudioAPIError,
         ErrorFormatter,
         JSONParser,
+    )
+    from prompt_templates import (
+        SDXL_SYSTEM_PROMPT,
+        build_sdxl_instruction,
+        get_detail_instruction,
     )
 
 
@@ -84,102 +94,23 @@ class LMStudioPromptEnhancer(LMStudioPromptBaseNode):
         
         # Build enhancement instruction
         style_instruction = f" in {style} style" if style != "none" else ""
-        detail_instruction = {
-            "minimal": "Keep it concise with only essential details.",
-            "moderate": "Add moderate details about composition and lighting.",
-            "detailed": "Include detailed descriptions of composition, lighting, mood, and visual elements.",
-            "very detailed": "Create an extremely detailed prompt with comprehensive descriptions of every visual aspect."
-        }[detail_level]
-        
-        # Build instruction based on format
-        if response_format == "json":
-            instruction = f"""Transform this simple concept into a professional SDXL image generation prompt{style_instruction}.
-
-Simple concept: {simple_prompt}
-{f"Additional requirements: {additional_details}" if additional_details else ""}
-
-IMPORTANT SDXL BEST PRACTICES:
-1. SDXL understands natural language - you can describe in detail OR use comma-separated keywords
-2. Subject first with vivid descriptors (colors, materials, textures)
-3. Composition and framing details (portrait, wide shot, close-up, perspective)
-4. Lighting specifics (golden hour, studio lighting, rim light, dramatic shadows)
-5. Mood and atmosphere (dramatic, peaceful, energetic, mysterious)
-6. Style references - use artist names (Greg Rutkowski, Artgerm, etc.) or art styles
-7. Quality boosters at end (highly detailed, 8k resolution, award winning photography)
-8. For keyword weights use (keyword:weight) between 1.0-1.4 only - SDXL is very sensitive
-9. NEGATIVE PROMPTS: Keep minimal! Only include what you actively want to avoid
-
-{detail_instruction}
-
-Return a JSON object with this structure:
-{{
-  "positive_prompt": "detailed natural language description OR comma-separated keywords with rich visual details",
-  "negative_prompt": "{"minimal list of specific things to avoid" if negative_prompt else ""}"
-}}
-
-EXAMPLE (keyword style):
-{{
-  "positive_prompt": "beautiful woman wearing fantastic hand-dyed cotton clothes, embellished beaded feather decorative fringe knots, colorful pigtails, subtropical flowers and plants, symmetrical face, intricate, elegant, highly detailed, 8k, digital painting, trending on pinterest, concept art, sharp focus, illustration, art by Tom Bagshaw and Alphonse Mucha",
-  "negative_prompt": "ugly, deformed"
-}}
-
-EXAMPLE (natural language style):
-{{
-  "positive_prompt": "A professional photograph of a rhino dressed in a tailored suit and tie, sitting at a polished wooden bar table with elegant bar stools in the background, award winning photography in the style of Elke Vogelsang, dramatic lighting, shallow depth of field, highly detailed",
-  "negative_prompt": "cartoon, illustration, animation"
-}}"""
-        else:
-            instruction = f"""Transform this simple concept into a professional SDXL image generation prompt{style_instruction}.
-
-Simple concept: {simple_prompt}
-{f"Additional requirements: {additional_details}" if additional_details else ""}
-
-IMPORTANT SDXL BEST PRACTICES:
-1. SDXL understands natural language well - describe images in detail like you're explaining to a person
-2. You can ALSO use comma-separated keywords - both approaches work
-3. Subject first with vivid details (materials, colors, textures, lighting)
-4. Include composition (portrait, wide angle, close-up) and perspective
-5. Specify lighting (golden hour, studio lighting, dramatic shadows, rim light)
-6. Add mood and atmosphere keywords (dramatic, peaceful, mysterious)
-7. Reference artists or styles (Greg Rutkowski, Artgerm, photorealistic, digital art)
-8. Add quality tags at end (highly detailed, 8k resolution, award winning)
-9. For weights use (keyword:1.1) to (keyword:1.4) max - SDXL is sensitive to emphasis
-10. Keep negative prompts minimal - only what you want to avoid
-
-{detail_instruction}
-
-EXAMPLE (keyword style):
-"a woman in a futuristic suit holding a gun, looking at camera, neon lighting, rain-soaked street, cyberpunk art by Krenz Cushart, neo-figurative, highly detailed anime style, dramatic composition, vibrant colors, 8k resolution"
-
-EXAMPLE (natural language):
-"A stunning photograph of a man in a subway station, beautiful detailed eyes, professional award winning portrait photography, shot with Zeiss 150mm f/2.8 lens, highly detailed glossy eyes and skin pores visible, dramatic lighting from overhead fluorescents, black and white photography"
-
-Return ONLY the formatted prompt, no explanations."""
-
-            if negative_prompt:
-                instruction += "\n\nAlso provide a negative prompt with common issues to avoid (same comma-separated format)."
-        
-        # Build request
-        messages = [
-            {
-                "role": "system",
-                "content": "You are an expert at writing SDXL prompts. SDXL understands natural language better than SD 1.5 - you can describe images in detail with full sentences OR use comma-separated keywords. Both work well. When using keyword weights like (keyword:1.2), keep weights between 1.0-1.4 as SDXL is very sensitive. Focus on vivid, specific visual details. For negative prompts, keep them minimal - only include what you actively want to avoid (like 'cartoon' for photos, or 'blurry, low quality')."
-            },
-            {
-                "role": "user",
-                "content": instruction
-            }
-        ]
+        detail_instruction = get_detail_instruction(detail_level)
+        instruction = build_sdxl_instruction(
+            simple_prompt=simple_prompt,
+            additional_details=additional_details,
+            style=style,
+            detail_instruction=detail_instruction,
+            response_format=response_format,
+            include_negative_prompt=negative_prompt,
+        )
         
         try:
             info_parts.append("⏳ Enhancing prompt...")
             
             # Build messages using base class helper
-            sys_prompt = "You are an expert at writing SDXL prompts. SDXL understands natural language better than SD 1.5 - you can describe images in detail with full sentences OR use comma-separated keywords. Both work well. When using keyword weights like (keyword:1.2), keep weights between 1.0-1.4 as SDXL is very sensitive. Focus on vivid, specific visual details. For negative prompts, keep them minimal - only include what you actively want to avoid (like 'cartoon' for photos, or 'blurry, low quality')."
-            
             messages = self._build_messages(
                 prompt=instruction,
-                system_prompt=sys_prompt,
+                system_prompt=SDXL_SYSTEM_PROMPT,
                 response_format="text"  # Don't use response_format param, use instruction-based JSON
             )
             

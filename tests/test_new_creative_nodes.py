@@ -11,18 +11,16 @@ Tests the 6 new nodes:
 """
 
 import sys
-from pathlib import Path
 
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "comfyui_custom_nodes" / "🖥XDEV" / "LM Studio"))
-
-# Import nodes
-from lm_prompt_mixer import LMStudioPromptMixer
-from lm_scene_composer import LMStudioSceneComposer
-from lm_aspect_ratio_optimizer import LMStudioAspectRatioOptimizer
-from lm_refiner_prompt_generator import LMStudioRefinerPromptGenerator
-from lm_controlnet_prompter import LMStudioControlNetPrompter
-from lm_regional_prompter import LMStudioRegionalPrompterHelper
+from comfyui_custom_nodes.xdev import (
+    LMStudioAspectRatioOptimizer,
+    LMStudioControlNetPrompter,
+    LMStudioPromptMixer,
+    LMStudioRegionalPrompterHelper,
+    LMStudioRefinerPromptGenerator,
+    LMStudioSceneComposer,
+    NODE_CLASS_MAPPINGS,
+)
 
 
 def test_imports():
@@ -157,19 +155,12 @@ def test_regional_prompter_structure():
 
 def test_node_class_mappings():
     """Test that nodes are properly registered."""
-    from lm_prompt_mixer import NODE_CLASS_MAPPINGS as mixer_mappings
-    from lm_scene_composer import NODE_CLASS_MAPPINGS as scene_mappings
-    from lm_aspect_ratio_optimizer import NODE_CLASS_MAPPINGS as aspect_mappings
-    from lm_refiner_prompt_generator import NODE_CLASS_MAPPINGS as refiner_mappings
-    from lm_controlnet_prompter import NODE_CLASS_MAPPINGS as controlnet_mappings
-    from lm_regional_prompter import NODE_CLASS_MAPPINGS as regional_mappings
-    
-    assert "XDEVLMStudioPromptMixer" in mixer_mappings
-    assert "XDEVLMStudioSceneComposer" in scene_mappings
-    assert "XDEVLMStudioAspectRatioOptimizer" in aspect_mappings
-    assert "XDEVLMStudioRefinerPromptGenerator" in refiner_mappings
-    assert "XDEVLMStudioControlNetPrompter" in controlnet_mappings
-    assert "XDEVLMStudioRegionalPrompterHelper" in regional_mappings
+    assert "XDEVLMStudioPromptMixer" in NODE_CLASS_MAPPINGS
+    assert "XDEVLMStudioSceneComposer" in NODE_CLASS_MAPPINGS
+    assert "XDEVLMStudioAspectRatioOptimizer" in NODE_CLASS_MAPPINGS
+    assert "XDEVLMStudioRefinerPromptGenerator" in NODE_CLASS_MAPPINGS
+    assert "XDEVLMStudioControlNetPrompter" in NODE_CLASS_MAPPINGS
+    assert "XDEVLMStudioRegionalPrompterHelper" in NODE_CLASS_MAPPINGS
     
     print("✅ Node class mappings validated")
 

@@ -1,15 +1,6 @@
 """Test auto unload trigger functionality."""
 
 import sys
-from pathlib import Path
-
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-# Add LM Studio folder to path
-lm_studio_path = project_root / "comfyui_custom_nodes" / "🖥XDEV" / "LM Studio"
-sys.path.insert(0, str(lm_studio_path))
 
 def test_auto_unload_trigger_import():
     """Test that auto unload trigger can be imported."""

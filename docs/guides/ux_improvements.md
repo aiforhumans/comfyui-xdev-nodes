@@ -1,8 +1,5 @@
 # LM Studio Nodes - UX Improvements
 
-> **Note:** This file is retained for historical context. The maintained version now
-> lives in `docs/guides/ux_improvements.md`.
-
 ## 🎯 Objective
 Transform LM Studio nodes from basic API wrappers into professional, user-friendly tools with clear feedback, structured outputs, and actionable error messages.
 

@@ -4,17 +4,10 @@ Note: These tests require LM Studio to be running at http://localhost:1234
 with a model loaded. Tests will be skipped if connection fails.
 """
 
-import sys
-from pathlib import Path
 import json
 
-# Add parent directories to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent.parent / "comfyui_custom_nodes" / "🖥XDEV" / "LM Studio"))
-
 import pytest
-from lm_text_gen import LMStudioTextGen
-from lm_prompt_enhancer import LMStudioPromptEnhancer
+from comfyui_custom_nodes.xdev import LMStudioPromptEnhancer, LMStudioTextGen
 
 # Note: Vision tests require an actual image tensor, so we'll do basic structural tests
 
@@ -28,7 +21,7 @@ class TestLMStudioTextGen:
         assert "required" in input_types
         assert "optional" in input_types
         assert "prompt" in input_types["required"]
-        assert "temperature" in input_types["required"]
+        assert "temperature" in input_types["optional"]
         assert "server_url" in input_types["optional"]
     
     def test_node_attributes(self):
@@ -94,7 +87,7 @@ class TestLMStudioVision:
     
     def test_node_structure(self):
         """Test node structure without actual image."""
-        from lm_vision import LMStudioVision
+        from comfyui_custom_nodes.xdev import LMStudioVision
         
         assert hasattr(LMStudioVision, "INPUT_TYPES")
         assert hasattr(LMStudioVision, "RETURN_TYPES")
@@ -103,7 +96,7 @@ class TestLMStudioVision:
     
     def test_input_types(self):
         """Test INPUT_TYPES includes image input."""
-        from lm_vision import LMStudioVision
+        from comfyui_custom_nodes.xdev import LMStudioVision
         
         input_types = LMStudioVision.INPUT_TYPES()
         assert "required" in input_types

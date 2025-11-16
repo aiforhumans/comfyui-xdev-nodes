@@ -3,18 +3,21 @@
 Run with: pytest test_new_lm_nodes.py
 """
 
-import sys
-from pathlib import Path
-
-# Add parent directory to path for imports
-parent_dir = Path(__file__).parent.parent / "comfyui_custom_nodes" / "🖥XDEV" / "LM Studio"
-sys.path.insert(0, str(parent_dir))
+from comfyui_custom_nodes.xdev import (
+    LMStudioBatchProcessor,
+    LMStudioChatHistory,
+    LMStudioChatHistoryLoader,
+    LMStudioContextOptimizer,
+    LMStudioMultiModelSelector,
+    LMStudioParameterPresets,
+    LMStudioResponseValidator,
+    LMStudioStreamingTextGen,
+    LMStudioTokenCounter,
+)
 
 
 def test_streaming_text_gen_import():
     """Test streaming text generator imports."""
-    from lm_streaming_text_gen import LMStudioStreamingTextGen
-    
     assert hasattr(LMStudioStreamingTextGen, 'INPUT_TYPES')
     assert hasattr(LMStudioStreamingTextGen, 'stream_generate')
     assert LMStudioStreamingTextGen.RETURN_TYPES == ("STRING", "STRING", "STRING")
@@ -23,8 +26,6 @@ def test_streaming_text_gen_import():
 
 def test_chat_history_import():
     """Test chat history manager imports."""
-    from lm_chat_history import LMStudioChatHistory, LMStudioChatHistoryLoader
-    
     assert hasattr(LMStudioChatHistory, 'INPUT_TYPES')
     assert hasattr(LMStudioChatHistory, 'manage_history')
     assert hasattr(LMStudioChatHistoryLoader, 'load_history')
@@ -33,8 +34,6 @@ def test_chat_history_import():
 
 def test_batch_processor_import():
     """Test batch processor imports."""
-    from lm_batch_processor import LMStudioBatchProcessor
-    
     assert hasattr(LMStudioBatchProcessor, 'INPUT_TYPES')
     assert hasattr(LMStudioBatchProcessor, 'process_batch')
     assert LMStudioBatchProcessor.RETURN_TYPES == ("STRING", "STRING", "STRING")
@@ -43,8 +42,6 @@ def test_batch_processor_import():
 
 def test_response_validator_import():
     """Test response validator imports."""
-    from lm_response_validator import LMStudioResponseValidator
-    
     assert hasattr(LMStudioResponseValidator, 'INPUT_TYPES')
     assert hasattr(LMStudioResponseValidator, 'validate_response')
     assert hasattr(LMStudioResponseValidator, 'VALIDATE_INPUTS')
@@ -53,8 +50,6 @@ def test_response_validator_import():
 
 def test_token_counter_import():
     """Test token counter imports."""
-    from lm_token_counter import LMStudioTokenCounter
-    
     assert hasattr(LMStudioTokenCounter, 'INPUT_TYPES')
     assert hasattr(LMStudioTokenCounter, 'count_tokens')
     assert LMStudioTokenCounter.RETURN_TYPES == ("INT", "INT", "BOOLEAN", "STRING", "STRING")
@@ -63,8 +58,6 @@ def test_token_counter_import():
 
 def test_context_optimizer_import():
     """Test context optimizer imports."""
-    from lm_context_optimizer import LMStudioContextOptimizer
-    
     assert hasattr(LMStudioContextOptimizer, 'INPUT_TYPES')
     assert hasattr(LMStudioContextOptimizer, 'optimize_context')
     print("✓ Context Optimizer imports successfully")
@@ -72,8 +65,6 @@ def test_context_optimizer_import():
 
 def test_parameter_presets_import():
     """Test parameter presets imports."""
-    from lm_parameter_presets import LMStudioParameterPresets
-    
     assert hasattr(LMStudioParameterPresets, 'INPUT_TYPES')
     assert hasattr(LMStudioParameterPresets, 'apply_preset')
     assert hasattr(LMStudioParameterPresets, 'PRESETS')
@@ -83,8 +74,6 @@ def test_parameter_presets_import():
 
 def test_multi_model_selector_import():
     """Test multi-model selector imports."""
-    from lm_multi_model_selector import LMStudioMultiModelSelector
-    
     assert hasattr(LMStudioMultiModelSelector, 'INPUT_TYPES')
     assert hasattr(LMStudioMultiModelSelector, 'select_model')
     assert hasattr(LMStudioMultiModelSelector, 'IS_CHANGED')
@@ -93,8 +82,6 @@ def test_multi_model_selector_import():
 
 def test_token_counter_logic():
     """Test token counter logic."""
-    from lm_token_counter import LMStudioTokenCounter
-    
     node = LMStudioTokenCounter()
     text = "This is a test prompt with multiple words."
     
@@ -118,8 +105,6 @@ def test_token_counter_logic():
 
 def test_response_validator_logic():
     """Test response validator logic."""
-    from lm_response_validator import LMStudioResponseValidator
-    
     node = LMStudioResponseValidator()
     
     # Test JSON validation
@@ -151,8 +136,6 @@ def test_response_validator_logic():
 
 def test_context_optimizer_logic():
     """Test context optimizer logic."""
-    from lm_context_optimizer import LMStudioContextOptimizer
-    
     node = LMStudioContextOptimizer()
     long_text = "This is a very long text. " * 100  # 2600 chars
     
@@ -172,8 +155,6 @@ def test_context_optimizer_logic():
 
 def test_parameter_presets_logic():
     """Test parameter presets logic."""
-    from lm_parameter_presets import LMStudioParameterPresets
-    
     node = LMStudioParameterPresets()
     
     # Test creative preset

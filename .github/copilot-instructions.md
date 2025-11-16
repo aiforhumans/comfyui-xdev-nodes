@@ -14,6 +14,51 @@ ComfyUI requires **dual `__init__.py` pattern**:
 
 **Why**: ComfyUI loads the root folder as a Python package, expecting `NODE_CLASS_MAPPINGS` dict at the top level.
 
+## Copilot & Agent Guidance
+
+### Coding Style for AI Pairing
+- Prefer small, composable helpers in each node so Copilot can reason about IO contracts.
+- Keep docstrings explicit about tensor shapes, expected tuple order, and side effects (CLI calls, network requests).
+- Reuse utilities from `lm_base_node.py` and `lm_utils.py`; do not duplicate retry logic or parsing helpers.
+- When adding inputs/outputs, update both `INPUT_TYPES` and `RETURN_TYPES` in the same hunk so Copilot keeps them in sync.
+- Stick to ASCII and explicit imports; avoid wildcard imports so completion engines see symbol origins.
+
+### Agent Playbook
+1. **Assess**: Read this file plus `README.md` to understand dual `__init__.py` structure and node categories before changing code.
+2. **Plan**: Draft a short todo list when touching multiple files (new node + tests + docs) so Copilot agents can track progress.
+3. **Modify**: Edit nodes via helpers (`_build_messages`, `_make_api_request`, `check_model_loaded`). Keep new logic behind clearly named functions for reuse.
+4. **Validate**: Run targeted tests in `tests/` (e.g., `pytest tests/test_prompt_tools.py`) and, when LM Studio is unavailable, mock responses per existing fixtures.
+5. **Document**: Update this guide and `docs/` summaries whenever behavior or public inputs change, so future agents inherit accurate context.
+
+### Prompting Patterns
+- *“Add a new SDXL utility node that mirrors lm_prompt_enhancer structure, with INPUT_TYPES matching { ... } and tests in tests/test_prompt_tools.py.”*
+- *“Refactor lm_auto_unload_trigger to share CLI invocation helper from lm_utils.run_lms_cli.”*
+- *“When response_format='json', ensure JSONParser handles fallback text by adding regression tests.”*
+- Remind Copilot to keep return tuples aligned with `RETURN_TYPES`, and to respect GPU safety checks before invoking LM Studio models.
+
+## Repo-Specific Task Templates
+
+### Add a New Prompt Tool Node
+1. Copy `comfyui_custom_nodes/🖥XDEV/Prompt tools/text_concatenate.py` as a starting point.
+2. Update `INPUT_TYPES`, `RETURN_TYPES`, and `CATEGORY` together; keep docstring explicit about IO semantics.
+3. Register the node in `comfyui_custom_nodes/🖥XDEV/Prompt tools/__init__.py` and ensure the top-level `comfyui_custom_nodes/__init__.py` picks it up.
+4. Add or extend tests in `tests/test_prompt_tools.py` (import via dynamic path setup) and run `pytest tests/test_prompt_tools.py`.
+5. Document any new parameters in `README.md` and `docs/docs/comfyui_prompt_mastering_guide.md` if they affect workflows.
+
+### Enhance or Fix an LM Studio Node
+1. Identify shared helpers in `lm_base_node.py` / `lm_utils.py`; extend them instead of duplicating logic.
+2. For network changes, update `_make_api_request` usage and ensure `JSONParser` handles new fields (add regression tests under `tests/test_lm_studio.py`).
+3. Respect GPU safety: call `check_model_loaded()` when models are involved and surface warnings through `info` output.
+4. When touching CLI interactions, reuse `run_lms_cli` helper and adjust `tests/test_auto_unload.py` to mock subprocess behavior.
+5. Update docs (`GPU_MEMORY_IMPLEMENTATION.md`, `SDXL_OPTIMIZATION.md`) if behavior visible to users changes.
+
+### Documentation or Release Prep
+1. Sync high-level changes into `README.md`, `docs/README.md`, and any affected deep-dive doc in `docs/docs/`.
+2. Run `python -m pytest` (or targeted suites) and capture results in the PR description.
+3. Bump metadata (version in `pyproject.toml`, changelog entry if applicable) before tagging a release.
+4. Use `xcopy` command from Deployment section to mirror into a local ComfyUI install for smoke testing.
+5. Open a draft PR summarizing key changes plus testing evidence; mention GPU memory implications explicitly.
+
 ## ComfyUI Node Conventions
 
 ### Mandatory Node Structure
@@ -82,7 +127,7 @@ python test_auto_unload.py    # GPU memory tests
 pytest                        # Full test suite
 ```
 
-Tests import nodes directly using `sys.path` manipulation to simulate ComfyUI's import structure.
+Tests share a `tests/conftest.py` helper that wires up ASCII-safe imports (see `comfyui_custom_nodes.xdev`). Prefer importing nodes via `from comfyui_custom_nodes.xdev import ...` inside tests.
 
 ### Deploy to ComfyUI
 ```powershell
@@ -167,7 +212,7 @@ except ImportError:
 2. **Not updating main `__init__.py`**: New nodes in subdirectories won't register without updating `comfyui_custom_nodes/__init__.py`
 3. **Using `forceInput: True` without model selector**: Model param becomes required input connection
 4. **Not handling ComfyUI's IMAGE tensor format**: Must check for batch dimension and scale 0-1 float to 0-255 uint8
-5. **Windows path issues with emoji folder names**: Use string literals for paths with `🖥XDEV`
+5. **Windows path issues with emoji folder names**: Import via `comfyui_custom_nodes.xdev` to avoid raw emoji paths.
 6. **subprocess in nodes**: Use `subprocess.run()` for CLI calls (e.g., lms CLI), set timeout to prevent hangs
 
 ## Testing Strategy

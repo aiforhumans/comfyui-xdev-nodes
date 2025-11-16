@@ -1,13 +1,11 @@
 """Tests for example_node.py"""
 
-import sys
-from pathlib import Path
-
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 import pytest
-from comfyui_custom_nodes.example_node import ExampleNode
+
+try:  # Example node exists only in starter template
+    from comfyui_custom_nodes.example_node import ExampleNode
+except ModuleNotFoundError:  # pragma: no cover - optional module
+    pytest.skip("ExampleNode not included in this build", allow_module_level=True)
 
 
 def test_example_node_add_positive():

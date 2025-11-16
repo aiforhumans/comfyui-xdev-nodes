@@ -31,10 +31,10 @@ class LMStudioTextGen(LMStudioTextBaseNode):
             "required": {
                 "prompt": ("STRING", {"default": "Write a creative image prompt for:", "multiline": True}),
                 "user_input": ("STRING", {"default": "a fantasy landscape", "multiline": True}),
-                "temperature": ("FLOAT", {"default": 0.7, "min": 0.0, "max": 2.0, "step": 0.1}),
                 "max_tokens": ("INT", {"default": 200, "min": -1, "max": 4096, "step": 1}),
             },
             "optional": {
+                "temperature": ("FLOAT", {"default": 0.7, "min": 0.0, "max": 2.0, "step": 0.1}),
                 "system_prompt": ("STRING", {"default": "You are a creative AI assistant that generates detailed SDXL image prompts. SDXL understands natural language well - describe images vividly with specific details about subject, composition, lighting, mood, and style. You can use full sentences or comma-separated keywords. Keep negative prompts minimal.", "multiline": True}),
                 "response_format": (["text", "json"], {"default": "text"}),
                 "server_url": ("STRING", {"default": "http://localhost:1234"}),

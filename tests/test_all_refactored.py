@@ -4,10 +4,6 @@ Validates structure, imports, and backward compatibility.
 """
 
 import sys
-from pathlib import Path
-
-# Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "comfyui_custom_nodes" / "🖥XDEV" / "LM Studio"))
 
 def test_imports():
     """Test that all refactored nodes import successfully."""

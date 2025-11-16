@@ -1,18 +1,13 @@
 """Tests for XDEV Prompt Tools"""
 
-import sys
-from pathlib import Path
-
-# Add parent directories to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent.parent / "comfyui_custom_nodes" / "🖥XDEV" / "Prompt tools"))
-
 import pytest
-from text_concatenate import TextConcatenate
-from multiline_prompt import MultilinePromptBuilder
-from style_injector import StyleTagsInjector
-from random_prompt import RandomPromptSelector
-from prompt_template import PromptTemplateSystem
+from comfyui_custom_nodes.xdev import (
+    MultilinePromptBuilder,
+    PromptTemplateSystem,
+    RandomPromptSelector,
+    StyleTagsInjector,
+    TextConcatenate,
+)
 
 
 class TestTextConcatenate:
