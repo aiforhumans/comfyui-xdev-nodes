@@ -3,29 +3,29 @@
 Provides common functionality and patterns for all LM Studio nodes.
 """
 
-from typing import Any, Dict, Tuple, Optional
 from abc import ABC, abstractmethod
+from typing import Any
 
 try:
-    from .lm_utils import (
-        LMStudioAPIClient,
-        InfoFormatter,
-        OutputFormatter,
-        build_messages,
-        build_payload,
-        extract_response_text,
-    )
     from .lm_model_manager import check_model_loaded
-except ImportError:
-    from lm_utils import (
-        LMStudioAPIClient,
+    from .lm_utils import (
         InfoFormatter,
+        LMStudioAPIClient,
         OutputFormatter,
         build_messages,
         build_payload,
         extract_response_text,
     )
+except ImportError:
     from lm_model_manager import check_model_loaded
+    from lm_utils import (
+        InfoFormatter,
+        LMStudioAPIClient,
+        OutputFormatter,
+        build_messages,
+        build_payload,
+        extract_response_text,
+    )
 
 
 class LMStudioBaseNode(ABC):
@@ -42,7 +42,7 @@ class LMStudioBaseNode(ABC):
     DEFAULT_TIMEOUT = 60
     
     @classmethod
-    def get_common_required_inputs(cls) -> Dict[str, Tuple]:
+    def get_common_required_inputs(cls) -> dict[str, tuple]:
         """Get common required input parameters.
         
         Returns:
@@ -55,7 +55,7 @@ class LMStudioBaseNode(ABC):
         }
     
     @classmethod
-    def get_common_optional_inputs(cls) -> Dict[str, Tuple]:
+    def get_common_optional_inputs(cls) -> dict[str, tuple]:
         """Get common optional input parameters.
         
         Returns:
@@ -71,7 +71,7 @@ class LMStudioBaseNode(ABC):
     
     @classmethod
     @abstractmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters for the node.
         
         Must be implemented by subclass.
@@ -150,7 +150,7 @@ class LMStudioBaseNode(ABC):
         temperature: float,
         max_tokens: int,
         response_format: str = "text",
-        model: Optional[str] = None,
+        model: str | None = None,
         seed: int = -1,
         timeout: int = None
     ) -> str:
@@ -198,9 +198,9 @@ class LMStudioBaseNode(ABC):
     def _build_messages(
         self,
         prompt: str,
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
         response_format: str = "text",
-        user_input: Optional[str] = None
+        user_input: str | None = None
     ) -> list:
         """Build messages array for API request.
         
@@ -229,7 +229,7 @@ class LMStudioTextBaseNode(LMStudioBaseNode):
     # Don't set FUNCTION here - let subclass define it
     
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Default INPUT_TYPES for text nodes."""
         return {
             "required": {

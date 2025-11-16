@@ -9,18 +9,18 @@ from __future__ import annotations
 
 import importlib
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Dict, Iterable, Tuple, Type
 
 BASE_DIR = Path(__file__).resolve().parent.parent / "🖥XDEV"
 PROMPT_TOOLS_PATH = BASE_DIR / "Prompt tools"
 LM_STUDIO_PATH = BASE_DIR / "LM Studio"
 
-NODE_CLASS_MAPPINGS: Dict[str, Type] = {}
-NODE_DISPLAY_NAME_MAPPINGS: Dict[str, str] = {}
+NODE_CLASS_MAPPINGS: dict[str, type] = {}
+NODE_DISPLAY_NAME_MAPPINGS: dict[str, str] = {}
 
 # Keep track of direct symbol exports for IDE/Copilot friendliness
-_EXPORTS: Dict[str, Type] = {}
+_EXPORTS: dict[str, type] = {}
 
 
 def _ensure_path(path: Path) -> bool:
@@ -32,12 +32,12 @@ def _ensure_path(path: Path) -> bool:
     return True
 
 
-def _import_class(module_name: str, class_name: str) -> Type:
+def _import_class(module_name: str, class_name: str) -> type:
     module = importlib.import_module(module_name)
     return getattr(module, class_name)
 
 
-def _load_prompt_tools() -> Tuple[Dict[str, Type], Dict[str, str]]:
+def _load_prompt_tools() -> tuple[dict[str, type], dict[str, str]]:
     if not _ensure_path(PROMPT_TOOLS_PATH):
         return {}, {}
 
@@ -49,8 +49,8 @@ def _load_prompt_tools() -> Tuple[Dict[str, Type], Dict[str, str]]:
         ("prompt_template", "PromptTemplateSystem", "XDEVPromptTemplate", "Prompt Template System"),
     ]
 
-    class_map: Dict[str, Type] = {}
-    display_map: Dict[str, str] = {}
+    class_map: dict[str, type] = {}
+    display_map: dict[str, str] = {}
 
     for module_name, class_name, mapping_key, display_name in definitions:
         cls = _import_class(module_name, class_name)
@@ -61,7 +61,7 @@ def _load_prompt_tools() -> Tuple[Dict[str, Type], Dict[str, str]]:
     return class_map, display_map
 
 
-def _load_lm_studio_nodes() -> Tuple[Dict[str, Type], Dict[str, str]]:
+def _load_lm_studio_nodes() -> tuple[dict[str, type], dict[str, str]]:
     if not _ensure_path(LM_STUDIO_PATH):
         return {}, {}
 
@@ -91,8 +91,8 @@ def _load_lm_studio_nodes() -> Tuple[Dict[str, Type], Dict[str, str]]:
         ("lm_regional_prompter", "LMStudioRegionalPrompterHelper", "XDEVLMStudioRegionalPrompterHelper", "LM Studio Regional Prompter Helper"),
     ]
 
-    class_map: Dict[str, Type] = {}
-    display_map: Dict[str, str] = {}
+    class_map: dict[str, type] = {}
+    display_map: dict[str, str] = {}
 
     for module_name, class_name, mapping_key, display_name in definitions:
         cls = _import_class(module_name, class_name)

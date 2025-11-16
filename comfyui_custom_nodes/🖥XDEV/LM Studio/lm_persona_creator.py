@@ -5,21 +5,19 @@ Create detailed, consistent character/persona descriptions for image generation.
 
 try:
     from .lm_base_node import LMStudioPromptBaseNode
-    from .lm_utils import JSONParser, ErrorFormatter
-    from .lm_model_manager import check_model_loaded
+    from .lm_utils import ErrorFormatter, JSONParser
 except ImportError:
     from lm_base_node import LMStudioPromptBaseNode
-    from lm_utils import JSONParser, ErrorFormatter
-    from lm_model_manager import check_model_loaded
+    from lm_utils import ErrorFormatter, JSONParser
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 
 class LMStudioPersonaCreator(LMStudioPromptBaseNode):
     """Generate detailed character/persona descriptions with consistency."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -62,7 +60,7 @@ class LMStudioPersonaCreator(LMStudioPromptBaseNode):
         temperature: float = 0.6,
         server_url: str = "http://localhost:1234",
         model: str = ""
-    ) -> Tuple[str, str, str, str]:
+    ) -> tuple[str, str, str, str]:
         """Create detailed persona description."""
         
         info_parts = self._init_info("Persona Creator", "👤")
@@ -186,7 +184,7 @@ Generate the detailed persona description now."""
                 persona_desc = full_desc
                 
                 # Build consistency reference
-                consistency_ref = f"PERSONA IDENTITY:\n"
+                consistency_ref = "PERSONA IDENTITY:\n"
                 consistency_ref += f"Seed: {consistency_seed if consistency_seed else 'none'}\n"
                 consistency_ref += f"Tokens: {consistency_tokens}\n\n"
                 consistency_ref += f"KEY FEATURES:\n{key_features}\n\n"
@@ -197,7 +195,7 @@ Generate the detailed persona description now."""
                 persona_desc = generated.strip()
                 negative = ""
                 consistency_ref = f"Concept: {character_concept}"
-                info_parts.append(f"⚠️ JSON parse fallback")
+                info_parts.append("⚠️ JSON parse fallback")
             
             # Success info
             word_count = len(persona_desc.split())

@@ -9,18 +9,17 @@ except ImportError:
     from lm_base_node import LMStudioUtilityBaseNode
 
 import json
-from typing import Any, Dict, List, Tuple, Optional
-
+from typing import Any
 
 # Global storage for chat histories (keyed by session_id)
-CHAT_HISTORIES: Dict[str, List[Dict[str, str]]] = {}
+CHAT_HISTORIES: dict[str, list[dict[str, str]]] = {}
 
 
 class LMStudioChatHistory(LMStudioUtilityBaseNode):
     """Manage conversation history for stateful chat interactions."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -51,7 +50,7 @@ class LMStudioChatHistory(LMStudioUtilityBaseNode):
         message: str,
         reset_history: bool = False,
         max_messages: int = 20
-    ) -> Tuple[str, str, str]:
+    ) -> tuple[str, str, str]:
         """Manage chat history with automatic truncation."""
         
         info_parts = self._init_info("Chat History Manager", "💬")
@@ -119,7 +118,7 @@ class LMStudioChatHistoryLoader(LMStudioUtilityBaseNode):
     """Load existing chat history for use in text generation."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -137,7 +136,7 @@ class LMStudioChatHistoryLoader(LMStudioUtilityBaseNode):
         import time
         return time.time()
 
-    def load_history(self, session_id: str) -> Tuple[str]:
+    def load_history(self, session_id: str) -> tuple[str]:
         """Load chat history as JSON."""
         history = CHAT_HISTORIES.get(session_id, [])
         messages_json = json.dumps(history, indent=2)

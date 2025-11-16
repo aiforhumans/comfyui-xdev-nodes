@@ -3,7 +3,7 @@
 Injects predefined style tags into prompts.
 """
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 
 class StyleTagsInjector:
@@ -24,7 +24,7 @@ class StyleTagsInjector:
     }
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -47,7 +47,7 @@ class StyleTagsInjector:
         style_preset: str,
         style_strength: float = 1.0,
         position: str = "suffix"
-    ) -> Tuple[str]:
+    ) -> tuple[str]:
         """Inject style tags into prompt."""
         style_tags = self.STYLE_PRESETS.get(style_preset, "")
         

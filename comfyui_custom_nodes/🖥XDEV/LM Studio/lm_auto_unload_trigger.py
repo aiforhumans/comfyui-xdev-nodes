@@ -6,23 +6,21 @@ Useful for automated workflows that need to free GPU memory before image generat
 Uses LM Studio CLI (lms) for programmatic model unloading.
 """
 
-from typing import Any, Dict, Tuple
-import urllib.request
-import urllib.error
+from typing import Any
 
 try:
     from .lm_base_node import LMStudioUtilityBaseNode
-    from .lm_model_manager import LMModelManager, check_model_loaded
+    from .lm_model_manager import check_model_loaded
 except ImportError:
     from lm_base_node import LMStudioUtilityBaseNode
-    from lm_model_manager import LMModelManager, check_model_loaded
+    from lm_model_manager import check_model_loaded
 
 
 class LMStudioAutoUnloadTrigger(LMStudioUtilityBaseNode):
     """Automatically unload LM Studio model when triggered."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -45,7 +43,7 @@ class LMStudioAutoUnloadTrigger(LMStudioUtilityBaseNode):
         unload_method: str = "warning_only",
         server_url: str = "http://localhost:1234",
         passthrough: str = ""
-    ) -> Tuple[str, bool, str]:
+    ) -> tuple[str, bool, str]:
         """Trigger model unload when signal received."""
         
         if not trigger:
@@ -98,11 +96,11 @@ class LMStudioAutoUnloadTrigger(LMStudioUtilityBaseNode):
                         error_output = result.stderr or result.stdout
                         raise Exception(f"lms command failed: {error_output}")
                         
-                except FileNotFoundError:
+                except FileNotFoundError as err:
                     # lms not found in PATH
-                    raise Exception("lms CLI not found in PATH. Please run: lms bootstrap")
-                except subprocess.TimeoutExpired:
-                    raise Exception("lms command timed out")
+                    raise Exception("lms CLI not found in PATH. Please run: lms bootstrap") from err
+                except subprocess.TimeoutExpired as err:
+                    raise Exception("lms command timed out") from err
                 
             except Exception as e:
                 status = (

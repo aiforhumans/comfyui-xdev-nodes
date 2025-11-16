@@ -3,7 +3,7 @@
 Estimates token usage for prompts before API calls.
 """
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 try:
     from .lm_base_node import LMStudioUtilityBaseNode
@@ -15,7 +15,7 @@ class LMStudioTokenCounter(LMStudioUtilityBaseNode):
     """Estimate token count for prompts to manage costs and limits."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -40,7 +40,7 @@ class LMStudioTokenCounter(LMStudioUtilityBaseNode):
         chars_per_token: float = 4.0,
         context_limit: int = 4096,
         max_completion: int = 500
-    ) -> Tuple[int, int, bool, str, str]:
+    ) -> tuple[int, int, bool, str, str]:
         """Estimate token count using various methods."""
         
         info_parts = self._init_info("Token Counter", "🔢")
@@ -112,7 +112,7 @@ class LMStudioTokenCounter(LMStudioUtilityBaseNode):
             usage_pct = (total_needed / context_limit) * 100
             info_parts.append(f"✅ Within limit ({usage_pct:.1f}%)")
         else:
-            info_parts.append(f"❌ Exceeds limit!")
+            info_parts.append("❌ Exceeds limit!")
         
         info_parts.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         

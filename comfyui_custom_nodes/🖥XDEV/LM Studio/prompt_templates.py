@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Dict, Literal
+from typing import Literal
 
 DetailLevel = Literal["minimal", "moderate", "detailed", "very detailed"]
 
 # Centralized SDXL keyword catalogs so nodes, docs, and tests stay in sync.
-LIGHTING_KEYWORDS: Dict[str, str] = {
+LIGHTING_KEYWORDS: dict[str, str] = {
     "natural": "available light, golden daylight, realistic shadows",
     "studio": "key/fill/rim setup with controlled highlights",
     "golden hour": "warm low-angle sun with long shadows",
@@ -21,7 +21,7 @@ LIGHTING_KEYWORDS: Dict[str, str] = {
     "custom": "user-provided lighting setup"
 }
 
-MOOD_KEYWORDS: Dict[str, str] = {
+MOOD_KEYWORDS: dict[str, str] = {
     "dramatic": "intense, high-stakes energy",
     "peaceful": "calm, tranquil atmosphere",
     "mysterious": "enigmatic, shadow-filled scene",
@@ -31,7 +31,7 @@ MOOD_KEYWORDS: Dict[str, str] = {
     "whimsical": "playful, imaginative tone"
 }
 
-CAMERA_FRAMING: Dict[str, str] = {
+CAMERA_FRAMING: dict[str, str] = {
     "portrait": "shoulders-up framing focused on the subject",
     "full body": "head-to-toe framing",
     "mid shot": "waist-up composition",
@@ -45,7 +45,7 @@ CAMERA_FRAMING: Dict[str, str] = {
     "custom": "user-provided framing"
 }
 
-QUALITY_TAGS: Dict[str, str] = {
+QUALITY_TAGS: dict[str, str] = {
     "highly detailed": "micro-detail emphasis",
     "8k resolution": "ultra high fidelity",
     "award winning": "prestige photography vibe",

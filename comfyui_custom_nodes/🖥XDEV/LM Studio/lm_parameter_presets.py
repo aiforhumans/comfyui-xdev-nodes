@@ -8,7 +8,7 @@ try:
 except ImportError:
     from lm_base_node import LMStudioUtilityBaseNode
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 
 class LMStudioParameterPresets(LMStudioUtilityBaseNode):
@@ -82,7 +82,7 @@ class LMStudioParameterPresets(LMStudioUtilityBaseNode):
     }
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         preset_names = list(cls.PRESETS.keys())
         
@@ -109,7 +109,7 @@ class LMStudioParameterPresets(LMStudioUtilityBaseNode):
         top_p_override: float = -1.0,
         frequency_penalty_override: float = -999.0,
         presence_penalty_override: float = -999.0
-    ) -> Tuple[float, float, float, float, str]:
+    ) -> tuple[float, float, float, float, str]:
         """Apply parameter preset with optional overrides."""
         
         info_parts = self._init_info("Parameter Presets", "🎛️")

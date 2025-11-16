@@ -6,19 +6,18 @@ a minimal model or restarting the connection.
 """
 
 import json
-import urllib.request
 import urllib.error
-from typing import Optional, Tuple
+import urllib.request
 
 
 class LMModelManager:
     """Manages LM Studio model loading/unloading for memory optimization."""
     
-    _last_loaded_model: Optional[str] = None
+    _last_loaded_model: str | None = None
     _auto_unload: bool = True
     
     @classmethod
-    def get_loaded_model(cls, server_url: str = "http://localhost:1234") -> Optional[str]:
+    def get_loaded_model(cls, server_url: str = "http://localhost:1234") -> str | None:
         """Check which model is currently loaded in LM Studio."""
         try:
             url = f"{server_url}/v1/models"
@@ -40,7 +39,7 @@ class LMModelManager:
             return None
     
     @classmethod
-    def request_model_unload(cls, server_url: str = "http://localhost:1234") -> Tuple[bool, str]:
+    def request_model_unload(cls, server_url: str = "http://localhost:1234") -> tuple[bool, str]:
         """
         Request model unload to free GPU memory.
         
@@ -87,7 +86,7 @@ class LMModelManager:
         return cls._auto_unload
 
 
-def check_model_loaded(server_url: str = "http://localhost:1234") -> Tuple[bool, Optional[str], str]:
+def check_model_loaded(server_url: str = "http://localhost:1234") -> tuple[bool, str | None, str]:
     """
     Check if a model is loaded and return warning if needed.
     

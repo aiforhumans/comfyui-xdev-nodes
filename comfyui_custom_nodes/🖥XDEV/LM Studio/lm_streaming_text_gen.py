@@ -5,25 +5,21 @@ Generates text with real-time streaming feedback and progress updates.
 
 try:
     from .lm_base_node import LMStudioTextBaseNode
-    from .lm_utils import ErrorFormatter
-    from .lm_model_manager import check_model_loaded
 except ImportError:
     from lm_base_node import LMStudioTextBaseNode
-    from lm_utils import ErrorFormatter
-    from lm_model_manager import check_model_loaded
 
 import json
-from typing import Any, Dict, Tuple
-import urllib.request
-import urllib.error
 import time
+import urllib.error
+import urllib.request
+from typing import Any
 
 
 class LMStudioStreamingTextGen(LMStudioTextBaseNode):
     """Generate text with streaming updates using LM Studio API."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -50,7 +46,7 @@ class LMStudioStreamingTextGen(LMStudioTextBaseNode):
         server_url: str = "http://localhost:1234",
         model: str = "",
         seed: int = -1
-    ) -> Tuple[str, str, str]:
+    ) -> tuple[str, str, str]:
         """Generate text with streaming and progress updates."""
         
         # Initialize info using base class helper
@@ -124,7 +120,6 @@ class LMStudioStreamingTextGen(LMStudioTextBaseNode):
                                 # Update progress every 0.5 seconds
                                 now = time.time()
                                 if now - last_update >= 0.5:
-                                    progress = min(token_count / max_tokens, 0.99)
                                     try:
                                         # Try to use ComfyUI progress API if available
                                         from comfy_api.latest import Execution
@@ -158,7 +153,7 @@ class LMStudioStreamingTextGen(LMStudioTextBaseNode):
             return (generated_text.strip(), str(token_count), "\n".join(info_parts))
             
         except (urllib.error.URLError, ConnectionRefusedError, OSError) as e:
-            error_msg = f"❌ Connection Error\n\n"
+            error_msg = "❌ Connection Error\n\n"
             error_msg += f"Cannot connect to LM Studio at: {server_url}\n\n"
             error_msg += "🔧 Troubleshooting:\n"
             error_msg += "1. Make sure LM Studio is running\n"

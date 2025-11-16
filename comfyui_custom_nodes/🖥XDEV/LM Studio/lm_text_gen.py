@@ -3,21 +3,21 @@
 Generates text prompts using LM Studio local server.
 """
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 try:
     from .lm_base_node import LMStudioTextBaseNode
     from .lm_utils import (
-        LMStudioConnectionError,
-        LMStudioAPIError,
         ErrorFormatter,
+        LMStudioAPIError,
+        LMStudioConnectionError,
     )
 except ImportError:
     from lm_base_node import LMStudioTextBaseNode
     from lm_utils import (
-        LMStudioConnectionError,
-        LMStudioAPIError,
         ErrorFormatter,
+        LMStudioAPIError,
+        LMStudioConnectionError,
     )
 
 
@@ -25,7 +25,7 @@ class LMStudioTextGen(LMStudioTextBaseNode):
     """Generate text using LM Studio API."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -56,7 +56,7 @@ class LMStudioTextGen(LMStudioTextBaseNode):
         server_url: str = "http://localhost:1234",
         model: str = "",
         seed: int = -1
-    ) -> Tuple[str, str]:
+    ) -> tuple[str, str]:
         """Generate text using LM Studio API with enhanced output formatting."""
         
         # Initialize info output using base class

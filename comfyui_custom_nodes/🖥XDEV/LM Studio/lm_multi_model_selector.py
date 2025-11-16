@@ -9,16 +9,16 @@ except ImportError:
     from lm_base_node import LMStudioUtilityBaseNode
 
 import json
-from typing import Any, Dict, List, Tuple
-import urllib.request
 import urllib.error
+import urllib.request
+from typing import Any
 
 
 class LMStudioMultiModelSelector(LMStudioUtilityBaseNode):
     """Dynamically discover and select from loaded models."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -43,7 +43,7 @@ class LMStudioMultiModelSelector(LMStudioUtilityBaseNode):
             return time.time()
         return False
 
-    def get_loaded_models(self, server_url: str) -> Tuple[List[Dict[str, Any]], str]:
+    def get_loaded_models(self, server_url: str) -> tuple[list[dict[str, Any]], str]:
         """Query LM Studio API for loaded models."""
         try:
             url = f"{server_url}/v1/models"
@@ -65,7 +65,7 @@ class LMStudioMultiModelSelector(LMStudioUtilityBaseNode):
         server_url: str = "http://localhost:1234",
         model_filter: str = "all",
         fallback_model: str = ""
-    ) -> Tuple[str, str, str]:
+    ) -> tuple[str, str, str]:
         """Select model from available options."""
         
         info_parts = self._init_info("Multi-Model Selector", "🎯")

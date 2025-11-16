@@ -3,14 +3,14 @@
 Builds complex prompts with subject, style, quality, and negative sections.
 """
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 
 class MultilinePromptBuilder:
     """Builds structured prompts with multiple sections."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -38,7 +38,7 @@ class MultilinePromptBuilder:
         lighting: str = "",
         quality: str = "",
         negative: str = ""
-    ) -> Tuple[str, str]:
+    ) -> tuple[str, str]:
         """Build positive and negative prompts."""
         positive_parts = []
         

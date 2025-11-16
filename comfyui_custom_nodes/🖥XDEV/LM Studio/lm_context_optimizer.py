@@ -8,14 +8,14 @@ try:
 except ImportError:
     from lm_base_node import LMStudioUtilityBaseNode
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 
 class LMStudioContextOptimizer(LMStudioUtilityBaseNode):
     """Optimize context length using smart truncation strategies."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -42,7 +42,7 @@ class LMStudioContextOptimizer(LMStudioUtilityBaseNode):
         preserve_start: int = 500,
         preserve_end: int = 500,
         chars_per_token: float = 4.0
-    ) -> Tuple[str, int, int, str]:
+    ) -> tuple[str, int, int, str]:
         """Optimize context using specified strategy."""
         
         info_parts = self._init_info("Context Optimizer", "✂️")

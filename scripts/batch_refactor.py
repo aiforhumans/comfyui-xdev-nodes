@@ -4,8 +4,6 @@ This script will automatically refactor the remaining 22 nodes to use
 the new base classes and utilities.
 """
 
-import re
-from pathlib import Path
 
 # Nodes to refactor (file name -> class name)
 NODES_TO_REFACTOR = {
@@ -36,7 +34,7 @@ NODES_TO_REFACTOR = {
     "lm_auto_unload_trigger.py": ("LMStudioAutoUnloadTrigger", "utility"),
 }
 
-def generate_refactoring_summary():
+def generate_refactoring_summary() -> None:
     """Generate a summary of what needs to be refactored."""
     
     print("="*60)

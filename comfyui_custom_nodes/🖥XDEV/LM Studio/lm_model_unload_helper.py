@@ -3,21 +3,21 @@
 Provides a workflow node to check and remind about model unloading.
 """
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 try:
     from .lm_base_node import LMStudioUtilityBaseNode
-    from .lm_model_manager import LMModelManager, check_model_loaded
+    from .lm_model_manager import check_model_loaded
 except ImportError:
     from lm_base_node import LMStudioUtilityBaseNode
-    from lm_model_manager import LMModelManager, check_model_loaded
+    from lm_model_manager import check_model_loaded
 
 
 class LMStudioModelUnloadHelper(LMStudioUtilityBaseNode):
     """Check if LM Studio model is loaded and provide unload guidance."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -38,7 +38,7 @@ class LMStudioModelUnloadHelper(LMStudioUtilityBaseNode):
         check_before_generation: bool = True,
         server_url: str = "http://localhost:1234",
         passthrough: str = ""
-    ) -> Tuple[str, str]:
+    ) -> tuple[str, str]:
         """Check model status and return guidance message."""
         
         if not check_before_generation:

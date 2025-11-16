@@ -4,14 +4,14 @@ Randomly selects from a list of prompts.
 """
 
 import random
-from typing import Any, Dict, Tuple
+from typing import Any
 
 
 class RandomPromptSelector:
     """Randomly selects one prompt from a list."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -35,7 +35,7 @@ class RandomPromptSelector:
         delimiter: str = "newline",
         seed: int = 0,
         enable_random: bool = True
-    ) -> Tuple[str, int]:
+    ) -> tuple[str, int]:
         """Randomly select a prompt from the list."""
         # Parse prompts based on delimiter
         if delimiter == "newline":

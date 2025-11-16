@@ -5,10 +5,11 @@ Centralized utilities for all LM Studio nodes to eliminate code duplication.
 
 import json
 import re
-import urllib.request
 import urllib.error
-from typing import Any, Dict, List, Optional, Tuple, Callable
+import urllib.request
+from collections.abc import Callable
 from functools import wraps
+from typing import Any
 
 # Compile regex patterns once at module level for performance
 JSON_PATTERN = re.compile(r'\{.*?\}', re.DOTALL)
@@ -46,9 +47,9 @@ class LMStudioAPIClient:
     def make_request(
         server_url: str,
         endpoint: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         timeout: int = DEFAULT_TIMEOUT
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Make API request to LM Studio server.
         
         Args:
@@ -87,7 +88,7 @@ class LMStudioAPIClient:
             raise LMStudioAPIError(f"HTTP {e.code}: {error_body}") from e
     
     @staticmethod
-    def get_loaded_models(server_url: str) -> List[Dict[str, Any]]:
+    def get_loaded_models(server_url: str) -> list[dict[str, Any]]:
         """Get list of loaded models from LM Studio.
         
         Args:
@@ -115,7 +116,7 @@ class InfoFormatter:
     """Format info outputs consistently across all nodes."""
     
     @staticmethod
-    def create_header(title: str, emoji: str = "📝") -> List[str]:
+    def create_header(title: str, emoji: str = "📝") -> list[str]:
         """Create info output header.
         
         Args:
@@ -132,7 +133,7 @@ class InfoFormatter:
         return lines
     
     @staticmethod
-    def add_model_info(lines: List[str], loaded_model: Optional[str], warning: Optional[str]) -> None:
+    def add_model_info(lines: list[str], loaded_model: str | None, warning: str | None) -> None:
         """Add model loading info.
         
         Args:
@@ -148,7 +149,7 @@ class InfoFormatter:
             lines.append("⚪ No model loaded")
     
     @staticmethod
-    def add_parameters(lines: List[str], params: Dict[str, Any]) -> None:
+    def add_parameters(lines: list[str], params: dict[str, Any]) -> None:
         """Add parameter information.
         
         Args:
@@ -183,7 +184,7 @@ class InfoFormatter:
             lines.append(f"{emoji} {label}: {formatted}")
     
     @staticmethod
-    def add_completion(lines: List[str], output_text: str, success: bool = True) -> None:
+    def add_completion(lines: list[str], output_text: str, success: bool = True) -> None:
         """Add completion status and statistics.
         
         Args:
@@ -202,7 +203,7 @@ class InfoFormatter:
         lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     
     @staticmethod
-    def format(parts: List[str]) -> str:
+    def format(parts: list[str]) -> str:
         """Join info parts into final string.
         
         Args:
@@ -243,9 +244,9 @@ class JSONParser:
     @staticmethod
     def parse_response(
         response: str,
-        expected_keys: Optional[List[str]] = None,
+        expected_keys: list[str] | None = None,
         nested: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Parse JSON from response with regex fallback.
         
         Args:
@@ -292,7 +293,7 @@ class JSONParser:
         return {}
     
     @staticmethod
-    def extract_field(parsed: Dict[str, Any], field: str, default: str = "") -> str:
+    def extract_field(parsed: dict[str, Any], field: str, default: str = "") -> str:
         """Extract field from parsed JSON with fallback.
         
         Args:
@@ -320,7 +321,7 @@ class ErrorFormatter:
         Returns:
             Formatted error message
         """
-        msg = f"❌ Connection Error\n\n"
+        msg = "❌ Connection Error\n\n"
         msg += f"Cannot connect to LM Studio at:\n{server_url}\n\n"
         msg += "🔧 Troubleshooting:\n"
         msg += "1. Make sure LM Studio is running\n"
@@ -334,7 +335,7 @@ class ErrorFormatter:
         return msg
     
     @staticmethod
-    def format_api_error(error_msg: str, http_code: Optional[int] = None) -> str:
+    def format_api_error(error_msg: str, http_code: int | None = None) -> str:
         """Format API error message.
         
         Args:
@@ -347,7 +348,7 @@ class ErrorFormatter:
         if http_code:
             msg = f"❌ API Error {http_code}\n\n"
         else:
-            msg = f"❌ API Error\n\n"
+            msg = "❌ API Error\n\n"
         
         msg += f"Server response: {error_msg}\n\n"
         msg += "🔧 Common causes:\n"
@@ -368,7 +369,7 @@ class ErrorFormatter:
         Returns:
             Formatted error message
         """
-        msg = f"❌ Model Error\n\n"
+        msg = "❌ Model Error\n\n"
         msg += "No model loaded or model not responding.\n\n"
         msg += "🔧 Steps to fix:\n"
         msg += "1. Open LM Studio\n"
@@ -397,7 +398,6 @@ def handle_lmstudio_errors(func: Callable) -> Callable:
     @wraps(func)
     def wrapper(*args, **kwargs):
         # Extract self and server_url from args/kwargs
-        self = args[0] if args else None
         server_url = kwargs.get('server_url', 'http://localhost:1234')
         
         try:
@@ -431,10 +431,10 @@ def handle_lmstudio_errors(func: Callable) -> Callable:
 
 def build_messages(
     prompt: str,
-    system_prompt: Optional[str] = None,
+    system_prompt: str | None = None,
     response_format: str = "text",
-    user_input: Optional[str] = None
-) -> List[Dict[str, str]]:
+    user_input: str | None = None
+) -> list[dict[str, str]]:
     """Build messages array for API request.
     
     Args:
@@ -466,14 +466,14 @@ def build_messages(
 
 
 def build_payload(
-    messages: List[Dict[str, str]],
+    messages: list[dict[str, str]],
     temperature: float = 0.7,
     max_tokens: int = 200,
     response_format: str = "text",
-    model: Optional[str] = None,
+    model: str | None = None,
     seed: int = -1,
     stream: bool = False
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build API request payload.
     
     Args:
@@ -509,7 +509,7 @@ def build_payload(
     return payload
 
 
-def extract_response_text(result: Dict[str, Any]) -> str:
+def extract_response_text(result: dict[str, Any]) -> str:
     """Extract generated text from API response.
     
     Args:
@@ -533,7 +533,7 @@ def extract_response_text(result: Dict[str, Any]) -> str:
 _PIL_Image = None
 _numpy = None
 
-def get_pil_image():
+def get_pil_image() -> Any:
     """Lazy import PIL.Image."""
     global _PIL_Image
     if _PIL_Image is None:
@@ -542,7 +542,7 @@ def get_pil_image():
     return _PIL_Image
 
 
-def get_numpy():
+def get_numpy() -> Any:
     """Lazy import numpy."""
     global _numpy
     if _numpy is None:

@@ -3,16 +3,16 @@
 Template-based prompt generation with variable substitution.
 """
 
-from typing import Any, Dict, Tuple
 import json
 import re
+from typing import Any
 
 
 class PromptTemplateSystem:
     """Template system with variable substitution."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -50,7 +50,7 @@ class PromptTemplateSystem:
         var_7: str = "",
         var_8: str = "",
         response_format: str = "text"
-    ) -> Tuple[str]:
+    ) -> tuple[str]:
         """Apply template with variable substitution."""
         result = template
         

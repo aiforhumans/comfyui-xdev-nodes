@@ -9,15 +9,15 @@ except ImportError:
     from lm_base_node import LMStudioUtilityBaseNode
 
 import json
-from typing import Any, Dict, Tuple
 import re
+from typing import Any
 
 
 class LMStudioResponseValidator(LMStudioUtilityBaseNode):
     """Validate LLM responses with automatic retry suggestions."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -55,7 +55,7 @@ class LMStudioResponseValidator(LMStudioUtilityBaseNode):
         must_contain: str = "",
         regex_pattern: str = "",
         strict_mode: bool = False
-    ) -> Tuple[str, bool, str, str]:
+    ) -> tuple[str, bool, str, str]:
         """Validate response against specified criteria."""
         
         info_parts = self._init_info("Response Validator", "✓")
@@ -88,7 +88,7 @@ class LMStudioResponseValidator(LMStudioUtilityBaseNode):
                                     errors.append(f"Missing required fields: {', '.join(missing)}")
                                     is_valid = False
                                 else:
-                                    info_parts.append(f"✅ All required fields present")
+                                    info_parts.append("✅ All required fields present")
                     except json.JSONDecodeError:
                         errors.append("Invalid JSON schema provided")
                         is_valid = False

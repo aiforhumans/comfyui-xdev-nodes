@@ -3,14 +3,14 @@
 Combines multiple text inputs with optional separator.
 """
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 
 class TextConcatenate:
     """Concatenates up to 5 text inputs with a separator."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -37,7 +37,7 @@ class TextConcatenate:
         text4: str = "",
         text5: str = "",
         separator: str = ", "
-    ) -> Tuple[str]:
+    ) -> tuple[str]:
         """Concatenate text inputs with separator."""
         texts = [t.strip() for t in [text1, text2, text3, text4, text5] if t.strip()]
         result = separator.join(texts)

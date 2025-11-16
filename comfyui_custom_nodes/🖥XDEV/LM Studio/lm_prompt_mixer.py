@@ -6,12 +6,12 @@ Uses LM Studio's text generation to create coherent merged prompts.
 
 try:
     from .lm_base_node import LMStudioPromptBaseNode
-    from .lm_utils import JSONParser, ErrorFormatter
     from .lm_model_manager import check_model_loaded
+    from .lm_utils import ErrorFormatter, JSONParser
 except ImportError:
     from lm_base_node import LMStudioPromptBaseNode
-    from lm_utils import JSONParser, ErrorFormatter
     from lm_model_manager import check_model_loaded
+    from lm_utils import ErrorFormatter, JSONParser
 
 
 class LMStudioPromptMixer(LMStudioPromptBaseNode):

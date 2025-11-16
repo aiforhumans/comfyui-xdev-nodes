@@ -7,16 +7,14 @@ Based on research: SDXL dimension handling, composition best practices
 """
 
 import json
-import urllib.request
-import urllib.error
 import re
+import urllib.error
+import urllib.request
 
 try:
     from .lm_base_node import LMStudioPromptBaseNode
-    from .lm_model_manager import check_model_loaded
 except ImportError:
     from lm_base_node import LMStudioPromptBaseNode
-    from lm_model_manager import check_model_loaded
 
 
 class LMStudioAspectRatioOptimizer(LMStudioPromptBaseNode):
@@ -154,6 +152,8 @@ Apply {orientation} orientation optimizations."""
         if model.strip():
             payload["model"] = model.strip()
         
+        lm_studio_url = f"{server_url}/v1/chat/completions"
+
         try:
             # Make API request
             req = urllib.request.Request(

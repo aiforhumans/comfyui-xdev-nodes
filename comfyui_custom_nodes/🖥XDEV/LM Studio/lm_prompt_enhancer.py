@@ -3,15 +3,15 @@
 Takes a simple prompt and expands it into a detailed image generation prompt.
 """
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 try:
     from .lm_base_node import LMStudioPromptBaseNode
     from .lm_utils import (
-        LMStudioConnectionError,
-        LMStudioAPIError,
         ErrorFormatter,
         JSONParser,
+        LMStudioAPIError,
+        LMStudioConnectionError,
     )
     from .prompt_templates import (
         SDXL_SYSTEM_PROMPT,
@@ -21,10 +21,10 @@ try:
 except ImportError:
     from lm_base_node import LMStudioPromptBaseNode
     from lm_utils import (
-        LMStudioConnectionError,
-        LMStudioAPIError,
         ErrorFormatter,
         JSONParser,
+        LMStudioAPIError,
+        LMStudioConnectionError,
     )
     from prompt_templates import (
         SDXL_SYSTEM_PROMPT,
@@ -37,7 +37,7 @@ class LMStudioPromptEnhancer(LMStudioPromptBaseNode):
     """Enhance simple prompts into detailed image generation prompts."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -70,7 +70,7 @@ class LMStudioPromptEnhancer(LMStudioPromptBaseNode):
         response_format: str = "text",
         server_url: str = "http://localhost:1234",
         model: str = ""
-    ) -> Tuple[str, str, str]:
+    ) -> tuple[str, str, str]:
         """Enhance a simple prompt using LM Studio with detailed feedback."""
         
         # Initialize info output using base class
@@ -93,7 +93,6 @@ class LMStudioPromptEnhancer(LMStudioPromptBaseNode):
         self._add_params_info(info_parts, **params)
         
         # Build enhancement instruction
-        style_instruction = f" in {style} style" if style != "none" else ""
         detail_instruction = get_detail_instruction(detail_level)
         instruction = build_sdxl_instruction(
             simple_prompt=simple_prompt,
@@ -153,8 +152,8 @@ class LMStudioPromptEnhancer(LMStudioPromptBaseNode):
                         else:
                             enhanced_lines.append(line.strip())
                     
-                    enhanced = ', '.join([l for l in enhanced_lines if l])
-                    neg_prompt = ', '.join([l for l in neg_lines if l])
+                    enhanced = ", ".join([line for line in enhanced_lines if line])
+                    neg_prompt = ", ".join([line for line in neg_lines if line])
                     
                     # Clean up any remaining labels
                     enhanced = enhanced.replace('Positive prompt:', '').replace('Positive:', '').strip()

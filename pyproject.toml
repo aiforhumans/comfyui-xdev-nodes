@@ -62,6 +62,9 @@ combine_as_imports = true
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+src = ["comfyui_custom_nodes", "tests"]
+
+[tool.ruff.lint]
 select = [
     "E",
     "F",
@@ -72,13 +75,19 @@ select = [
     "A",
 ]
 ignore = [
-    "ANN101",
-    "ANN102",
+    "E501",
 ]
-src = ["comfyui_custom_nodes", "tests"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["ANN201"]
+"tests/*" = [
+    "ANN201",  # allow missing return annotations in tests
+    "F401",    # many tests import modules purely to ensure availability
+    "I001",    # relaxed import sorting for readability in test blocks
+    "E501",    # descriptive assertions often exceed default line length
+    "F541",    # tests occasionally use f-strings for emphasis only
+    "E712",    # legacy equality assertions retained for clarity
+    "F841",    # some helper variables kept for debugging context
+]
 
 [tool.ruff.format]
 quote-style = "double"

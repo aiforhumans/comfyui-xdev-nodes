@@ -9,20 +9,20 @@ except ImportError:
     from lm_base_node import LMStudioUtilityBaseNode
 
 import json
-from typing import Any, Dict, Tuple, List
-import urllib.request
 import urllib.error
+import urllib.request
+from typing import Any
 
 
 class LMStudioModelSelector(LMStudioUtilityBaseNode):
     """Select and output model name from LM Studio's loaded models."""
     
     # Class variable to cache models
-    _cached_models: List[str] = []
+    _cached_models: list[str] = []
     _cache_valid: bool = False
 
     @classmethod
-    def get_models(cls, server_url: str = "http://localhost:1234") -> List[str]:
+    def get_models(cls, server_url: str = "http://localhost:1234") -> list[str]:
         """Fetch available models from LM Studio server."""
         try:
             url = f"{server_url}/v1/models"
@@ -54,7 +54,7 @@ class LMStudioModelSelector(LMStudioUtilityBaseNode):
             return ["Error: LM Studio not running"]
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         # Try to fetch models for the dropdown
         models = cls.get_models()
@@ -78,7 +78,7 @@ class LMStudioModelSelector(LMStudioUtilityBaseNode):
         model: str,
         server_url: str = "http://localhost:1234",
         refresh: bool = False
-    ) -> Tuple[str]:
+    ) -> tuple[str]:
         """Return selected model name."""
         
         # If refresh is enabled, update the model list

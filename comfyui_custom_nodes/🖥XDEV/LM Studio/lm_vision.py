@@ -5,40 +5,32 @@ Analyzes images and generates descriptions using vision models like Qwen3-VL.
 
 import base64
 import json
-import urllib.request
 import urllib.error
-from typing import Any, Dict, Tuple
+import urllib.request
 from io import BytesIO
+from typing import Any
 
 try:
     from .lm_base_node import LMStudioBaseNode
-    from .lm_utils import (
-        LMStudioConnectionError,
-        LMStudioAPIError,
-        ErrorFormatter,
-        JSONParser,
-        get_pil_image,
-        get_numpy,
-    )
     from .lm_model_manager import check_model_loaded
+    from .lm_utils import (
+        get_numpy,
+        get_pil_image,
+    )
 except ImportError:
     from lm_base_node import LMStudioBaseNode
-    from lm_utils import (
-        LMStudioConnectionError,
-        LMStudioAPIError,
-        ErrorFormatter,
-        JSONParser,
-        get_pil_image,
-        get_numpy,
-    )
     from lm_model_manager import check_model_loaded
+    from lm_utils import (
+        get_numpy,
+        get_pil_image,
+    )
 
 
 class LMStudioVision(LMStudioBaseNode):
     """Analyze images using LM Studio vision models."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -101,7 +93,7 @@ class LMStudioVision(LMStudioBaseNode):
         server_url: str = "http://localhost:1234",
         model: str = "qwen/qwen3-vl-4b",
         detail_level: str = "auto"
-    ) -> Tuple[str, str, str]:
+    ) -> tuple[str, str, str]:
         """Analyze image using LM Studio vision model with enhanced feedback."""
         
         # Initialize info output
@@ -248,7 +240,7 @@ class LMStudioVision(LMStudioBaseNode):
             return (desc_output, prompt_output, "\n".join(info_parts))
             
         except (urllib.error.URLError, ConnectionRefusedError, OSError) as e:
-            error_msg = f"❌ Connection Error\n\n"
+            error_msg = "❌ Connection Error\n\n"
             error_msg += f"Cannot connect to LM Studio at:\n{server_url}\n\n"
             error_msg += "🔧 Troubleshooting:\n"
             error_msg += "1. Make sure LM Studio is running\n"
@@ -280,7 +272,7 @@ class LMStudioVision(LMStudioBaseNode):
             return (error_msg, "", "\n".join(info_parts))
             
         except json.JSONDecodeError as e:
-            error_msg = f"❌ Invalid Response\n\n"
+            error_msg = "❌ Invalid Response\n\n"
             error_msg += "Server returned invalid JSON.\n"
             error_msg += "The vision model may still be loading.\n"
             error_msg += "Wait a moment and try again.\n\n"

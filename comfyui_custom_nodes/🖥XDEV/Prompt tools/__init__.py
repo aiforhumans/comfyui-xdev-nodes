@@ -3,11 +3,11 @@
 A collection of utility nodes for working with text prompts.
 """
 
-from .text_concatenate import TextConcatenate
 from .multiline_prompt import MultilinePromptBuilder
-from .style_injector import StyleTagsInjector
-from .random_prompt import RandomPromptSelector
 from .prompt_template import PromptTemplateSystem
+from .random_prompt import RandomPromptSelector
+from .style_injector import StyleTagsInjector
+from .text_concatenate import TextConcatenate
 
 NODE_CLASS_MAPPINGS = {
     "XDEVTextConcatenate": TextConcatenate,

@@ -3,25 +3,25 @@
 Generates complete SDXL-optimized prompts with proper structure and conditioning parameters.
 """
 
+import json
+import re
+import urllib.error
+import urllib.request
+from typing import Any
+
 try:
     from .lm_base_node import LMStudioPromptBaseNode
-    from .lm_utils import JSONParser, ErrorFormatter
-    from .lm_model_manager import check_model_loaded
     from .prompt_templates import CAMERA_FRAMING, LIGHTING_KEYWORDS
 except ImportError:
     from lm_base_node import LMStudioPromptBaseNode
-    from lm_utils import JSONParser, ErrorFormatter
-    from lm_model_manager import check_model_loaded
     from prompt_templates import CAMERA_FRAMING, LIGHTING_KEYWORDS
-
-from typing import Any, Dict, Tuple
 
 
 class LMStudioSDXLPromptBuilder(LMStudioPromptBaseNode):
     """Build complete SDXL prompts with LLM assistance and proper conditioning structure."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -64,13 +64,13 @@ class LMStudioSDXLPromptBuilder(LMStudioPromptBaseNode):
         temperature: float = 0.75,
         server_url: str = "http://localhost:1234",
         model: str = ""
-    ) -> Tuple[str, str, str, str]:
+    ) -> tuple[str, str, str, str]:
         """Build SDXL-optimized prompt with proper structure."""
         
         info_parts = self._init_info("SDXL Prompt Builder", "🎨")
         self._add_model_info(info_parts, server_url)
         
-        def _hint(value: str, catalog: Dict[str, str]) -> str:
+        def _hint(value: str, catalog: dict[str, str]) -> str:
             description = catalog.get(value)
             return f"{value} ({description})" if description and value != "custom" else value
 
@@ -184,7 +184,6 @@ Generate the prompt now using {detail_level} detail level and {style} style."""
             
             # Parse JSON response
             try:
-                import re
                 json_match = re.search(r'\{.*\}', generated, re.DOTALL)
                 if json_match:
                     parsed = json.loads(json_match.group(0))

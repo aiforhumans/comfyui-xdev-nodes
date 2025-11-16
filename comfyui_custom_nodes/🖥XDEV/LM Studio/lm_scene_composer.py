@@ -5,14 +5,16 @@ Generates foreground, midground, background, lighting, and atmosphere.
 Based on research: A1111 prompt weighting, composable diffusion, spatial descriptors
 """
 
+import re
+import urllib.error
+import urllib.request
+
 try:
     from .lm_base_node import LMStudioPromptBaseNode
-    from .lm_utils import JSONParser, ErrorFormatter
-    from .lm_model_manager import check_model_loaded
+    from .lm_utils import JSONParser
 except ImportError:
     from lm_base_node import LMStudioPromptBaseNode
-    from lm_utils import JSONParser, ErrorFormatter
-    from lm_model_manager import check_model_loaded
+    from lm_utils import JSONParser
 
 
 class LMStudioSceneComposer(LMStudioPromptBaseNode):
@@ -176,7 +178,7 @@ Detail Level: {detail_level}
             return ("", "", "", "", "", "", error_msg)
         
         except urllib.error.URLError as e:
-            error_msg = f"❌ Connection Error: {e.reason}\nIs LM Studio running at {lm_studio_url}?"
+            error_msg = f"❌ Connection Error: {e.reason}\nIs LM Studio running at {server_url}?"
             print(f"[LM Studio Scene Composer] {error_msg}")
             return ("", "", "", "", "", "", error_msg)
         

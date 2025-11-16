@@ -5,25 +5,21 @@ Process multiple prompts efficiently in batch.
 
 try:
     from .lm_base_node import LMStudioTextBaseNode
-    from .lm_utils import ErrorFormatter
-    from .lm_model_manager import check_model_loaded
 except ImportError:
     from lm_base_node import LMStudioTextBaseNode
-    from lm_utils import ErrorFormatter
-    from lm_model_manager import check_model_loaded
 
 import json
-from typing import Any, Dict, List, Tuple
-import urllib.request
-import urllib.error
 import time
+import urllib.error
+import urllib.request
+from typing import Any
 
 
 class LMStudioBatchProcessor(LMStudioTextBaseNode):
     """Process multiple prompts in batch with efficiency optimizations."""
 
     @classmethod
-    def INPUT_TYPES(cls) -> Dict[str, Any]:
+    def INPUT_TYPES(cls) -> dict[str, Any]:
         """Define input parameters."""
         return {
             "required": {
@@ -53,7 +49,7 @@ class LMStudioBatchProcessor(LMStudioTextBaseNode):
         server_url: str = "http://localhost:1234",
         model: str = "",
         batch_delay: float = 0.1
-    ) -> Tuple[str, str, str]:
+    ) -> tuple[str, str, str]:
         """Process multiple prompts in batch."""
         
         info_parts = self._init_info("Batch Processor", "📦")
@@ -166,7 +162,7 @@ class LMStudioBatchProcessor(LMStudioTextBaseNode):
                 results_text += "\n" + "─" * 50 + "\n\n"
             
             # Summary
-            info_parts[-1] = f"✅ Batch complete!"
+            info_parts[-1] = "✅ Batch complete!"
             info_parts.append(f"📊 Success: {successful}/{len(prompt_list)}")
             if failed > 0:
                 info_parts.append(f"❌ Failed: {failed}/{len(prompt_list)}")
