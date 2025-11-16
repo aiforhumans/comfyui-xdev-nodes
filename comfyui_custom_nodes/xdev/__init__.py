@@ -7,9 +7,10 @@ import modules without dealing with emoji paths.
 
 from __future__ import annotations
 
+import importlib
 import sys
 from pathlib import Path
-from typing import Dict, Tuple, Type
+from typing import Dict, Iterable, Tuple, Type
 
 BASE_DIR = Path(__file__).resolve().parent.parent / "🖥XDEV"
 PROMPT_TOOLS_PATH = BASE_DIR / "Prompt tools"
@@ -31,39 +32,31 @@ def _ensure_path(path: Path) -> bool:
     return True
 
 
+def _import_class(module_name: str, class_name: str) -> Type:
+    module = importlib.import_module(module_name)
+    return getattr(module, class_name)
+
+
 def _load_prompt_tools() -> Tuple[Dict[str, Type], Dict[str, str]]:
     if not _ensure_path(PROMPT_TOOLS_PATH):
         return {}, {}
 
-    from text_concatenate import TextConcatenate
-    from multiline_prompt import MultilinePromptBuilder
-    from style_injector import StyleTagsInjector
-    from random_prompt import RandomPromptSelector
-    from prompt_template import PromptTemplateSystem
+    definitions = [
+        ("text_concatenate", "TextConcatenate", "XDEVTextConcatenate", "Text Concatenate"),
+        ("multiline_prompt", "MultilinePromptBuilder", "XDEVMultilinePrompt", "Multi-line Prompt Builder"),
+        ("style_injector", "StyleTagsInjector", "XDEVStyleInjector", "Style Tags Injector"),
+        ("random_prompt", "RandomPromptSelector", "XDEVRandomPrompt", "Random Prompt Selector"),
+        ("prompt_template", "PromptTemplateSystem", "XDEVPromptTemplate", "Prompt Template System"),
+    ]
 
-    _EXPORTS.update({
-        "TextConcatenate": TextConcatenate,
-        "MultilinePromptBuilder": MultilinePromptBuilder,
-        "StyleTagsInjector": StyleTagsInjector,
-        "RandomPromptSelector": RandomPromptSelector,
-        "PromptTemplateSystem": PromptTemplateSystem,
-    })
+    class_map: Dict[str, Type] = {}
+    display_map: Dict[str, str] = {}
 
-    class_map = {
-        "XDEVTextConcatenate": TextConcatenate,
-        "XDEVMultilinePrompt": MultilinePromptBuilder,
-        "XDEVStyleInjector": StyleTagsInjector,
-        "XDEVRandomPrompt": RandomPromptSelector,
-        "XDEVPromptTemplate": PromptTemplateSystem,
-    }
-
-    display_map = {
-        "XDEVTextConcatenate": "Text Concatenate",
-        "XDEVMultilinePrompt": "Multi-line Prompt Builder",
-        "XDEVStyleInjector": "Style Tags Injector",
-        "XDEVRandomPrompt": "Random Prompt Selector",
-        "XDEVPromptTemplate": "Prompt Template System",
-    }
+    for module_name, class_name, mapping_key, display_name in definitions:
+        cls = _import_class(module_name, class_name)
+        _EXPORTS[class_name] = cls
+        class_map[mapping_key] = cls
+        display_map[mapping_key] = display_name
 
     return class_map, display_map
 
@@ -72,106 +65,40 @@ def _load_lm_studio_nodes() -> Tuple[Dict[str, Type], Dict[str, str]]:
     if not _ensure_path(LM_STUDIO_PATH):
         return {}, {}
 
-    from lm_text_gen import LMStudioTextGen
-    from lm_vision import LMStudioVision
-    from lm_prompt_enhancer import LMStudioPromptEnhancer
-    from lm_streaming_text_gen import LMStudioStreamingTextGen
-    from lm_batch_processor import LMStudioBatchProcessor
-    from lm_model_selector import LMStudioModelSelector
-    from lm_multi_model_selector import LMStudioMultiModelSelector
-    from lm_model_unload_helper import LMStudioModelUnloadHelper
-    from lm_auto_unload_trigger import LMStudioAutoUnloadTrigger
-    from lm_chat_history import LMStudioChatHistory, LMStudioChatHistoryLoader
-    from lm_token_counter import LMStudioTokenCounter
-    from lm_context_optimizer import LMStudioContextOptimizer
-    from lm_response_validator import LMStudioResponseValidator
-    from lm_parameter_presets import LMStudioParameterPresets
-    from lm_sdxl_prompt_builder import LMStudioSDXLPromptBuilder
-    from lm_persona_creator import LMStudioPersonaCreator
-    from lm_prompt_mixer import LMStudioPromptMixer
-    from lm_scene_composer import LMStudioSceneComposer
-    from lm_aspect_ratio_optimizer import LMStudioAspectRatioOptimizer
-    from lm_refiner_prompt_generator import LMStudioRefinerPromptGenerator
-    from lm_controlnet_prompter import LMStudioControlNetPrompter
-    from lm_regional_prompter import LMStudioRegionalPrompterHelper
+    definitions = [
+        ("lm_text_gen", "LMStudioTextGen", "XDEVLMStudioText", "LM Studio Text Generator"),
+        ("lm_vision", "LMStudioVision", "XDEVLMStudioVision", "LM Studio Vision (Image Analysis)"),
+        ("lm_prompt_enhancer", "LMStudioPromptEnhancer", "XDEVLMStudioEnhancer", "LM Studio Prompt Enhancer"),
+        ("lm_streaming_text_gen", "LMStudioStreamingTextGen", "XDEVLMStudioStreaming", "LM Studio Streaming Text Generator"),
+        ("lm_batch_processor", "LMStudioBatchProcessor", "XDEVLMStudioBatch", "LM Studio Batch Processor"),
+        ("lm_model_selector", "LMStudioModelSelector", "XDEVLMStudioModelSelector", "LM Studio Model Selector"),
+        ("lm_multi_model_selector", "LMStudioMultiModelSelector", "XDEVLMStudioMultiModel", "LM Studio Multi-Model Selector"),
+        ("lm_model_unload_helper", "LMStudioModelUnloadHelper", "XDEVLMStudioUnloadHelper", "LM Studio Model Unload Helper"),
+        ("lm_auto_unload_trigger", "LMStudioAutoUnloadTrigger", "XDEVLMStudioAutoUnload", "LM Studio Auto Unload Trigger"),
+        ("lm_chat_history", "LMStudioChatHistory", "XDEVLMStudioChatHistory", "LM Studio Chat History Manager"),
+        ("lm_chat_history", "LMStudioChatHistoryLoader", "XDEVLMStudioChatLoader", "LM Studio Chat History Loader"),
+        ("lm_token_counter", "LMStudioTokenCounter", "XDEVLMStudioTokenCounter", "LM Studio Token Counter"),
+        ("lm_context_optimizer", "LMStudioContextOptimizer", "XDEVLMStudioContextOpt", "LM Studio Context Optimizer"),
+        ("lm_response_validator", "LMStudioResponseValidator", "XDEVLMStudioValidator", "LM Studio Response Validator"),
+        ("lm_parameter_presets", "LMStudioParameterPresets", "XDEVLMStudioPresets", "LM Studio Parameter Presets"),
+        ("lm_sdxl_prompt_builder", "LMStudioSDXLPromptBuilder", "XDEVLMStudioSDXLBuilder", "LM Studio SDXL Prompt Builder"),
+        ("lm_persona_creator", "LMStudioPersonaCreator", "XDEVLMStudioPersona", "LM Studio Persona Creator"),
+        ("lm_prompt_mixer", "LMStudioPromptMixer", "XDEVLMStudioPromptMixer", "LM Studio Prompt Mixer"),
+        ("lm_scene_composer", "LMStudioSceneComposer", "XDEVLMStudioSceneComposer", "LM Studio Scene Composer"),
+        ("lm_aspect_ratio_optimizer", "LMStudioAspectRatioOptimizer", "XDEVLMStudioAspectRatioOptimizer", "LM Studio SDXL Aspect Ratio Optimizer"),
+        ("lm_refiner_prompt_generator", "LMStudioRefinerPromptGenerator", "XDEVLMStudioRefinerPromptGenerator", "LM Studio SDXL Refiner Prompt Generator"),
+        ("lm_controlnet_prompter", "LMStudioControlNetPrompter", "XDEVLMStudioControlNetPrompter", "LM Studio ControlNet Prompter"),
+        ("lm_regional_prompter", "LMStudioRegionalPrompterHelper", "XDEVLMStudioRegionalPrompterHelper", "LM Studio Regional Prompter Helper"),
+    ]
 
-    _EXPORTS.update({
-        "LMStudioTextGen": LMStudioTextGen,
-        "LMStudioVision": LMStudioVision,
-        "LMStudioPromptEnhancer": LMStudioPromptEnhancer,
-        "LMStudioStreamingTextGen": LMStudioStreamingTextGen,
-        "LMStudioBatchProcessor": LMStudioBatchProcessor,
-        "LMStudioModelSelector": LMStudioModelSelector,
-        "LMStudioMultiModelSelector": LMStudioMultiModelSelector,
-        "LMStudioModelUnloadHelper": LMStudioModelUnloadHelper,
-        "LMStudioAutoUnloadTrigger": LMStudioAutoUnloadTrigger,
-        "LMStudioChatHistory": LMStudioChatHistory,
-        "LMStudioChatHistoryLoader": LMStudioChatHistoryLoader,
-        "LMStudioTokenCounter": LMStudioTokenCounter,
-        "LMStudioContextOptimizer": LMStudioContextOptimizer,
-        "LMStudioResponseValidator": LMStudioResponseValidator,
-        "LMStudioParameterPresets": LMStudioParameterPresets,
-        "LMStudioSDXLPromptBuilder": LMStudioSDXLPromptBuilder,
-        "LMStudioPersonaCreator": LMStudioPersonaCreator,
-        "LMStudioPromptMixer": LMStudioPromptMixer,
-        "LMStudioSceneComposer": LMStudioSceneComposer,
-        "LMStudioAspectRatioOptimizer": LMStudioAspectRatioOptimizer,
-        "LMStudioRefinerPromptGenerator": LMStudioRefinerPromptGenerator,
-        "LMStudioControlNetPrompter": LMStudioControlNetPrompter,
-        "LMStudioRegionalPrompterHelper": LMStudioRegionalPrompterHelper,
-    })
+    class_map: Dict[str, Type] = {}
+    display_map: Dict[str, str] = {}
 
-    class_map = {
-        "XDEVLMStudioText": LMStudioTextGen,
-        "XDEVLMStudioVision": LMStudioVision,
-        "XDEVLMStudioEnhancer": LMStudioPromptEnhancer,
-        "XDEVLMStudioStreaming": LMStudioStreamingTextGen,
-        "XDEVLMStudioBatch": LMStudioBatchProcessor,
-        "XDEVLMStudioModelSelector": LMStudioModelSelector,
-        "XDEVLMStudioMultiModel": LMStudioMultiModelSelector,
-        "XDEVLMStudioUnloadHelper": LMStudioModelUnloadHelper,
-        "XDEVLMStudioAutoUnload": LMStudioAutoUnloadTrigger,
-        "XDEVLMStudioChatHistory": LMStudioChatHistory,
-        "XDEVLMStudioChatLoader": LMStudioChatHistoryLoader,
-        "XDEVLMStudioTokenCounter": LMStudioTokenCounter,
-        "XDEVLMStudioContextOpt": LMStudioContextOptimizer,
-        "XDEVLMStudioValidator": LMStudioResponseValidator,
-        "XDEVLMStudioPresets": LMStudioParameterPresets,
-        "XDEVLMStudioSDXLBuilder": LMStudioSDXLPromptBuilder,
-        "XDEVLMStudioPersona": LMStudioPersonaCreator,
-        "XDEVLMStudioPromptMixer": LMStudioPromptMixer,
-        "XDEVLMStudioSceneComposer": LMStudioSceneComposer,
-        "XDEVLMStudioAspectRatioOptimizer": LMStudioAspectRatioOptimizer,
-        "XDEVLMStudioRefinerPromptGenerator": LMStudioRefinerPromptGenerator,
-        "XDEVLMStudioControlNetPrompter": LMStudioControlNetPrompter,
-        "XDEVLMStudioRegionalPrompterHelper": LMStudioRegionalPrompterHelper,
-    }
-
-    display_map = {
-        "XDEVLMStudioText": "LM Studio Text Generator",
-        "XDEVLMStudioVision": "LM Studio Vision (Image Analysis)",
-        "XDEVLMStudioEnhancer": "LM Studio Prompt Enhancer",
-        "XDEVLMStudioStreaming": "LM Studio Streaming Text Generator",
-        "XDEVLMStudioBatch": "LM Studio Batch Processor",
-        "XDEVLMStudioModelSelector": "LM Studio Model Selector",
-        "XDEVLMStudioMultiModel": "LM Studio Multi-Model Selector",
-        "XDEVLMStudioUnloadHelper": "LM Studio Model Unload Helper",
-        "XDEVLMStudioAutoUnload": "LM Studio Auto Unload Trigger",
-        "XDEVLMStudioChatHistory": "LM Studio Chat History Manager",
-        "XDEVLMStudioChatLoader": "LM Studio Chat History Loader",
-        "XDEVLMStudioTokenCounter": "LM Studio Token Counter",
-        "XDEVLMStudioContextOpt": "LM Studio Context Optimizer",
-        "XDEVLMStudioValidator": "LM Studio Response Validator",
-        "XDEVLMStudioPresets": "LM Studio Parameter Presets",
-        "XDEVLMStudioSDXLBuilder": "LM Studio SDXL Prompt Builder",
-        "XDEVLMStudioPersona": "LM Studio Persona Creator",
-        "XDEVLMStudioPromptMixer": "LM Studio Prompt Mixer",
-        "XDEVLMStudioSceneComposer": "LM Studio Scene Composer",
-        "XDEVLMStudioAspectRatioOptimizer": "LM Studio SDXL Aspect Ratio Optimizer",
-        "XDEVLMStudioRefinerPromptGenerator": "LM Studio SDXL Refiner Prompt Generator",
-        "XDEVLMStudioControlNetPrompter": "LM Studio ControlNet Prompter",
-        "XDEVLMStudioRegionalPrompterHelper": "LM Studio Regional Prompter Helper",
-    }
+    for module_name, class_name, mapping_key, display_name in definitions:
+        cls = _import_class(module_name, class_name)
+        _EXPORTS[class_name] = cls
+        class_map[mapping_key] = cls
+        display_map[mapping_key] = display_name
 
     return class_map, display_map
 
@@ -186,8 +113,5 @@ NODE_DISPLAY_NAME_MAPPINGS.update(lm_display_map)
 
 globals().update(_EXPORTS)
 
-__all__ = [
-    "NODE_CLASS_MAPPINGS",
-    "NODE_DISPLAY_NAME_MAPPINGS",
-    *_EXPORTS.keys(),
-]
+_export_names: Iterable[str] = _EXPORTS.keys()
+__all__ = ("NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", *_export_names)
