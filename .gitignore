@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+.virtualenv/
+
+# ComfyUI specific
+models/
+output/
+temp/
+input/
+*.ckpt
+*.safetensors
+*.pt
+*.pth
+*.bin
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Logs
+*.log
+logs/
+
+# Secrets
+.env
+.env.local
+*.key
+*.pem
+secrets.json
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Development
+.mypy_cache/
+.ruff_cache/
+.pytype/

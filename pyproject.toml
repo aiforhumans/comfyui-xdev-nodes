@@ -1,0 +1,52 @@
+[project]
+name = "comfyui-xdev-nodes"
+version = "2.0.0"
+description = "XDEV LM Studio + prompt automation toolkit for ComfyUI"
+requires-python = ">=3.10,<3.12"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "AI for Humans"}
+]
+dependencies = [
+    "numpy>=1.24.0,<2.0.0",
+    "Pillow>=10.0.0",
+    "safetensors>=0.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "black>=23.7.0",
+    "flake8>=6.1.0",
+    "mypy>=1.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/aiforhumans/comfyui-xdev-nodes"
+Repository = "https://github.com/aiforhumans/comfyui-xdev-nodes"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["comfyui_custom_nodes"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311"]
+include = '\.pyi?$'
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false

@@ -1,0 +1,19 @@
+# PyTorch (use ComfyUI's bundled version for portable install)
+# torch>=2.0.0
+# torchvision>=0.15.0
+
+# Core dependencies (usually bundled with ComfyUI portable)
+numpy>=1.24.0,<2.0.0
+Pillow>=10.0.0
+
+# Model utilities
+safetensors>=0.3.0
+
+# Development dependencies (optional)
+# pytest>=7.4.0
+# black>=23.7.0
+# flake8>=6.1.0
+
+# Note: ComfyUI portable for Windows includes torch, numpy, and other dependencies.
+# Only install additional packages if needed for your custom nodes.
+# For development, create a separate virtual environment.
