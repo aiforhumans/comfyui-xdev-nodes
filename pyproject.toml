@@ -69,6 +69,7 @@ select = [
     "B",
     "UP",
     "ANN201",
+    "A",
 ]
 ignore = [
     "ANN101",

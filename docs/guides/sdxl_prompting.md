@@ -70,6 +70,19 @@
 - Include camera settings: shallow depth of field, f/2.8, bokeh
 - Lighting details: golden hour, rim light, studio lighting, dramatic shadows
 
+### Prompt Style Reference Library
+
+The codebase now exposes a shared `PROMPT_STYLE_LIBRARY` (see `prompt_templates.py`) so nodes and docs reuse the same options. Highlights:
+
+| Category | Go-to Options | Notes |
+|----------|---------------|-------|
+| Lighting | natural, studio, golden hour, dramatic, soft, volumetric, rim light, neon, candlelight, moonlit | Each option maps to a description that LM nodes surface in their info output. |
+| Composition | portrait, full body, mid shot, close-up, wide shot, dynamic angle, low angle, high angle, bird's eye, macro | Used by SDXL Prompt Builder dropdowns to stay in sync with docs. |
+| Mood | dramatic, peaceful, mysterious, energetic, romantic, melancholic, whimsical | Helpful when crafting custom instructions or templates. |
+| Quality Tags | highly detailed, 8k resolution, award winning, professional, sharp focus, film grain, bokeh, sweeping composition | Append to the end of prompts for consistent finishing touches. |
+
+When you add new presets, update `PROMPT_STYLE_LIBRARY` first so UI widgets, docs, and tests stay aligned automatically.
+
 ## 🔧 Implementation Changes
 
 ### LM Studio Prompt Enhancer Node

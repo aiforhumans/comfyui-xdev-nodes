@@ -4,6 +4,7 @@ Template-based prompt generation with variable substitution.
 """
 
 from typing import Any, Dict, Tuple
+import json
 import re
 
 
@@ -29,6 +30,7 @@ class PromptTemplateSystem:
                 "var_6": ("STRING", {"default": ""}),
                 "var_7": ("STRING", {"default": ""}),
                 "var_8": ("STRING", {"default": ""}),
+                "response_format": (["text", "json"], {"default": "text"}),
             }
         }
 
@@ -46,7 +48,8 @@ class PromptTemplateSystem:
         var_5: str = "",
         var_6: str = "",
         var_7: str = "",
-        var_8: str = ""
+        var_8: str = "",
+        response_format: str = "text"
     ) -> Tuple[str]:
         """Apply template with variable substitution."""
         result = template
@@ -80,6 +83,18 @@ class PromptTemplateSystem:
         result = re.sub(r'\s+', ' ', result)
         result = re.sub(r',\s*,', ',', result)
         result = result.strip(' ,')
+
+        if response_format == "json":
+            variables_used = [
+                value for value in [var_1, var_2, var_3, var_4, var_5, var_6, var_7, var_8]
+                if value
+            ]
+            payload = {
+                "prompt": result,
+                "variables_used": variables_used,
+                "token_count": len(result.split()),
+            }
+            return (json.dumps(payload),)
         
         return (result,)
 

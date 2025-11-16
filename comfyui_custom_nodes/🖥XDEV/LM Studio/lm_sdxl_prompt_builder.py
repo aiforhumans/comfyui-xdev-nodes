@@ -7,10 +7,12 @@ try:
     from .lm_base_node import LMStudioPromptBaseNode
     from .lm_utils import JSONParser, ErrorFormatter
     from .lm_model_manager import check_model_loaded
+    from .prompt_templates import CAMERA_FRAMING, LIGHTING_KEYWORDS
 except ImportError:
     from lm_base_node import LMStudioPromptBaseNode
     from lm_utils import JSONParser, ErrorFormatter
     from lm_model_manager import check_model_loaded
+    from prompt_templates import CAMERA_FRAMING, LIGHTING_KEYWORDS
 
 from typing import Any, Dict, Tuple
 
@@ -25,8 +27,8 @@ class LMStudioSDXLPromptBuilder(LMStudioPromptBaseNode):
             "required": {
                 "concept": ("STRING", {"default": "a fantasy warrior", "multiline": True, "tooltip": "Simple concept or description"}),
                 "style": (["photorealistic", "digital art", "anime", "fantasy art", "cinematic", "oil painting", "watercolor", "concept art", "3d render", "custom"], {"default": "photorealistic"}),
-                "composition": (["portrait", "full body", "mid shot", "close-up", "wide shot", "dynamic angle", "low angle", "high angle"], {"default": "portrait"}),
-                "lighting": (["natural", "studio", "golden hour", "dramatic", "soft", "volumetric", "rim light", "neon", "custom"], {"default": "natural"}),
+                "composition": (list(CAMERA_FRAMING.keys()), {"default": "portrait"}),
+                "lighting": (list(LIGHTING_KEYWORDS.keys()), {"default": "natural"}),
                 "detail_level": (["moderate", "high", "very high", "ultra detailed"], {"default": "high"}),
             },
             "optional": {
@@ -68,9 +70,16 @@ class LMStudioSDXLPromptBuilder(LMStudioPromptBaseNode):
         info_parts = self._init_info("SDXL Prompt Builder", "🎨")
         self._add_model_info(info_parts, server_url)
         
+        def _hint(value: str, catalog: Dict[str, str]) -> str:
+            description = catalog.get(value)
+            return f"{value} ({description})" if description and value != "custom" else value
+
+        composition_hint = _hint(composition, CAMERA_FRAMING)
+        lighting_hint = _hint(lighting, LIGHTING_KEYWORDS)
+
         info_parts.append(f"🎭 Style: {style}")
-        info_parts.append(f"📐 Composition: {composition}")
-        info_parts.append(f"💡 Lighting: {lighting}")
+        info_parts.append(f"📐 Composition: {composition_hint}")
+        info_parts.append(f"💡 Lighting: {lighting_hint}")
         info_parts.append(f"🔍 Detail: {detail_level}")
         
         # Build comprehensive instruction
@@ -78,8 +87,8 @@ class LMStudioSDXLPromptBuilder(LMStudioPromptBaseNode):
 
 REQUIREMENTS:
 Style: {style}
-Composition: {composition}
-Lighting: {lighting}
+Composition: {composition_hint}
+Lighting: {lighting_hint}
 Detail Level: {detail_level}
 {f"Additional Requirements: {custom_details}" if custom_details else ""}
 {f"Artist References: {artist_references}" if artist_references else ""}
@@ -88,8 +97,8 @@ SDXL BEST PRACTICES TO FOLLOW:
 1. SDXL understands natural language - write detailed descriptions like explaining to a person
 2. Can also use comma-separated keywords - both approaches work
 3. Start with main subject and key descriptors
-4. Include specific composition and framing details ({composition})
-5. Specify lighting ({lighting}) and atmosphere
+4. Include specific composition and framing details ({composition_hint})
+5. Specify lighting ({lighting_hint}) and atmosphere
 6. Add mood and emotional tone
 7. Reference artists or styles if provided
 8. Use quality tags: "highly detailed", "8k resolution", "professional", "award winning"

@@ -2,9 +2,60 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Dict, Literal
 
 DetailLevel = Literal["minimal", "moderate", "detailed", "very detailed"]
+
+# Centralized SDXL keyword catalogs so nodes, docs, and tests stay in sync.
+LIGHTING_KEYWORDS: Dict[str, str] = {
+    "natural": "available light, golden daylight, realistic shadows",
+    "studio": "key/fill/rim setup with controlled highlights",
+    "golden hour": "warm low-angle sun with long shadows",
+    "dramatic": "high contrast chiaroscuro, deep shadows",
+    "soft": "diffused light, gentle falloff, dreamy feel",
+    "volumetric": "god rays with particles visible",
+    "rim light": "back edge highlight that outlines the subject",
+    "neon": "bold colored glows and reflections",
+    "candlelight": "warm flickering illumination",
+    "moonlit": "cool blue tones with silhouettes",
+    "custom": "user-provided lighting setup"
+}
+
+MOOD_KEYWORDS: Dict[str, str] = {
+    "dramatic": "intense, high-stakes energy",
+    "peaceful": "calm, tranquil atmosphere",
+    "mysterious": "enigmatic, shadow-filled scene",
+    "energetic": "dynamic, action-focused",
+    "romantic": "soft, intimate feel",
+    "melancholic": "quiet, reflective mood",
+    "whimsical": "playful, imaginative tone"
+}
+
+CAMERA_FRAMING: Dict[str, str] = {
+    "portrait": "shoulders-up framing focused on the subject",
+    "full body": "head-to-toe framing",
+    "mid shot": "waist-up composition",
+    "close-up": "face filling most of the frame",
+    "wide shot": "environment-forward view",
+    "dynamic angle": "Dutch tilt or motion-heavy framing",
+    "low angle": "camera below eye level",
+    "high angle": "camera above eye level",
+    "bird's eye": "top-down perspective",
+    "macro": "extreme close detail",
+    "custom": "user-provided framing"
+}
+
+QUALITY_TAGS: Dict[str, str] = {
+    "highly detailed": "micro-detail emphasis",
+    "8k resolution": "ultra high fidelity",
+    "award winning": "prestige photography vibe",
+    "professional": "studio-grade production",
+    "sharp focus": "crisp clarity",
+    "film grain": "cinematic texture",
+    "bokeh": "shallow depth of field",
+    "dramatic lighting": "spotlit high contrast",
+    "sweeping composition": "epic scene layout"
+}
 
 SDXL_SYSTEM_PROMPT = (
     "You are an expert at writing SDXL prompts. SDXL understands natural language "
@@ -114,4 +165,20 @@ Return ONLY the formatted prompt, no explanations."""
     return instruction
 
 
-__all__ = ["SDXL_SYSTEM_PROMPT", "get_detail_instruction", "build_sdxl_instruction"]
+PROMPT_STYLE_LIBRARY = {
+    "lighting": LIGHTING_KEYWORDS,
+    "mood": MOOD_KEYWORDS,
+    "composition": CAMERA_FRAMING,
+    "quality": QUALITY_TAGS,
+}
+
+__all__ = [
+    "SDXL_SYSTEM_PROMPT",
+    "get_detail_instruction",
+    "build_sdxl_instruction",
+    "LIGHTING_KEYWORDS",
+    "MOOD_KEYWORDS",
+    "CAMERA_FRAMING",
+    "QUALITY_TAGS",
+    "PROMPT_STYLE_LIBRARY",
+]

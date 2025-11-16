@@ -1,5 +1,7 @@
 """Tests for XDEV Prompt Tools"""
 
+import json
+
 import pytest
 from comfyui_custom_nodes.xdev import (
     MultilinePromptBuilder,
@@ -150,6 +152,19 @@ class TestPromptTemplateSystem:
         node = PromptTemplateSystem()
         result = node.apply_template("plain text without variables")
         assert result == ("plain text without variables",)
+
+    def test_json_response_format(self):
+        node = PromptTemplateSystem()
+        result = node.apply_template(
+            "A {var_1} with {var_2}",
+            var_1="dragon",
+            var_2="silver scales",
+            response_format="json",
+        )
+        payload = json.loads(result[0])
+        assert payload["prompt"].startswith("A dragon")
+        assert payload["token_count"] >= 3
+        assert "silver" in payload["prompt"]
 
 
 # Smoke tests for manual execution

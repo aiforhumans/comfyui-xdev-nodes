@@ -56,6 +56,28 @@ Changes:
 3. It will warn you if a model is loaded
 4. Follow on-screen instructions to unload manually
 
+## CLI Diagnostics
+
+For repeatable troubleshooting, use the LM Studio CLI (`lms.exe`) in the same shell as your ComfyUI install. The helper nodes and `run_lms_cli` utility expect this output format.
+
+```powershell
+# List currently loaded models
+%USERPROFILE%\.lmstudio\bin\lms.exe list --loaded
+
+# Sample output
+Loaded Models:
+    - llama-3.1-8b-instruct (GPU 0, 10.4 GB)
+
+# Force-unload everything before running SDXL workflows
+%USERPROFILE%\.lmstudio\bin\lms.exe unload --all
+
+# Success output should resemble
+Unloading all models...
+✔ All models unloaded. GPU memory reclaimed.
+```
+
+If the CLI hangs or returns an error, capture the exact command/output pair in your bug report; the nodes surface that text verbatim in their info outputs.
+
 ## Technical Details
 
 ### Why Manual Unload?
